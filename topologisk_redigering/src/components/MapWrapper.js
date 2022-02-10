@@ -13,6 +13,7 @@ import VectorLayer from 'ol/layer/Vector';
 import VectorSource from 'ol/source/Vector';
 
 
+
 //Put vector layer into map. sammanfoga kod från app och wrapper på ett smart sätt 
 
 function MapWrapper( ) {
@@ -37,13 +38,21 @@ function MapWrapper( ) {
         console.log(newCoordinates)
         setCoordinates(coordinates => [...coordinates,newCoordinates])
       }
-
+//TODO while drawing add multinine
+//TODO change form points to coordinates and dra polygon on start= end
+//TODO add precision based on zoom
+//
     const drawLayer = () => {
         setFeatures(features => [...features, new Feature(new Point(coordinates[coordinates.length -1]))])
-       
         
+        
+        let startX = coordinates[0][0].toPrecision(1)
+        let startY = coordinates[0][1].toPrecision(1)
 
-        if (features.length >= 4) {
+        let endX = coordinates[coordinates.length-1][0].toPrecision(1)
+        let endY = coordinates[coordinates.length-1][1].toPrecision(1)
+        console.log(`${endX}, ${endY}`)
+        if (startX === endX && startY === endY && coordinates.length > 2) {
             console.log("saving!")
             const vectorSource = new VectorSource({projection: 'EPSG:4326'})
             vectorSource.addFeatures(features)
@@ -55,9 +64,13 @@ function MapWrapper( ) {
             console.log("såsen är klar")
             
             saveGEOJson(coordinates)
-            //setCoordinates(coordinates => [])
+            setCoordinates(coordinates => [])
         }
         console.log("Features:", features)
+    }
+
+    const drawFeatures = () => {
+       
     }
 
     useEffect(() => {
@@ -69,8 +82,8 @@ function MapWrapper( ) {
                 }),
             ],
             view: new View({
-                center: [0, 0],
-                zoom: 0,
+                center: [1800000, 1800000],
+                zoom: 5,
             }),
         });
         initialMap.on('click', handleMapClick)
@@ -82,6 +95,10 @@ function MapWrapper( ) {
         console.log("FEATURES:", features)
         }, [coordinates])
 
+    useEffect(() => {
+        drawFeatures()
+        
+        }, [features])
 
 
     return (
