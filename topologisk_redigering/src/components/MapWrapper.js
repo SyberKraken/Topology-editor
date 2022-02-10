@@ -5,6 +5,7 @@ import OSM from 'ol/source/OSM';
 import 'ol/ol.css';
 import {Circle, Fill, Stroke, Style} from 'ol/style';
 import Polygon from 'ol/geom/Polygon';
+import LineString from 'ol/geom/LineString';
 import { Feature } from 'ol';
 import Geometry from 'ol/geom/Geometry';
 import Point from 'ol/geom/Point';
@@ -38,21 +39,23 @@ function MapWrapper( ) {
       }
 
     const drawLayer = () => {
-        setFeatures(features => [...features, new Feature(new Circle(coordinates[0]), 10000)])
+        setFeatures(features => [...features, new Feature(new Point(coordinates[coordinates.length -1]))])
+       
+        
 
         if (features.length >= 4) {
-        console.log("saving!")
-        const vectorSource = new VectorSource({projection: 'EPSG:4326'})
-        vectorSource.addFeatures(features)
-        const vectorLayer = new VectorLayer({source: vectorSource})
+            console.log("saving!")
+            const vectorSource = new VectorSource({projection: 'EPSG:4326'})
+            vectorSource.addFeatures(features)
+            const vectorLayer = new VectorLayer({source: vectorSource})
+            
+            map.addLayer(vectorLayer)
+            //setMap(map)
         
-        map.addLayer(vectorLayer)
-        setMap(map)
-      
-        console.log("såsen är klar")
-        
-        saveGEOJson(coordinates)
-        setCoordinates(coordinates => [])
+            console.log("såsen är klar")
+            
+            saveGEOJson(coordinates)
+            //setCoordinates(coordinates => [])
         }
         console.log("Features:", features)
     }
