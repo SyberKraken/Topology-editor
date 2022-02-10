@@ -38,35 +38,34 @@ function MapWrapper( ) {
         console.log(newCoordinates)
         setCoordinates(coordinates => [...coordinates,newCoordinates])
       }
+      //adds features in he feature list to map and renders to screen
+      const updateMap = () => {
+        const vectorSource = new VectorSource({projection: 'EPSG:4326'})
+        vectorSource.addFeatures(features)
+        const vectorLayer = new VectorLayer({source: vectorSource})
+        map.addLayer(vectorLayer)
+      }
 //TODO while drawing a polygon add multiline
 //TODO change form points to coordinates and dra polygon on start= end
 //TODO add precision based on zoom
 //
     const drawLayer = () => {
-
-
-
-
-
-        setFeatures(features => [...features, new Feature(new Point(coordinates[coordinates.length -1]))])
-        
-    
-
+        if (coordinates.length > 1){
+            let lineString = new LineString([coordinates[coordinates.length-1],coordinates[coordinates.length-2]])
+            setFeatures(features => [...features, new Feature(lineString)])
+            updateMap()
+        }
         let startX = coordinates[0][0].toPrecision(1)
         let startY = coordinates[0][1].toPrecision(1)
 
         let endX = coordinates[coordinates.length-1][0].toPrecision(1)
         let endY = coordinates[coordinates.length-1][1].toPrecision(1)
         console.log(`${endX}, ${endY}`)
+        //Runs when a propper polygon is detected
         if (startX === endX && startY === endY && coordinates.length > 2) {
             console.log("saving!")
-            const vectorSource = new VectorSource({projection: 'EPSG:4326'})
-            vectorSource.addFeatures(features)
-            const vectorLayer = new VectorLayer({source: vectorSource})
-            
-            map.addLayer(vectorLayer)
+            updateMap()
             //setMap(map)
-        
             console.log("såsen är klar")
             
             saveGEOJson(coordinates)
