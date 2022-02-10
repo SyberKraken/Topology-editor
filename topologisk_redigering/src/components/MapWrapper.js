@@ -38,14 +38,20 @@ function MapWrapper( ) {
         console.log(newCoordinates)
         setCoordinates(coordinates => [...coordinates,newCoordinates])
       }
-//TODO while drawing add multinine
+//TODO while drawing a polygon add multiline
 //TODO change form points to coordinates and dra polygon on start= end
 //TODO add precision based on zoom
 //
     const drawLayer = () => {
+
+
+
+
+
         setFeatures(features => [...features, new Feature(new Point(coordinates[coordinates.length -1]))])
         
-        
+    
+
         let startX = coordinates[0][0].toPrecision(1)
         let startY = coordinates[0][1].toPrecision(1)
 
