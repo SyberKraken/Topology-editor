@@ -11,6 +11,7 @@ import Geometry from 'ol/geom/Geometry';
 import Point from 'ol/geom/Point';
 import VectorLayer from 'ol/layer/Vector';
 import VectorSource from 'ol/source/Vector';
+import { style } from '@mui/system';
 
 
 
@@ -24,6 +25,18 @@ function MapWrapper( ) {
     const [coordinates, setCoordinates] = useState([]);
     const [features, setFeatures] = useState([]);
     const [testCoordinates, setTestCoordinates] = useState([]);
+
+    const styles = [
+        new Style({
+            stroke: new Stroke({
+              color: 'red',
+              width: 1,
+            }),
+            fill: new Fill({
+              color: 'rgba(125, 255, 255, 0.5)',
+            }),
+          }),
+    ]
 
     const saveGEOJson = (points) => {
         console.log("saving geojson")
@@ -42,11 +55,12 @@ function MapWrapper( ) {
     const updateMap = (newFeature) => {
         const vectorSource = new VectorSource({projection: 'EPSG:4326'})
         vectorSource.addFeature(newFeature)
-        const vectorLayer = new VectorLayer({source: vectorSource})
+        const vectorLayer = new VectorLayer({source: vectorSource, style: styles, name: "Tag"})
+        map.getLayerGroup().getLayers()
         map.addLayer(vectorLayer)
     }
-//TODO while drawing a polygon add multiline (lags one click behind)
-//TODO change form points to coordinates and dra polygon on start= end
+//TODO Save polygon
+//TODO change form points to coordinates and draw polygon on start= end
 //TODO add precision based on zoom
 //
 
@@ -68,9 +82,13 @@ function MapWrapper( ) {
         }
         
         
+
         //Runs when a propper polygon is detected
         if (checkPolygonCompleted(coordinates, 1)) {
-            updateMap(/* TODO Update map with polygon */)
+            coordinates[coordinates.length - 1] = coordinates[0]
+            const polyT = new Feature(new Polygon([coordinates]) )
+            console.log(polyT)
+            updateMap(polyT/* TODO Update map with polygon */)
             saveGEOJson(coordinates)
             setCoordinates(coordinates => [])
         }
