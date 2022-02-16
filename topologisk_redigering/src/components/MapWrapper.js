@@ -3,12 +3,10 @@ import { Map, View } from 'ol';
 import TileLayer from 'ol/layer/Tile';
 import OSM from 'ol/source/OSM';
 import 'ol/ol.css';
-import {Circle, Fill, Stroke, Style} from 'ol/style';
+import {Fill, Stroke, Style} from 'ol/style';
 import Polygon from 'ol/geom/Polygon';
 import LineString from 'ol/geom/LineString';
 import { Feature } from 'ol';
-import Geometry from 'ol/geom/Geometry';
-import Point from 'ol/geom/Point';
 import VectorLayer from 'ol/layer/Vector';
 import VectorSource from 'ol/source/Vector';
 import { style } from '@mui/system';
@@ -24,7 +22,6 @@ function MapWrapper( ) {
     mapRef.current = map;
     const [coordinates, setCoordinates] = useState([]);
     const [features, setFeatures] = useState([]);
-    const [testCoordinates, setTestCoordinates] = useState([]);
 
     const styles = [
         new Style({
