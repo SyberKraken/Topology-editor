@@ -1,10 +1,15 @@
-import { IconButton } from "@mui/material"
+import { IconButton, Tooltip } from "@mui/material"
 
 
-function NavItem({icon, label}) {
+function NavItem(props) {
+  const {icon, label, onClick, ...rest} = props
   return (
-    <IconButton aria-label={label}>{icon}</IconButton>
+    <Tooltip title={label}>
+      <IconButton onClick={onClick}>{icon}</IconButton>
+    </Tooltip>
   )
 }
+
+
 
 export default NavItem
