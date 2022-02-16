@@ -7,6 +7,13 @@ import {Fill, Stroke, Style} from 'ol/style';
 import VectorLayer from 'ol/layer/Vector';
 import VectorSource from 'ol/source/Vector';
 import Draw from 'ol/interaction/Draw';
+import WMTSSource from "ol/source/WMTS";
+import WMTSTileGrid from 'ol/tilegrid/WMTS';
+import WMTS from 'ol/source/WMTS';
+import {get as getProjection} from 'ol/proj';
+import {getTopLeft, getWidth} from 'ol/extent';
+//import {get as getProjection} from "ol/proj"
+
 
 //TODO Save polygon
 //TODO Put vector layer into map. sammanfoga kod från app och wrapper på ett smart sätt 
@@ -19,6 +26,18 @@ function MapWrapper( ) {
     const [draw, setDraw] = useState()
 
     const source = new VectorSource({wrapX: false});
+
+    const wSource = new WMTSSource({
+        url: 'https://api.lantmateriet.se/open/topowebb-ccby/v1/wmts/token/voU1dN3au7UlPoc3oluV65EfEEIa/',
+        layer: "testName",
+        format: 'image/png',
+        matrixSet: '3006',
+        //tileGrid: tilegrid,
+        version: '1.0.0',
+        style: 'default',
+        crossOrigin: 'anonymous',
+        projection: "EPSG:3006"
+    });
     
     const vector = new VectorLayer({
         source: source,
@@ -54,18 +73,81 @@ function MapWrapper( ) {
         map.addLayer(vectorLayer)
     }*/
 
+
+
     useEffect(() => {
+
+        const projection = getProjection('EPSG:3857');
+        const projectionExtent = projection.getExtent();
+        const size = getWidth(projectionExtent) / 256;
+        const resolutions = new Array(19);
+        const matrixIds = new Array(19);
+        for (let z = 0; z < 19; ++z) {
+          // generate resolutions and matrixIds arrays for this WMTS
+          resolutions[z] = size / Math.pow(2, z);
+          matrixIds[z] = z;
+        }
+        
+        const OUTER_SWEDEN_EXTENT = [-1200000, 4700000, 2600000, 8500000];
+        const wmts_3006_resolutions = [4096.0, 2048.0, 1024.0, 512.0, 256.0, 128.0, 64.0, 32.0, 16.0, 8.0];
+        const wmts_3006_matrixIds = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+
+        const tilegrid = new WMTSTileGrid({
+            tileSize: 256,
+            extent: OUTER_SWEDEN_EXTENT,
+            resolutions: wmts_3006_resolutions,
+            matrixIds: wmts_3006_matrixIds
+        });
+
         const initialMap = new Map({
             target: mapElement.current,
             layers: [
                 new TileLayer({ 
                     source: new OSM(),
                 }),
+          /*       new TileLayer({ 
+                    
+                    opacity: 0.7,
+                    source: new WMTS({
+                        attributions:
+                        'Tiles © <a href="https://mrdata.usgs.gov/geology/state/"' +
+                        ' target="_blank">USGS</a>',
+                        url: 'https://mrdata.usgs.gov/mapcache/wmts',
+                        layer: 'sgmc2',
+                        matrixSet: 'GoogleMapsCompatible',
+                        format: 'image/png',
+                        projection: projection,
+                        tileGrid: new WMTSTileGrid({
+                        origin: getTopLeft(projectionExtent),
+                        resolutions: resolutions,
+                        matrixIds: matrixIds,
+                    }),
+                    style: 'default',
+                    wrapX: true,
+                    })
+                }), */
+                new TileLayer({ 
+                    opacity: 0.7,
+                    source: new WMTS({
+                        url: 'https://api.lantmateriet.se/open/topowebb-ccby/v1/wmts/token/1e921571-1161-3304-8226-ed630c22e0bf',
+                        layer: "testName",
+                        format: 'image/png',
+                        matrixSet: '3006',
+                        tileGrid: tilegrid,
+                        version: '1.0.0',
+                        style: 'default',
+                        crossOrigin: 'anonymous',
+                        projection: "EPSG:3006"
+                    }),
+                    style: 'default',
+                    wrapX: true,
+                }),
                 vector
             ],
+            taget: map,
             view: new View({
-                center: [1800000, 1800000],
-                zoom: 5,
+                center: [-11158582, 4813697],
+                zoom: 1,
             }),
         });
         initialMap.on('click', handleMapClick)
