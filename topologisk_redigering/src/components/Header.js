@@ -1,10 +1,10 @@
-import { SportsRugbySharp } from '@mui/icons-material'
 import AddIcon from '@mui/icons-material/AddCircle'
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline'
 import ModeEditIcon from '@mui/icons-material/ModeEdit'
+import UploadFileIcon from '@mui/icons-material/UploadFile';
 import { Container } from '@mui/material'
 import { useState } from 'react'
-import {handleAddClick, handleDeleteClick, handleEditClick} from '../res/UIFunctions'
+import {handleAddClick, handleDeleteClick, handleEditClick, handleImportClick} from '../res/UIFunctions'
 import NavItem from './NavItem'
 
 function Header(props) {
@@ -20,6 +20,8 @@ function Header(props) {
                onClick={() => {handleDeleteClick(); setCurrentTool("Delete")}}/>
       <NavItem icon={<ModeEditIcon fontSize={currentTool==="Edit" ? "large" : "small"} color={currentTool==="Edit" ? "success" : ""}/>} label={"Edit"} 
                onClick={() => {handleEditClick(); setCurrentTool("Edit")}}/>
+      <NavItem icon={<UploadFileIcon fontSize={currentTool==="Import" ? "large" : "small"} color={currentTool==="Import" ? "success" : ""}/>}
+               label={"Import File"} onClick={() => {handleImportClick(); setCurrentTool("Import")}}/>
     </nav>
   </Container>
 }
