@@ -11,7 +11,7 @@ import Draw from 'ol/interaction/Draw';
 //TODO Save polygon
 //TODO Put vector layer into map. sammanfoga kod från app och wrapper på ett smart sätt 
 
-function MapWrapper( ) {
+function MapWrapper() {
     const [map, setMap] = useState();
     const mapElement = useRef();
     const mapRef = useRef();
@@ -23,6 +23,7 @@ function MapWrapper( ) {
     const vector = new VectorLayer({
         source: source,
       });
+      //console.log(`SOURCE: ${source}`)
 
     const drawPolygon = () => {
         setDraw(new Draw({
@@ -44,7 +45,9 @@ function MapWrapper( ) {
     ]
 
     const handleMapClick = (e) => {
+        
     }
+
 
     /*const updateMap = (newFeature) => {
         const vectorSource = new VectorSource({projection: 'EPSG:4326'})

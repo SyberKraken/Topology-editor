@@ -5,9 +5,16 @@ import Header from './components/Header';
 
 
 const App = () => {
+  const [selectedTool, setSelectedTool] = useState('')
+
+  const changeSelectedTool = (tool) => {
+    setSelectedTool(tool)
+    //console.log(selectedTool)
+  }
+
   return (
   <>
-    <Header/>
+    <Header selectTool={changeSelectedTool}/>
     <MapWrapper/>
   </>
   )

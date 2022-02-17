@@ -1,11 +1,9 @@
-import React, { useState } from 'react'
-import '../popup.css'
+import React from 'react'
 
 function ImportPopup() {
   return (
-    <div className={popupStyles.}>ImportPopup</div>
+    <div>ImportPopup</div>
   )
-
 }
 
 export default ImportPopup

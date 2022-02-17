@@ -1,5 +1,8 @@
-  
-    export function handleAddClick(){
+  import MapWrapper from "../components/MapWrapper"
+    
+    
+    export function handleAddClick({selectTool}){
+        selectTool = "add"
         console.log("add not implemented!");
     }
 
