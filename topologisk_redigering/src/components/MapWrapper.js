@@ -28,7 +28,8 @@ function MapWrapper( ) {
     const source = new VectorSource({wrapX: false});
 
     const wSource = new WMTSSource({
-        url: 'https://api.lantmateriet.se/open/topowebb-ccby/v1/wmts/token/voU1dN3au7UlPoc3oluV65EfEEIa/',
+        //url: 'https://api.lantmateriet.se/open/topowebb-ccby/v1/wmts/token/voU1dN3au7UlPoc3oluV65EfEEIa/',
+        url: "https://api.lantmateriet.se/open/topowebb-ccby/v1/wmts/token/Id3mSjTmArivr1cffRxobYDTU0Ma/?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0",
         layer: "testName",
         format: 'image/png',
         matrixSet: '3006',
@@ -102,9 +103,9 @@ function MapWrapper( ) {
         const initialMap = new Map({
             target: mapElement.current,
             layers: [
-                new TileLayer({ 
+                /* new TileLayer({ 
                     source: new OSM(),
-                }),
+                }), */
           /*       new TileLayer({ 
                     
                     opacity: 0.7,
@@ -127,9 +128,10 @@ function MapWrapper( ) {
                     })
                 }), */
                 new TileLayer({ 
-                    opacity: 0.7,
+                    //opacity: 0.7,
                     source: new WMTS({
-                        url: 'https://api.lantmateriet.se/open/topowebb-ccby/v1/wmts/token/1e921571-1161-3304-8226-ed630c22e0bf',
+                        url: "https://api.lantmateriet.se/open/topowebb-ccby/v1/wmts/token/5401f50c-568c-3459-a49f-69426e4ed1c6/?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&LAYER=topowebb&STYLE=default&FORMAT=image/png",
+                        //url: 'https://api.lantmateriet.se/open/topowebb-ccby/v1/wmts/token/5401f50c-568c-3459-a49f-69426e4ed1c6/?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&LAYER=topowebb&STYLE=default&TILEMATRIXSET=3006&TILEMATRIX=9&TILEROW=862&TILECOL=887&FORMAT=image/png',
                         layer: "testName",
                         format: 'image/png',
                         matrixSet: '3006',
@@ -146,8 +148,8 @@ function MapWrapper( ) {
             ],
             taget: map,
             view: new View({
-                center: [-11158582, 4813697],
-                zoom: 1,
+                center: [609924.45, 6877630.37],
+                zoom: 6,
             }),
         });
         initialMap.on('click', handleMapClick)
@@ -168,3 +170,5 @@ function MapWrapper( ) {
 }
 
 export default MapWrapper;
+
+//   5401f50c-568c-3459-a49f-69426e4ed1c6
