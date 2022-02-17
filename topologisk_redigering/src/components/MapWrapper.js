@@ -11,19 +11,19 @@ import Draw from 'ol/interaction/Draw';
 //TODO Save polygon
 //TODO Put vector layer into map. sammanfoga kod från app och wrapper på ett smart sätt 
 
-function MapWrapper() {
+function MapWrapper({changeSelectedTool, selectTool}) {
     const [map, setMap] = useState();
     const mapElement = useRef();
     const mapRef = useRef();
     mapRef.current = map;
     const [draw, setDraw] = useState()
 
+
     const source = new VectorSource({wrapX: false});
     
     const vector = new VectorLayer({
         source: source,
       });
-      //console.log(`SOURCE: ${source}`)
 
     const drawPolygon = () => {
         setDraw(new Draw({
@@ -49,6 +49,7 @@ function MapWrapper() {
     }
 
 
+
     /*const updateMap = (newFeature) => {
         const vectorSource = new VectorSource({projection: 'EPSG:4326'})
         vectorSource.addFeature(newFeature)
@@ -56,6 +57,16 @@ function MapWrapper() {
         map.getLayerGroup().getLayers()
         map.addLayer(vectorLayer)
     }*/
+
+    useEffect(() => {
+        console.log({changeSelectedTool})
+        if ({changeSelectedTool}.changeSelectedTool == 'Add'){
+            drawPolygon()  
+        }
+    }, [{changeSelectedTool}.changeSelectedTool])
+
+
+
 
     useEffect(() => {
         const initialMap = new Map({
@@ -73,7 +84,6 @@ function MapWrapper() {
         });
         initialMap.on('click', handleMapClick)
         setMap(initialMap);
-        drawPolygon();  //TODO: move to button interaction
 
     }, []);
 

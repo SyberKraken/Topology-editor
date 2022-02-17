@@ -15,7 +15,7 @@ const App = () => {
   return (
   <>
     <Header selectTool={changeSelectedTool}/>
-    <MapWrapper/>
+    <MapWrapper changeSelectedTool={selectedTool} selectTool={changeSelectedTool} />
   </>
   )
 }
