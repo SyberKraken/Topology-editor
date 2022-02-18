@@ -10,6 +10,8 @@ import WMTSTileGrid from 'ol/tilegrid/WMTS';
 import WMTS from 'ol/source/WMTS';
 import {get as getProjection} from 'ol/proj';
 import {getWidth} from 'ol/extent';
+import GeoJSON from 'ol/format/GeoJSON';
+
 
 //TODO Save polygon
 
@@ -71,6 +73,22 @@ function MapWrapper({changeSelectedTool, selectTool}) {
         }));
     }
 
+    // npm install http-server -g (dosen't work if it's not global)
+    // new terminal run command :  npm run http (for windows)
+    //                            npm run httpl (for linux)
+    // if you get an excution policy error run:
+    //      Set-ExecutionPolicy Unrestricted (powershell admin to run http-server)
+    const vectorLayerFromUrl = (path) => {
+        const vectorLayer = new VectorLayer({
+            source: new VectorSource({
+                url: `http://127.0.0.1:8080/${path}`,
+                format: new GeoJSON()
+            })
+          })
+
+        return vectorLayer
+    }
+
     useEffect(() => {
         console.log({changeSelectedTool})
         if ({changeSelectedTool}.changeSelectedTool == 'Add'){
@@ -95,6 +113,8 @@ function MapWrapper({changeSelectedTool, selectTool}) {
             }),
         });
         setMap(initialMap);
+        const vectorLayer = vectorLayerFromUrl("geoJsonExample2.geojson")
+        initialMap.addLayer(vectorLayer)
         //drawPolygon();  //TODO: move to button interaction
     }, []);
 
