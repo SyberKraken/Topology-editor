@@ -63,7 +63,7 @@ function MapWrapper({changeSelectedTool, selectTool}) {
 
     const source = new VectorSource({
         wrapX: false,
-        url: `http://127.0.0.1:8080/src/data/geoJsonExample2.geojson`,
+        url: `http://127.0.0.1:8080/geoJsonExample2.geojson`,
         format: new GeoJSON({projection: "EPSG:3006"}),
         
     });
@@ -101,7 +101,15 @@ function MapWrapper({changeSelectedTool, selectTool}) {
             drawPolygon()  
         }
         else if ({changeSelectedTool}.changeSelectedTool == 'Delete'){
-            console.log(new GeoJSON({projection: "EPSG:3006"}).writeFeatures(map.getLayers().getArray()[1].getSource().getFeatures()) )
+            const features = map.getLayers().getArray()[1].getSource().getFeatures()
+            const jsonObj = new GeoJSON({projection: "EPSG:3006"}).writeFeaturesObject(features)
+            jsonObj["crs"] = {
+                    "type": "name",
+                    "properties": {
+                      "name": "EPSG:3006"
+                    }}
+
+            console.log(JSON.stringify(jsonObj))
         }
     }, [{changeSelectedTool}.changeSelectedTool])
 
