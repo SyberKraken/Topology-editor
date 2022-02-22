@@ -89,21 +89,32 @@ function MapWrapper({changeSelectedTool, selectTool}) {
         return vectorLayer
     }
 
-    //debugging for viewing last drawn polygon
-    const zoomToLastPolygon = () => {
+      //debugging for viewing last drawn polygon
+      const zoomToLastPolygon = () => {
         //console.log(map.getLayers().getArray()[1].getSource().getFeatures())
         let featureList = map.getLayers().getArray()[1].getSource().getFeatures()
         if (featureList.size > 0){
             map.getView().fit(featureList[featureList.length - 1 ].getGeometry())
         }else
         console.log("No features on map")
-            
+         
+        }
+
+    const loadPolyFromDB = ([]) => {      
+        //Cant load in layer while runnign at the moment.     
+        //realoadMap(vectorLayerFromUrl("geoJsonExample2.geojson"))
     }
 
     useEffect(() => {
         console.log({changeSelectedTool})
         if ({changeSelectedTool}.changeSelectedTool == 'Add'){
             drawPolygon()  
+        }
+        if ({changeSelectedTool}.changeSelectedTool == 'Delete'){
+            zoomToLastPolygon() 
+        }
+        if ({changeSelectedTool}.changeSelectedTool == 'Import'){
+            loadPolyFromDB()
         }
         
     }, [{changeSelectedTool}.changeSelectedTool])
@@ -115,7 +126,7 @@ function MapWrapper({changeSelectedTool, selectTool}) {
                 swedenMapLayer,
                 polygonLayer
             ],
-            taget: map,
+            
             view: new View({
                 center: [609924.45, 6877630.37],
                 zoom: 5.9,
@@ -124,9 +135,7 @@ function MapWrapper({changeSelectedTool, selectTool}) {
                 
             }),
         });
-        setMap(initialMap);
-        const vectorLayer = vectorLayerFromUrl("geoJsonExample2.geojson")
-        initialMap.addLayer(vectorLayer)
+        setMap(initialMap)
         //drawPolygon();  //TODO: move to button interaction
     }, []);
 
