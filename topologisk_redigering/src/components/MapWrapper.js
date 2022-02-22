@@ -89,11 +89,23 @@ function MapWrapper({changeSelectedTool, selectTool}) {
         return vectorLayer
     }
 
+    //debugging for viewing last drawn polygon
+    const zoomToLastPolygon = () => {
+        //console.log(map.getLayers().getArray()[1].getSource().getFeatures())
+        let featureList = map.getLayers().getArray()[1].getSource().getFeatures()
+        if (featureList.size > 0){
+            map.getView().fit(featureList[featureList.length - 1 ].getGeometry())
+        }else
+        console.log("No features on map")
+            
+    }
+
     useEffect(() => {
         console.log({changeSelectedTool})
         if ({changeSelectedTool}.changeSelectedTool == 'Add'){
             drawPolygon()  
         }
+        
     }, [{changeSelectedTool}.changeSelectedTool])
 
     useEffect(() => {
