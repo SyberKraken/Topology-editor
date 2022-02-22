@@ -60,7 +60,11 @@ function MapWrapper({changeSelectedTool, selectTool}) {
         wrapX: true,
     })
 
-    const source = new VectorSource({wrapX: false});
+    const source = new VectorSource({
+        wrapX: false,
+        url: `http://127.0.0.1:8080/geoJsonExample2.geojson`,
+        format: new GeoJSON()
+    });
     
     const polygonLayer = new VectorLayer({
         source: source,
@@ -113,8 +117,8 @@ function MapWrapper({changeSelectedTool, selectTool}) {
             }),
         });
         setMap(initialMap);
-        const vectorLayer = vectorLayerFromUrl("geoJsonExample2.geojson")
-        initialMap.addLayer(vectorLayer)
+        //const vectorLayer = vectorLayerFromUrl("geoJsonExample2.geojson")
+        //initialMap.addLayer(vectorLayer)
         //drawPolygon();  //TODO: move to button interaction
     }, []);
 
