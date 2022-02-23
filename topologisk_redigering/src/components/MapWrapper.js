@@ -11,11 +11,7 @@ import { get as getProjection } from 'ol/proj';
 import { getWidth } from 'ol/extent';
 import GeoJSON from 'ol/format/GeoJSON';
 
-<<<<<<< HEAD
 function MapWrapper({changeSelectedTool, selectTool, changeGeoJsonData}) {
-=======
-function MapWrapper({ changeSelectedTool, selectTool }) {
->>>>>>> fd5e83d10e42c57e4cecc74c6d09a49c5d69391a
     const [map, setMap] = useState();
     const mapElement = useRef();
     const mapRef = useRef();
@@ -92,8 +88,18 @@ function MapWrapper({ changeSelectedTool, selectTool }) {
         //realoadMap(vectorLayerFromUrl("geoJsonExample2.geojson"))
     }
 
-    const stopDrawingMode = () => {
-        map.getInteractions().pop()
+    const deleteLatest = () => {
+        if (map) {
+            console.log(map.getLayers().getArray()[1].getSource().getFeatures())
+            let layers = map.getLayers().getArray()[1].getSource()
+            let length = map.getLayers().getArray()[1].getSource().getFeatures().length
+            let lastFeature = map.getLayers().getArray()[1].getSource().getFeatures()[length-1]
+
+
+            layers.removeFeature(lastFeature)
+            
+            
+        } 
     }
 
     const featuresToGeoJSON = () => {
@@ -122,9 +128,6 @@ function MapWrapper({ changeSelectedTool, selectTool }) {
         } else if(map){
             stopDrawing()
         }
-        else if (map) {
-            stopDrawingMode()
-        }
 
         if ({changeSelectedTool}.changeSelectedTool == 'Zoom'){
             zoomToLastPolygon() 
@@ -132,18 +135,17 @@ function MapWrapper({ changeSelectedTool, selectTool }) {
         else if ({changeSelectedTool}.changeSelectedTool == 'Import'){
             loadPolyFromDB()
         }
-<<<<<<< HEAD
         else if({changeSelectedTool}.changeSelectedTool == 'Etc'){
             console.log("calling featuresToJson")
             featuresToGeoJSON()
         }
-
-=======
-
-        else if ({ changeSelectedTool }.changeSelectedTool == 'Delete') {
+        else if ({ changeSelectedTool }.changeSelectedTool == 'Save') {
             saveToDatabase()
         }
->>>>>>> fd5e83d10e42c57e4cecc74c6d09a49c5d69391a
+        else if ({ changeSelectedTool }.changeSelectedTool == 'Delete') {
+            console.log("deleting")
+            deleteLatest()
+        }
         
     }, [currTool])
 
