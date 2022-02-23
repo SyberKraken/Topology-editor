@@ -12,6 +12,8 @@ import { getWidth } from 'ol/extent';
 import GeoJSON from 'ol/format/GeoJSON';
 import {Circle as CircleStyle, Fill, Stroke, Style} from 'ol/style';
 import MultiPoint from 'ol/geom/MultiPoint';
+import {Modify, Snap} from 'ol/interaction';
+
 
 function MapWrapper({changeSelectedTool, selectTool, changeGeoJsonData}) {
     const [map, setMap] = useState();
@@ -19,6 +21,7 @@ function MapWrapper({changeSelectedTool, selectTool, changeGeoJsonData}) {
     const mapRef = useRef();
     mapRef.current = map;
     const [draw, setDraw] = useState()
+    const [snap, setSnap] = useState()
 
     const projection = getProjection('EPSG:3857');
     const projectionExtent = projection.getExtent();
@@ -33,13 +36,6 @@ function MapWrapper({changeSelectedTool, selectTool, changeGeoJsonData}) {
 
 
     const styles = [
-        /* We are using two different styles for the polygons:
-         *  - The first style is for the polygons themselves.
-         *  - The second style is to draw the vertices of the polygons.
-         *    In a custom `geometry` function the vertices of a polygon are
-         *    returned as `MultiPoint` geometry, which will be used to render
-         *    the style.
-         */
         new Style({
           stroke: new Stroke({
             color: 'light-blue',
@@ -67,9 +63,12 @@ function MapWrapper({changeSelectedTool, selectTool, changeGeoJsonData}) {
             source: map.getLayers().getArray()[1].getSource(),
             type: "Polygon",    //TODO: change to value from tool selection in menu/header.
         }));
+        setSnap(new Snap({source: map.getLayers().getArray()[1].getSource()}))
+
     }
 
     const stopDrawing = () => {
+        map.removeInteraction(snap)
         map.removeInteraction(draw)
     }
     // new terminal run command :  npm run http (for windows)
@@ -121,8 +120,18 @@ function MapWrapper({changeSelectedTool, selectTool, changeGeoJsonData}) {
         //realoadMap(vectorLayerFromUrl("geoJsonExample2.geojson"))
     }
 
-    const stopDrawingMode = () => {
-        map.getInteractions().pop()
+    const deleteLatest = () => {
+        if (map) {
+            console.log(map.getLayers().getArray()[1].getSource().getFeatures())
+            let layers = map.getLayers().getArray()[1].getSource()
+            let length = map.getLayers().getArray()[1].getSource().getFeatures().length
+            let lastFeature = map.getLayers().getArray()[1].getSource().getFeatures()[length-1]
+
+
+            layers.removeFeature(lastFeature)
+            
+            
+        } 
     }
 
     const featuresToGeoJSON = () => {
@@ -151,9 +160,6 @@ function MapWrapper({changeSelectedTool, selectTool, changeGeoJsonData}) {
         } else if(map){
             stopDrawing()
         }
-        else if (map) {
-            stopDrawingMode()
-        }
 
         if ({changeSelectedTool}.changeSelectedTool == 'Zoom'){
             zoomToLastPolygon() 
@@ -165,10 +171,12 @@ function MapWrapper({changeSelectedTool, selectTool, changeGeoJsonData}) {
             console.log("calling featuresToJson")
             featuresToGeoJSON()
         }
-
-
-        else if ({ changeSelectedTool }.changeSelectedTool == 'Delete') {
+        else if ({ changeSelectedTool }.changeSelectedTool == 'Save') {
             saveToDatabase()
+        }
+        else if ({ changeSelectedTool }.changeSelectedTool == 'Delete') {
+            console.log("deleting")
+            deleteLatest()
         }
         
     }, [currTool])
@@ -236,6 +244,7 @@ function MapWrapper({changeSelectedTool, selectTool, changeGeoJsonData}) {
     useEffect(() => {
         if (map) {
             map.addInteraction(draw)
+            map.addInteraction(snap)
         }
     }, [draw])
 
