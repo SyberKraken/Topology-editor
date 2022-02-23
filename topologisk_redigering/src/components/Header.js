@@ -21,6 +21,10 @@ function Header({ selectTool }) {
                onClick={() => {setCurrentTool("Edit")}}/>
       <NavItem icon={<UploadFileIcon fontSize={currentTool==="Import" ? "large" : "small"} color={currentTool==="Import" ? "success" : ""}/>}
                label={"Import File"} onClick={() => {setCurrentTool("Import")}}/>
+      <NavItem icon={<UploadFileIcon fontSize={currentTool==="Zoom" ? "large" : "small"} color={currentTool==="Zoom" ? "success" : ""}/>}
+               label={"Zoom to most recent polygon"} onClick={() => {setCurrentTool("Zoom")}}/>
+      <NavItem icon={<UploadFileIcon fontSize={currentTool==="Etc" ? "large" : "small"} color={currentTool==="Etc" ? "success" : ""}/>}
+               label={"Do something"} onClick={() => {setCurrentTool("Etc")}}/>               
     </nav>
   </Container>
 }
