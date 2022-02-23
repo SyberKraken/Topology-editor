@@ -79,29 +79,15 @@ function MapWrapper({ changeSelectedTool, selectTool }) {
         }));
     }
 
-    // npm install http-server -g (dosen't work if it's not global)
     // new terminal run command :  npm run http (for windows)
     //                            npm run httpl (for linux)
     // if you get an excution policy error run:
     //      Set-ExecutionPolicy Unrestricted (powershell admin to run http-server)
-    const vectorLayerFromUrl = (path) => {
-        const vectorLayer = new VectorLayer({
-            source: new VectorSource({
-                url: `http://127.0.0.1:8080/${path}`,
-                format: new GeoJSON()
-            })
-        })
-
-        return vectorLayer
-    }
-
-    useEffect(() => {
-        console.log({ changeSelectedTool })
-        if ({ changeSelectedTool }.changeSelectedTool == 'Add') {
-            drawPolygon()
-        }
-        else if ({ changeSelectedTool }.changeSelectedTool == 'Delete') {
-            const features = map.getLayers().getArray()[1].getSource().getFeatures()
+    // YOU NEED TO INSTALL json-server GLOBALLY FOR THE FOLLOWING FUNCTION TO WORK! (23/2)
+    // npm install -g json-server
+    
+    const saveToDatabase = () => {
+        const features = map.getLayers().getArray()[1].getSource().getFeatures()
             const jsonObj = new GeoJSON({ projection: "EPSG:3006" }).writeFeaturesObject(features)
             jsonObj["crs"] = {
                 "type": "name",
@@ -123,6 +109,15 @@ function MapWrapper({ changeSelectedTool, selectTool }) {
                 })
                 .then(function (res) { console.log(res) })
                 .catch(function (res) { console.log(res) })
+    }
+
+    useEffect(() => {
+        console.log({ changeSelectedTool })
+        if ({ changeSelectedTool }.changeSelectedTool == 'Add') {
+            drawPolygon()
+        }
+        else if ({ changeSelectedTool }.changeSelectedTool == 'Delete') {
+            saveToDatabase()
         }
     }, [{ changeSelectedTool }.changeSelectedTool])
 
@@ -144,7 +139,7 @@ function MapWrapper({ changeSelectedTool, selectTool }) {
             }),
         });
         setMap(initialMap);
-        drawPolygon()
+        //drawPolygon()
         //const vectorLayer = vectorLayerFromUrl("geoJsonExample2.geojson")
         //initialMap.addLayer(vectorLayer)
         //drawPolygon();  //TODO: move to button interaction
