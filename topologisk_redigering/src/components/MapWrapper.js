@@ -98,8 +98,18 @@ function MapWrapper({changeSelectedTool, selectTool, changeGeoJsonData}) {
         //realoadMap(vectorLayerFromUrl("geoJsonExample2.geojson"))
     }
 
-    const stopDrawingMode = () => {
-        map.getInteractions().pop()
+    const deleteLatest = () => {
+        if (map) {
+            console.log(map.getLayers().getArray()[1].getSource().getFeatures())
+            let layers = map.getLayers().getArray()[1].getSource()
+            let length = map.getLayers().getArray()[1].getSource().getFeatures().length
+            let lastFeature = map.getLayers().getArray()[1].getSource().getFeatures()[length-1]
+
+
+            layers.removeFeature(lastFeature)
+            
+            
+        } 
     }
 
     const featuresToGeoJSON = () => {
@@ -128,9 +138,6 @@ function MapWrapper({changeSelectedTool, selectTool, changeGeoJsonData}) {
         } else if(map){
             stopDrawing()
         }
-        else if (map) {
-            stopDrawingMode()
-        }
 
         if ({changeSelectedTool}.changeSelectedTool == 'Zoom'){
             zoomToLastPolygon() 
@@ -142,10 +149,12 @@ function MapWrapper({changeSelectedTool, selectTool, changeGeoJsonData}) {
             console.log("calling featuresToJson")
             featuresToGeoJSON()
         }
-
-
-        else if ({ changeSelectedTool }.changeSelectedTool == 'Delete') {
+        else if ({ changeSelectedTool }.changeSelectedTool == 'Save') {
             saveToDatabase()
+        }
+        else if ({ changeSelectedTool }.changeSelectedTool == 'Delete') {
+            console.log("deleting")
+            deleteLatest()
         }
         
     }, [currTool])
