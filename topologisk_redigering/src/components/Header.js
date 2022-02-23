@@ -2,10 +2,10 @@ import AddIcon from '@mui/icons-material/AddCircle'
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline'
 import ModeEditIcon from '@mui/icons-material/ModeEdit'
 import UploadFileIcon from '@mui/icons-material/UploadFile';
-import { Container } from '@mui/material'
+import ZoomInMapIcon from '@mui/icons-material/ZoomInMap';
+import BuildIcon from '@mui/icons-material/Build';
 import { useState } from 'react'
 import NavItem from './NavItem'
-import SelectType from './SelectType';
 
 function Header({ selectTool }) {
 
@@ -31,8 +31,13 @@ function Header({ selectTool }) {
                 onClick={() => {setStatus("Edit")}}/>
         <NavItem icon={<UploadFileIcon fontSize={currentTool==="Import" ? "large" : "small"} color={currentTool==="Import" ? "success" : ""}/>}
                 label={"Import File"} onClick={() => {setStatus("Import")}}/>
+        <NavItem icon={<ZoomInMapIcon fontSize={currentTool==="Zoom" ? "large" : "small"} color={currentTool==="Zoom" ? "success" : ""}/>}
+               label={"Zoom to most recent polygon"} onClick={() => {setStatus("Zoom")}}/>
+        <NavItem icon={<BuildIcon fontSize={currentTool==="Etc" ? "large" : "small"} color={currentTool==="Etc" ? "success" : ""}/>}
+               label={"Do something"} onClick={() => {setStatus("Etc")}}/>              
       </nav>
     </>)
+
 }
 
 export default Header;
