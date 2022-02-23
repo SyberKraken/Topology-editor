@@ -37,6 +37,10 @@ function MapWrapper({changeSelectedTool, selectTool, changeGeoJsonData}) {
         }));
     }
 
+    const stopDrawing = () => {
+        map.removeInteraction(draw)
+    }
+
     // npm install http-server -g (dosen't work if it's not global)
     // new terminal run command :  npm run http (for windows)
     //                            npm run httpl (for linux)
@@ -91,10 +95,13 @@ function MapWrapper({changeSelectedTool, selectTool, changeGeoJsonData}) {
             changeGeoJsonData(jsonObj)
     }
 
+    const currTool = {changeSelectedTool}.changeSelectedTool
     useEffect(() => {
         console.log({changeSelectedTool})
-        if ({changeSelectedTool}.changeSelectedTool == 'Add'){
+        if (currTool === 'Add'){
             drawPolygon()  
+        } else if(map){
+            stopDrawing()
         }
         else if (map) {
             stopDrawingMode()
@@ -112,7 +119,7 @@ function MapWrapper({changeSelectedTool, selectTool, changeGeoJsonData}) {
         }
 
         
-    }, [{changeSelectedTool}.changeSelectedTool])
+    }, [currTool])
 
     useEffect(() => {
 
@@ -155,6 +162,7 @@ function MapWrapper({changeSelectedTool, selectTool, changeGeoJsonData}) {
                 swedenMapLayer,
                 polygonLayer
             ],
+            taget: 'map-container',
             view: new View({
                 center: [609924.45, 6877630.37],
                 zoom: 5.9,
@@ -173,7 +181,7 @@ function MapWrapper({changeSelectedTool, selectTool, changeGeoJsonData}) {
         }, [draw])
 
     return (
-        <div style={{height:'100vh',width:'100%'}} ref={mapElement} className="map-container" />
+        <div style={{height:'100vh',width:'100%', zIndex:1, position:'relative'}} ref={mapElement} className="map-container" />
     );
 }
 
