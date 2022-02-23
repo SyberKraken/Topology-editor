@@ -2,27 +2,42 @@ import AddIcon from '@mui/icons-material/AddCircle'
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline'
 import ModeEditIcon from '@mui/icons-material/ModeEdit'
 import UploadFileIcon from '@mui/icons-material/UploadFile';
-import { Container } from '@mui/material'
+import ZoomInMapIcon from '@mui/icons-material/ZoomInMap';
+import BuildIcon from '@mui/icons-material/Build';
 import { useState } from 'react'
 import NavItem from './NavItem'
 
 function Header({ selectTool }) {
 
-  const [currentTool, setCurrentTool] = useState("Default")
+  const [currentTool, setCurrentTool] = useState("")
   selectTool(currentTool)
 
-    return <Container maxWidth="sm">
-    <nav>
-      <NavItem icon={<AddIcon fontSize={currentTool==="Add" ? "large" : "small"} color={currentTool==="Add" ? "success" : ""}/>} label={"Add"} 
-               onClick={() => {setCurrentTool("Add")}}/>
-      <NavItem icon={<DeleteOutlineIcon fontSize={currentTool==="Delete" ? "large" : "small"} color={currentTool==="Delete" ? "success" : ""}/>} label={"Delete"}
-               onClick={() => {setCurrentTool("Delete")}}/>
-      <NavItem icon={<ModeEditIcon fontSize={currentTool==="Edit" ? "large" : "small"} color={currentTool==="Edit" ? "success" : ""}/>} label={"Edit"} 
-               onClick={() => {setCurrentTool("Edit")}}/>
-      <NavItem icon={<UploadFileIcon fontSize={currentTool==="Import" ? "large" : "small"} color={currentTool==="Import" ? "success" : ""}/>}
-               label={"Import File"} onClick={() => {setCurrentTool("Import")}}/>
-    </nav>
-  </Container>
+  function setStatus(tool) {
+    if (tool === currentTool){
+      setCurrentTool("None")
+    }else {
+      setCurrentTool(tool)
+    }
+  }
+
+    return (
+    <>
+      <nav>
+        <NavItem icon={<AddIcon fontSize={currentTool==="Add" ? "large" : "small"} color={currentTool==="Add" ? "success" : ""}/>} label={"Add"} 
+                onClick={() => {setStatus("Add")}}/>
+        <NavItem icon={<DeleteOutlineIcon fontSize={currentTool==="Delete" ? "large" : "small"} color={currentTool==="Delete" ? "success" : ""}/>} label={"Delete"}
+                onClick={() => {setStatus("Delete")}}/>
+        <NavItem icon={<ModeEditIcon fontSize={currentTool==="Edit" ? "large" : "small"} color={currentTool==="Edit" ? "success" : ""}/>} label={"Edit"} 
+                onClick={() => {setStatus("Edit")}}/>
+        <NavItem icon={<UploadFileIcon fontSize={currentTool==="Import" ? "large" : "small"} color={currentTool==="Import" ? "success" : ""}/>}
+                label={"Import File"} onClick={() => {setStatus("Import")}}/>
+        <NavItem icon={<ZoomInMapIcon fontSize={currentTool==="Zoom" ? "large" : "small"} color={currentTool==="Zoom" ? "success" : ""}/>}
+               label={"Zoom to most recent polygon"} onClick={() => {setStatus("Zoom")}}/>
+        <NavItem icon={<BuildIcon fontSize={currentTool==="Etc" ? "large" : "small"} color={currentTool==="Etc" ? "success" : ""}/>}
+               label={"Do something"} onClick={() => {setStatus("Etc")}}/>              
+      </nav>
+    </>)
+
 }
 
 export default Header;
