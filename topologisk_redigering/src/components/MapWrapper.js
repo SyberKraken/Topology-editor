@@ -11,6 +11,7 @@ import WMTS from 'ol/source/WMTS';
 import {get as getProjection} from 'ol/proj';
 import {getWidth} from 'ol/extent';
 import GeoJSON from 'ol/format/GeoJSON';
+import Header from './Header';
 
 
 //TODO Save polygon
@@ -73,6 +74,10 @@ function MapWrapper({changeSelectedTool, selectTool}) {
         }));
     }
 
+    const stopDrawing = () => {
+        map.removeInteraction(draw)
+    }
+
     // npm install http-server -g (dosen't work if it's not global)
     // new terminal run command :  npm run http (for windows)
     //                            npm run httpl (for linux)
@@ -99,14 +104,16 @@ function MapWrapper({changeSelectedTool, selectTool}) {
         console.log("No features on map")
             
     }
-
+    const currTool = {changeSelectedTool}.changeSelectedTool
     useEffect(() => {
         console.log({changeSelectedTool})
-        if ({changeSelectedTool}.changeSelectedTool == 'Add'){
+        if (currTool === 'Add'){
             drawPolygon()  
+        } else if(map){
+            stopDrawing()
         }
         
-    }, [{changeSelectedTool}.changeSelectedTool])
+    }, [currTool])
 
     useEffect(() => {
         const initialMap = new Map({
@@ -115,7 +122,7 @@ function MapWrapper({changeSelectedTool, selectTool}) {
                 swedenMapLayer,
                 polygonLayer
             ],
-            taget: map,
+            taget: 'map-container',
             view: new View({
                 center: [609924.45, 6877630.37],
                 zoom: 5.9,
@@ -125,8 +132,8 @@ function MapWrapper({changeSelectedTool, selectTool}) {
             }),
         });
         setMap(initialMap);
-        const vectorLayer = vectorLayerFromUrl("geoJsonExample2.geojson")
-        initialMap.addLayer(vectorLayer)
+        //const vectorLayer = vectorLayerFromUrl("geoJsonExample2.geojson")
+        //initialMap.addLayer(vectorLayer)
         //drawPolygon();  //TODO: move to button interaction
     }, []);
 
@@ -137,7 +144,7 @@ function MapWrapper({changeSelectedTool, selectTool}) {
         }, [draw])
 
     return (
-        <div style={{height:'100vh',width:'100%'}} ref={mapElement} className="map-container" />
+        <div style={{height:'100vh',width:'100%', zIndex:1, position:'relative'}} ref={mapElement} className="map-container" />
     );
 }
 
