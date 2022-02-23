@@ -10,12 +10,10 @@ import WMTS from 'ol/source/WMTS';
 import { get as getProjection } from 'ol/proj';
 import { getWidth } from 'ol/extent';
 import GeoJSON from 'ol/format/GeoJSON';
+import {Circle as CircleStyle, Fill, Stroke, Style} from 'ol/style';
+import MultiPoint from 'ol/geom/MultiPoint';
 
-<<<<<<< HEAD
 function MapWrapper({changeSelectedTool, selectTool, changeGeoJsonData}) {
-=======
-function MapWrapper({ changeSelectedTool, selectTool }) {
->>>>>>> fd5e83d10e42c57e4cecc74c6d09a49c5d69391a
     const [map, setMap] = useState();
     const mapElement = useRef();
     const mapRef = useRef();
@@ -32,6 +30,37 @@ function MapWrapper({ changeSelectedTool, selectTool }) {
         resolutions[z] = size / Math.pow(2, z);
         matrixIds[z] = z;
     }
+
+
+    const styles = [
+        /* We are using two different styles for the polygons:
+         *  - The first style is for the polygons themselves.
+         *  - The second style is to draw the vertices of the polygons.
+         *    In a custom `geometry` function the vertices of a polygon are
+         *    returned as `MultiPoint` geometry, which will be used to render
+         *    the style.
+         */
+        new Style({
+          stroke: new Stroke({
+            color: 'light-blue',
+            width: 3,
+          }),
+        }),
+        new Style({
+          image: new CircleStyle({
+            radius: 5,
+            fill: new Fill({
+              color: 'orange',
+            }),
+          }),
+          geometry: function (feature) {
+            // return the coordinates of the first ring of the polygon
+            const coordinates = feature.getGeometry().getCoordinates()[0];
+            return new MultiPoint(coordinates);
+          },
+        }),
+      ];
+
 
     const drawPolygon = () => {
         setDraw(new Draw({
@@ -132,18 +161,15 @@ function MapWrapper({ changeSelectedTool, selectTool }) {
         else if ({changeSelectedTool}.changeSelectedTool == 'Import'){
             loadPolyFromDB()
         }
-<<<<<<< HEAD
         else if({changeSelectedTool}.changeSelectedTool == 'Etc'){
             console.log("calling featuresToJson")
             featuresToGeoJSON()
         }
 
-=======
 
         else if ({ changeSelectedTool }.changeSelectedTool == 'Delete') {
             saveToDatabase()
         }
->>>>>>> fd5e83d10e42c57e4cecc74c6d09a49c5d69391a
         
     }, [currTool])
 
@@ -186,6 +212,7 @@ function MapWrapper({ changeSelectedTool, selectTool }) {
 
         const polygonLayer = new VectorLayer({
             source: source,
+            style: styles
         });
 
             const initialMap = new Map({
