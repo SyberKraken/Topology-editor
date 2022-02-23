@@ -12,7 +12,7 @@ import {get as getProjection} from 'ol/proj';
 import {getWidth} from 'ol/extent';
 import GeoJSON from 'ol/format/GeoJSON';
 
-function MapWrapper({changeSelectedTool, selectTool}) {
+function MapWrapper({changeSelectedTool, selectTool, changeGeoJsonData}) {
     const [map, setMap] = useState();
     const mapElement = useRef();
     const mapRef = useRef();
@@ -74,6 +74,23 @@ function MapWrapper({changeSelectedTool, selectTool}) {
         map.getInteractions().pop()
     }
 
+    const featuresToGeoJSON = () => {
+        let features = [];
+        if (map) {features = map.getLayers().getArray()[1].getSource().getFeatures() }
+        else {features = []}
+        console.log("raw feature list")
+        console.log(features)
+            const jsonObj = new GeoJSON({ projection: "EPSG:3006" }).writeFeaturesObject(features)
+            jsonObj["crs"] = {
+                "type": "name",
+                "properties": {
+                    "name": "EPSG:3006"
+                }
+            }
+            console.log(jsonObj)
+            changeGeoJsonData(jsonObj)
+    }
+
     useEffect(() => {
         console.log({changeSelectedTool})
         if ({changeSelectedTool}.changeSelectedTool == 'Add'){
@@ -89,6 +106,11 @@ function MapWrapper({changeSelectedTool, selectTool}) {
         else if ({changeSelectedTool}.changeSelectedTool == 'Import'){
             loadPolyFromDB()
         }
+        else if({changeSelectedTool}.changeSelectedTool == 'Etc'){
+            console.log("calling featuresToJson")
+            featuresToGeoJSON()
+        }
+
         
     }, [{changeSelectedTool}.changeSelectedTool])
 
