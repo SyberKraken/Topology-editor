@@ -2,20 +2,20 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Map, View } from 'ol';
 import TileLayer from 'ol/layer/Tile';
 import 'ol/ol.css';
-import {Fill, Stroke, Style} from 'ol/style';
+import { Fill, Stroke, Style } from 'ol/style';
 import VectorLayer from 'ol/layer/Vector';
 import VectorSource from 'ol/source/Vector';
 import Draw from 'ol/interaction/Draw';
 import WMTSTileGrid from 'ol/tilegrid/WMTS';
 import WMTS from 'ol/source/WMTS';
-import {get as getProjection} from 'ol/proj';
-import {getWidth} from 'ol/extent';
+import { get as getProjection } from 'ol/proj';
+import { getWidth } from 'ol/extent';
 import GeoJSON from 'ol/format/GeoJSON';
 
 
 //TODO Save polygon
 
-function MapWrapper({changeSelectedTool, selectTool}) {
+function MapWrapper({ changeSelectedTool, selectTool }) {
     const [map, setMap] = useState();
     const mapElement = useRef();
     const mapRef = useRef();
@@ -32,7 +32,7 @@ function MapWrapper({changeSelectedTool, selectTool}) {
         resolutions[z] = size / Math.pow(2, z);
         matrixIds[z] = z;
     }
-    
+
     const OUTER_SWEDEN_EXTENT = [-1200000, 4700000, 2600000, 8500000];
     const wmts_3006_resolutions = [4096.0, 2048.0, 1024.0, 512.0, 256.0, 128.0, 64.0, 32.0, 16.0, 8.0];
     const wmts_3006_matrixIds = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
@@ -44,7 +44,7 @@ function MapWrapper({changeSelectedTool, selectTool}) {
         matrixIds: wmts_3006_matrixIds
     });
 
-    const swedenMapLayer = new TileLayer({ 
+    const swedenMapLayer = new TileLayer({
         source: new WMTS({
             url: "https://api.lantmateriet.se/open/topowebb-ccby/v1/wmts/token/5401f50c-568c-3459-a49f-69426e4ed1c6/?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&LAYER=topowebb&STYLE=default&FORMAT=image/png",
             layer: "swedenMapLayer",
@@ -63,11 +63,11 @@ function MapWrapper({changeSelectedTool, selectTool}) {
 
     const source = new VectorSource({
         wrapX: false,
-        url: `http://127.0.0.1:8080/geoJsonExample2.geojson`,
-        format: new GeoJSON({projection: "EPSG:3006"}),
-        
+        url: "http://localhost:3000/file1",
+        format: new GeoJSON({ projection: "EPSG:3006" }),
+
     });
-    
+
     const polygonLayer = new VectorLayer({
         source: source,
     });
@@ -90,28 +90,41 @@ function MapWrapper({changeSelectedTool, selectTool}) {
                 url: `http://127.0.0.1:8080/${path}`,
                 format: new GeoJSON()
             })
-          })
+        })
 
         return vectorLayer
     }
 
     useEffect(() => {
-        console.log({changeSelectedTool})
-        if ({changeSelectedTool}.changeSelectedTool == 'Add'){
-            drawPolygon()  
+        console.log({ changeSelectedTool })
+        if ({ changeSelectedTool }.changeSelectedTool == 'Add') {
+            drawPolygon()
         }
-        else if ({changeSelectedTool}.changeSelectedTool == 'Delete'){
+        else if ({ changeSelectedTool }.changeSelectedTool == 'Delete') {
             const features = map.getLayers().getArray()[1].getSource().getFeatures()
-            const jsonObj = new GeoJSON({projection: "EPSG:3006"}).writeFeaturesObject(features)
+            const jsonObj = new GeoJSON({ projection: "EPSG:3006" }).writeFeaturesObject(features)
             jsonObj["crs"] = {
-                    "type": "name",
-                    "properties": {
-                      "name": "EPSG:3006"
-                    }}
+                "type": "name",
+                "properties": {
+                    "name": "EPSG:3006"
+                }
+            }
 
             console.log(JSON.stringify(jsonObj))
+
+            fetch("http://localhost:3000/file1",
+                {
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    },
+                    method: "PUT",
+                    body: JSON.stringify(jsonObj)
+                })
+                .then(function (res) { console.log(res) })
+                .catch(function (res) { console.log(res) })
         }
-    }, [{changeSelectedTool}.changeSelectedTool])
+    }, [{ changeSelectedTool }.changeSelectedTool])
 
 
     useEffect(() => {
@@ -121,19 +134,17 @@ function MapWrapper({changeSelectedTool, selectTool}) {
                 swedenMapLayer,
                 polygonLayer
             ],
-            
+
             view: new View({
                 center: [609924.45, 6877630.37],
                 zoom: 5.9,
-                minZoom:5.8,
-                maxZoom:17,
-                
+                minZoom: 5.8,
+                maxZoom: 17,
+
             }),
         });
         setMap(initialMap);
         drawPolygon()
-        
-        
         //const vectorLayer = vectorLayerFromUrl("geoJsonExample2.geojson")
         //initialMap.addLayer(vectorLayer)
         //drawPolygon();  //TODO: move to button interaction
@@ -141,12 +152,12 @@ function MapWrapper({changeSelectedTool, selectTool}) {
 
     useEffect(() => {
         if (map) {
-             map.addInteraction(draw) 
-            }
-        }, [draw])
+            map.addInteraction(draw)
+        }
+    }, [draw])
 
     return (
-        <div style={{height:'100vh',width:'100%'}} ref={mapElement} className="map-container" />
+        <div style={{ height: '100vh', width: '100%' }} ref={mapElement} className="map-container" />
     );
 }
 
