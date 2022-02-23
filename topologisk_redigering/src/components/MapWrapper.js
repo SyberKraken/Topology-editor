@@ -10,17 +10,18 @@ import WMTS from 'ol/source/WMTS';
 import { get as getProjection } from 'ol/proj';
 import { getWidth } from 'ol/extent';
 import GeoJSON from 'ol/format/GeoJSON';
+import Stroke from 'ol/style/Stroke';
+import Style from 'ol/style/Style';
+import Fill from 'ol/style/Fill';
+import {Modify, Snap} from 'ol/interaction';
 
-<<<<<<< HEAD
 function MapWrapper({changeSelectedTool, selectTool, changeGeoJsonData}) {
-=======
-function MapWrapper({ changeSelectedTool, selectTool }) {
->>>>>>> fd5e83d10e42c57e4cecc74c6d09a49c5d69391a
     const [map, setMap] = useState();
     const mapElement = useRef();
     const mapRef = useRef();
     mapRef.current = map;
     const [draw, setDraw] = useState()
+    const [snap, setSnap] = useState()
 
     const projection = getProjection('EPSG:3857');
     const projectionExtent = projection.getExtent();
@@ -33,14 +34,19 @@ function MapWrapper({ changeSelectedTool, selectTool }) {
         matrixIds[z] = z;
     }
 
+    
+
     const drawPolygon = () => {
         setDraw(new Draw({
             source: map.getLayers().getArray()[1].getSource(),
             type: "Polygon",    //TODO: change to value from tool selection in menu/header.
         }));
+        setSnap(new Snap({source: map.getLayers().getArray()[1].getSource()}))
+
     }
 
     const stopDrawing = () => {
+        map.removeInteraction(snap)
         map.removeInteraction(draw)
     }
     // new terminal run command :  npm run http (for windows)
@@ -132,18 +138,15 @@ function MapWrapper({ changeSelectedTool, selectTool }) {
         else if ({changeSelectedTool}.changeSelectedTool == 'Import'){
             loadPolyFromDB()
         }
-<<<<<<< HEAD
         else if({changeSelectedTool}.changeSelectedTool == 'Etc'){
             console.log("calling featuresToJson")
             featuresToGeoJSON()
         }
 
-=======
 
         else if ({ changeSelectedTool }.changeSelectedTool == 'Delete') {
             saveToDatabase()
         }
->>>>>>> fd5e83d10e42c57e4cecc74c6d09a49c5d69391a
         
     }, [currTool])
 
@@ -209,6 +212,7 @@ function MapWrapper({ changeSelectedTool, selectTool }) {
     useEffect(() => {
         if (map) {
             map.addInteraction(draw)
+            map.addInteraction(snap)
         }
     }, [draw])
 
