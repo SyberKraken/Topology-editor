@@ -26,7 +26,7 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "http": "json-server --watch --no-cors .\\src\\data\\geoJsonExample2.json"
+    "http": "json-server -p 4000 --watch --no-cors .\\src\\data\\geoJsonExample2.json"
   },
   "eslintConfig": {
     "extends": [
