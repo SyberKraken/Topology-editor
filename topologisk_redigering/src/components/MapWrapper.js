@@ -63,7 +63,7 @@ function MapWrapper({ changeSelectedTool, selectTool }) {
 
     const source = new VectorSource({
         wrapX: false,
-        url: "http://localhost:3000/file1",
+        url: "http://localhost:4000/file1",
         format: new GeoJSON({ projection: "EPSG:3006" }),
 
     });
@@ -112,7 +112,7 @@ function MapWrapper({ changeSelectedTool, selectTool }) {
 
             console.log(JSON.stringify(jsonObj))
 
-            fetch("http://localhost:3000/file1",
+            fetch("http://localhost:4000/file1",
                 {
                     headers: {
                         'Accept': 'application/json',
