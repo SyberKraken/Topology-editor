@@ -14,11 +14,11 @@ const App = () => {
   }
 
   const changeGeoJsonData = (data) => {
-    setGeoJsonData(data)
-  }
+      setGeoJsonData(data)
+    }
 
   useEffect (() => {
-    console.log(geoJsonData)
+      console.log(JSON.stringify(geoJsonData))
   }, [geoJsonData])
 
   return (

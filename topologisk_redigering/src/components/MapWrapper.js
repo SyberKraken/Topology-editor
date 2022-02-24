@@ -15,7 +15,8 @@ import MultiPoint from 'ol/geom/MultiPoint';
 import {Modify, Snap} from 'ol/interaction';
 
 
-function MapWrapper({changeSelectedTool, selectTool, changeGeoJsonData}) {
+
+function MapWrapper({changeSelectedTool, selectTool, changeGeoJsonData, geoJsonData}) {
     const [map, setMap] = useState();
     const mapElement = useRef();
     const mapRef = useRef();
@@ -151,6 +152,19 @@ function MapWrapper({changeSelectedTool, selectTool, changeGeoJsonData}) {
             changeGeoJsonData(jsonObj)
     }
 
+    const loadGeoJsonData = () => {
+        console.log(JSON.stringify(geoJsonData))
+        let featureList = []
+        geoJsonData.readFeaturesObject(featureList)
+        const source = new VectorSource({
+            wrapX: false,
+            features: featureList
+        });
+        console.log(map.getLayers().getArray()[1])
+        map.getLayers().getArray()[1].setSource(source)
+        
+    }
+
     const currTool = {changeSelectedTool}.changeSelectedTool
     useEffect(() => {
 
@@ -175,8 +189,9 @@ function MapWrapper({changeSelectedTool, selectTool, changeGeoJsonData}) {
             saveToDatabase()
         }
         else if ({ changeSelectedTool }.changeSelectedTool == 'Delete') {
-            console.log("deleting")
-            deleteLatest()
+            //console.log("deleting")
+            //deleteLatest()
+            loadGeoJsonData()
         }
         
     }, [currTool])
