@@ -41,6 +41,9 @@ function MapWrapper({changeSelectedTool, selectTool, changeGeoJsonData}) {
             color: 'light-blue',
             width: 3,
           }),
+          fill: new Fill({
+            color: 'rgba(0, 0, 255, 0.1)',
+          }),
         }),
         new Style({
           image: new CircleStyle({
