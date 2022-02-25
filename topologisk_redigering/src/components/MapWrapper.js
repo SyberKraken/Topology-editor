@@ -42,6 +42,9 @@ function MapWrapper({changeSelectedTool, selectTool, changeGeoJsonData, geoJsonD
             color: 'light-blue',
             width: 3,
           }),
+          fill: new Fill({
+            color: 'rgba(0, 0, 255, 0.1)',
+          }),
         }),
         new Style({
           image: new CircleStyle({
@@ -50,19 +53,27 @@ function MapWrapper({changeSelectedTool, selectTool, changeGeoJsonData, geoJsonD
               color: 'orange',
             }),
           }),
+          
           geometry: function (feature) {
             // return the coordinates of the first ring of the polygon
             const coordinates = feature.getGeometry().getCoordinates()[0];
             return new MultiPoint(coordinates);
           },
         }),
+         new Style({
+            fill: new Fill({
+                color:'rgba(255,255,0,0.1'
+            })
+              
+        }) 
       ];
 
 
     const drawPolygon = () => {
         setDraw(new Draw({
             source: map.getLayers().getArray()[1].getSource(),
-            type: "Polygon",    //TODO: change to value from tool selection in menu/header.
+            type: "Polygon",
+            geometryName: "Polygon",    //TODO: change to value from tool selection in menu/header.
         }));
         setSnap(new Snap({source: map.getLayers().getArray()[1].getSource()}))
 
@@ -162,7 +173,16 @@ function MapWrapper({changeSelectedTool, selectTool, changeGeoJsonData, geoJsonD
         });
         console.log(map.getLayers().getArray()[1])
         map.getLayers().getArray()[1].setSource(source)
+    }
         
+    const handleMapClick = (evt) => {
+        console.log(evt.map.hasFeatureAtPixel(evt.pixel, evt.map.getLayers().getArray()[1].getSource()))
+        evt.map.forEachFeatureAtPixel(evt.pixel, (feature) => {console.log(feature.getGeometryName())})
+        //evt.map.forEachLayerAtPixel(evt.pixel, (layer) => {console.log(layer.getSource())})
+        //console.log(evt.map.getLayers().getArray()[1].getSource().getFeatures()[0].getGeometryName())
+        /* if (evt.map.hasFeatureAtPixel(evt.pixel)){
+            draw.removeLastPoint()
+        } */
     }
 
     const currTool = {changeSelectedTool}.changeSelectedTool
@@ -253,6 +273,7 @@ function MapWrapper({changeSelectedTool, selectTool, changeGeoJsonData, geoJsonD
                 }),
             });
             
+        initialMap.on('click', handleMapClick)
         setMap(initialMap)
     }, []);
 

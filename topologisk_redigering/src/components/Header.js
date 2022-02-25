@@ -35,7 +35,7 @@ function Header({ selectTool }) {
         <NavItem icon={<ZoomInMapIcon fontSize={currentTool==="Zoom" ? "large" : "small"} color={currentTool==="Zoom" ? "success" : ""}/>}
                label={"Zoom to most recent polygon"} onClick={() => {setStatus("Zoom")}}/>
         <NavItem icon={<BuildIcon fontSize={currentTool==="Etc" ? "large" : "small"} color={currentTool==="Etc" ? "success" : ""}/>}
-               label={"Clean polygons"} onClick={() => {setStatus("Etc")}}/>   
+               label={"Debug print"} onClick={() => {setStatus("Etc")}}/>   
         <NavItem icon={<BuildIcon fontSize={currentTool==="Save" ? "large" : "small"} color={currentTool==="Save" ? "success" : ""}/>}
                label={"Save to cloud!"} onClick={() => {setStatus("Save")}}/>                            
       </nav>
