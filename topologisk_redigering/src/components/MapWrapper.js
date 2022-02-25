@@ -189,9 +189,9 @@ function MapWrapper({changeSelectedTool, selectTool, changeGeoJsonData, geoJsonD
             saveToDatabase()
         }
         else if ({ changeSelectedTool }.changeSelectedTool == 'Delete') {
-            //console.log("deleting")
-            //deleteLatest()
-            loadGeoJsonData()
+            console.log("deleting")
+            deleteLatest()
+            //loadGeoJsonData()
         }
         
     }, [currTool])
