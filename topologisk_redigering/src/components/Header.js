@@ -37,7 +37,9 @@ function Header({ selectTool }) {
         <NavItem icon={<BuildIcon fontSize={currentTool==="Etc" ? "large" : "small"} color={currentTool==="Etc" ? "success" : ""}/>}
                label={"Debug print"} onClick={() => {setStatus("Etc")}}/>   
         <NavItem icon={<BuildIcon fontSize={currentTool==="Save" ? "large" : "small"} color={currentTool==="Save" ? "success" : ""}/>}
-               label={"Save to cloud!"} onClick={() => {setStatus("Save")}}/>                            
+               label={"Save to cloud!"} onClick={() => {setStatus("Save")}}/>      
+        <NavItem icon={<BuildIcon fontSize={currentTool==="AppVariableImport" ? "large" : "small"} color={currentTool==="AppVariableImport" ? "success" : ""}/>}
+        label={"Import geoJson state from App.js!"} onClick={() => {setStatus("AppVariableImport")}}/>                       
       </nav>
     </>)
 

@@ -166,7 +166,8 @@ function MapWrapper({changeSelectedTool, selectTool, changeGeoJsonData, geoJsonD
     const loadGeoJsonData = () => {
         console.log(JSON.stringify(geoJsonData))
         let featureList = []
-        geoJsonData.readFeaturesObject(featureList)
+        featureList = (new GeoJSON()).readFeatures(geoJsonData) //  GeoJSON.readFeatures(geoJsonData)
+        console.log(featureList)
         const source = new VectorSource({
             wrapX: false,
             features: featureList
@@ -213,6 +214,11 @@ function MapWrapper({changeSelectedTool, selectTool, changeGeoJsonData, geoJsonD
             deleteLatest()
             //loadGeoJsonData()
         }
+
+        else if ({ changeSelectedTool }.changeSelectedTool == 'AppVariableImport') {
+            loadGeoJsonData()
+        }
+        
         
     }, [currTool])
 
