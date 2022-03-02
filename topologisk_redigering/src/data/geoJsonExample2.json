@@ -1,7 +1,35 @@
 {
   "file1": {
     "type": "FeatureCollection",
-    "features": [],
+    "features": [
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Polygon",
+          "coordinates": [
+            [
+              [
+                298261.9580588731,
+                7408253.997237243
+              ],
+              [
+                370897.03341143625,
+                6572796.465124582
+              ],
+              [
+                692432.3884017968,
+                6813191.232006846
+              ],
+              [
+                298261.9580588731,
+                7408253.997237243
+              ]
+            ]
+          ]
+        },
+        "properties": null
+      }
+    ],
     "crs": {
       "type": "name",
       "properties": {
