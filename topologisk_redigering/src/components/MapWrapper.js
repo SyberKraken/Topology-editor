@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Map, View } from 'ol';
+import { Feature, Map, View } from 'ol';
 import TileLayer from 'ol/layer/Tile';
 import 'ol/ol.css';
 import VectorLayer from 'ol/layer/Vector';
@@ -16,6 +16,8 @@ import MultiPoint from 'ol/geom/MultiPoint';
 import {Modify, Snap} from 'ol/interaction';
 import GeoJSONReader from 'jsts/org/locationtech/jts/io/GeoJSONReader.js'
 import GeoJSONWriter from 'jsts/org/locationtech/jts/io/GeoJSONWriter.js'
+import Polygon from 'ol/geom/Polygon';
+
 
 
 function MapWrapper({changeSelectedTool, selectTool, changeGeoJsonData, geoJsonData}) {
@@ -186,42 +188,31 @@ function MapWrapper({changeSelectedTool, selectTool, changeGeoJsonData, geoJsonD
         } */
     }
 
-    const geoJsonToJsts = () => {
-        //code needed because geoJsonData is not yet actually geoJsonData
-        const features = map.getLayers().getArray()[1].getSource().getFeatures()
-        const jsonObj = new GeoJSON({ projection: "EPSG:3006" }).writeFeaturesObject(features)
-        jsonObj["crs"] = {
-            "type": "name",
-            "properties": {
-                "name": "EPSG:3006"
-            }
-        }
-        //-----------
-        console.log(JSON.stringify(jsonObj))
-        let reader = new GeoJSONReader().read(jsonObj)
-        return reader //
+    const geoJsonToJsts = (geoJson) => {
+        let reader = new GeoJSONReader().read(geoJson)
+        return reader 
     }
 
     const jstsToGeoJson = (jstsObject) => {
         let writer = new GeoJSONWriter()
-        const jsonObj = new GeoJSON({ projection: "EPSG:3006" })
-        jstsObject.features.forEach(feature=> {
-            console.log(JSON.stringify(writer.write(feature.geometry)))
-            let x = new Geometry()
-            console.log(JSON.stringify(x))
-            jsonObj.writeGeometryObject(writer.write(feature.geometry))
-        });
+        let featureList = []
 
-        //const jsonObj = new GeoJSON({ projection: "EPSG:3006" }).writeFeaturesObject(features)
-        
-        
+        jstsObject.features.forEach(feature=> {
+            let writtenGeometry = writer.write(feature.geometry) 
+            let polygon = new Polygon(writtenGeometry.coordinates) 
+            let featureWrapping = new Feature(polygon)
+            featureList.push(featureWrapping)
+        }); 
+       
+        const jsonObj = new GeoJSON({ projection: "EPSG:3006" }).writeFeaturesObject(featureList)
+
         jsonObj["crs"] = {
             "type": "name",
             "properties": {
                 "name": "EPSG:3006"
             }
         }
-        return jsonObj//new GeoJSONWriter().write(jstsObject.features[0].geometry)
+        return jsonObj
     }
 
     const currTool = {changeSelectedTool}.changeSelectedTool
@@ -242,10 +233,11 @@ function MapWrapper({changeSelectedTool, selectTool, changeGeoJsonData, geoJsonD
             loadPolyFromDB()
         }
         else if({changeSelectedTool}.changeSelectedTool == 'Etc'){
-            let jstsObject = geoJsonToJsts()
-            let geoJsonObject = jstsToGeoJson(jstsObject)
-            console.log("jstsObject: ",jstsObject)
-            console.log("geoJsonObject: ", geoJsonObject)
+                //let jstsObject = geoJsonToJsts()
+                //let geoJsonObject = jstsToGeoJson(jstsObject)
+                //console.log("jstsObject: ",jstsObject)
+                //console.log("geoJsonObject: ", JSON.stringify(geoJsonObject))
+            console.log("thank you for debugging.")
         }
         else if ({ changeSelectedTool }.changeSelectedTool == 'Save') {
             saveToDatabase()
