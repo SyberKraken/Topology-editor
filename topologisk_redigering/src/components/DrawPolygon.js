@@ -5,12 +5,15 @@ import React from 'react'
 
  function DrawPolygon(props) {
 
-
+  
   const drawing = () => { 
-    new Draw({
-    source: props.source,
-    type:"Polygon",
-  })}
+    console.log("Draw")
+    console.log(props.source)
+    props.selectDraw(new Draw({
+      source: props.source,
+      type:"Polygon",
+    }))
+    }
    
   return (
     <button onClick={drawing}>

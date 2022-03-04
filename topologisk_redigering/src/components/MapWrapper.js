@@ -14,6 +14,8 @@ import {Circle as CircleStyle, Fill, Stroke, Style} from 'ol/style';
 import MultiPoint from 'ol/geom/MultiPoint';
 import {Modify, Snap} from 'ol/interaction';
 import DrawPolygon from './DrawPolygon';
+import { featuresToGeoJSON } from './GeoJsonHandler';
+import { saveToDatabase, GeoJsonObjToFeatureList, loadPolyFromDB } from './DatabaseHandler';
 
 
 
@@ -78,7 +80,7 @@ function MapWrapper({changeSelectedTool, selectTool, changeGeoJsonData, geoJsonD
         }) 
       ];
 
-    const tilegrid = new WMTSTileGrid({
+      const tilegrid = new WMTSTileGrid({
         tileSize: 256,
         extent: OUTER_SWEDEN_EXTENT,
         resolutions: wmts_3006_resolutions,
@@ -114,50 +116,52 @@ function MapWrapper({changeSelectedTool, selectTool, changeGeoJsonData, geoJsonD
         style: styles
     });
 
-    
+   
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-useEffect(() => {  
-    console.log(swedenMapLayer)
+    useEffect(() => {
+        console.log(swedenMapLayer)
 
-         const initialMap = new Map({
-            target: mapElement.current,
-            layers: [
-                swedenMapLayer,
-                polygonLayer
-            ],
-            view: new View({
-                center: [609924.45, 6877630.37],
-                zoom: 5.9,
-                minZoom: 5.8,
-                maxZoom: 17,
+            const initialMap = new Map({
+                target: mapElement.current,
+                layers: [
+                    swedenMapLayer, 
+                    polygonLayer
+                ],
+                view: new View({
+                    center: [609924.45, 6877630.37],
+                    zoom: 5.9,
+                    minZoom: 5.8,
+                    maxZoom: 17,
 
-            }),
-        });
-        
-        setMap(initialMap) 
-},[]);
+                }),
+            });
+            setMap(initialMap)         
 
-    const drawInteraction = () => {
-        console.log("Hej")
-        setMapSource(map.getLayers().getArray()[1].getSource())
+    },[])
 
+    const getMapSource = () => {
+        return map.getLayers().getArray()[1].getSource()
+    }
+
+    const getFeatureList = () => {
+        return map.getLayers().getArray()[1].getSource().getFeatures()
     }
 
 
-     const drawPolygon = () => {
+        const drawPolygon = () => {
         setDraw(new Draw({
-            source: map.getLayers().getArray()[1].getSource(),
+            source: getMapSource(),
             type: "Polygon",
             geometryName: "Polygon",    //TODO: change to value from tool selection in menu/header.
         }));
-        setSnap(new Snap({source: map.getLayers().getArray()[1].getSource()}))
+        setSnap(new Snap({source: getMapSource()}))
     } 
 
-     const stopDrawing = () => {
+        const stopDrawing = () => {
         map.removeInteraction(snap)
         map.removeInteraction(draw)
-    } 
+    }  
 
     // new terminal run command :  npm run http (for windows)
     //                            npm run httpl (for linux)
@@ -166,30 +170,7 @@ useEffect(() => {
     // YOU NEED TO INSTALL json-server GLOBALLY FOR THE FOLLOWING FUNCTION TO WORK! (23/2)
     // npm install -g json-server
     
-    const saveToDatabase = () => {
-        const features = map.getLayers().getArray()[1].getSource().getFeatures()
-            const jsonObj = new GeoJSON({ projection: "EPSG:3006" }).writeFeaturesObject(features)
-            jsonObj["crs"] = {
-                "type": "name",
-                "properties": {
-                    "name": "EPSG:3006"
-                }
-            }
 
-            console.log(JSON.stringify(jsonObj))
-
-            fetch("http://localhost:4000/file1",
-                {
-                    headers: {
-                        'Accept': 'application/json',
-                        'Content-Type': 'application/json'
-                    },
-                    method: "PUT",
-                    body: JSON.stringify(jsonObj)
-                })
-                .then(function (res) { console.log(res) })
-                .catch(function (res) { console.log(res) })
-    }
 
       //debugging for viewing last drawn polygon
     const zoomToLastPolygon = () => {
@@ -203,106 +184,77 @@ useEffect(() => {
         } 
     }
 
-    const loadPolyFromDB = ([]) => {      
-        //Cant load in layer while runnign at the moment.     
-        //realoadMap(vectorLayerFromUrl("geoJsonExample2.geojson"))
-    }
-
     const deleteLatest = () => {
         if (map) {
-            console.log(map.getLayers().getArray()[1].getSource().getFeatures())
+            //console.log(map.getLayers().getArray()[1].getSource().getFeatures())
             let layers = map.getLayers().getArray()[1].getSource()
-            let length = map.getLayers().getArray()[1].getSource().getFeatures().length
-            let lastFeature = map.getLayers().getArray()[1].getSource().getFeatures()[length-1]
-            layers.removeFeature(lastFeature)
-                      
+            let length = getFeatureList().length
+            let lastFeature = getFeatureList()[length-1]
+            layers.removeFeature(lastFeature)                      
         } 
     }
 
-    const featuresToGeoJSON = () => {
+    const featuresToGeo = () => {
         let features = [];
-        if (map) {features = map.getLayers().getArray()[1].getSource().getFeatures() }
+        if (map) {features = getFeatureList() }
         else {features = []}
-        console.log("raw feature list")
-        console.log(features)
-            const jsonObj = new GeoJSON({ projection: "EPSG:3006" }).writeFeaturesObject(features)
-            jsonObj["crs"] = {
-                "type": "name",
-                "properties": {
-                    "name": "EPSG:3006"
-                }
-            }
-            console.log(jsonObj)
-            changeGeoJsonData(jsonObj)
+        changeGeoJsonData(featuresToGeoJSON(features))
     }
 
     const loadGeoJsonData = () => {
         console.log(JSON.stringify(geoJsonData))
-        let featureList = []
-        featureList = (new GeoJSON()).readFeatures(geoJsonData) //  GeoJSON.readFeatures(geoJsonData)
-        console.log(featureList)
+        //const featureList = GeoJsonObjToFeatureList(geoJsonData)
         const source = new VectorSource({
             wrapX: false,
-            features: featureList
+            features: GeoJsonObjToFeatureList(geoJsonData)
         });
-        console.log(map.getLayers().getArray()[1])
+        //console.log(map.getLayers().getArray()[1])
         map.getLayers().getArray()[1].setSource(source)
     }
         
     const currTool = {changeSelectedTool}.changeSelectedTool
     useEffect(() => {
 
-        console.log({changeSelectedTool})
         if (currTool === 'Add'){
-            //drawPolygon()  
+            drawPolygon()  
         } else if(map){
-            //stopDrawing()
+            stopDrawing()
         }
-
-        if ({changeSelectedTool}.changeSelectedTool === 'Zoom'){
+        if (currTool === 'Zoom'){
             zoomToLastPolygon() 
         }
-        else if ({changeSelectedTool}.changeSelectedTool === 'Import'){
+        else if (currTool === 'Import'){
             loadPolyFromDB()
         }
-        else if({changeSelectedTool}.changeSelectedTool === 'Etc'){
-            console.log("calling featuresToJson")
-            featuresToGeoJSON()
+        else if(currTool === 'Etc'){
+            featuresToGeo()
         }
-        else if ({ changeSelectedTool }.changeSelectedTool === 'Save') {
-            saveToDatabase()
+        else if (currTool === 'Save') {
+            saveToDatabase(map.getLayers().getArray()[1].getSource().getFeatures())
         }
-        else if ({ changeSelectedTool }.changeSelectedTool === 'Delete') {
-            console.log("deleting")
+        else if (currTool === 'Delete') {
             deleteLatest()
-            //loadGeoJsonData()
         }
-
-        else if ({ changeSelectedTool }.changeSelectedTool === 'AppVariableImport') {
+        else if (currTool === 'AppVariableImport') {
             loadGeoJsonData()
         }
           
     }, [currTool])
 
-
-    /* Initiate map */
-    
-
-    /* useEffect(() => {
+     useEffect(() => {
         if (map) {
+            console.log("hej")
             map.addInteraction(draw)
             map.addInteraction(snap)
         }
     }, [draw])
- */
-    
+ 
+
     return (
         <>
             <div style={{ height: '100vh', width: '100%' }} 
             ref={mapElement} 
-            className="map-container" >
-
-            <DrawPolygon source={mapSource} onClick={drawInteraction}/>
+            className="map-container" >                
             </div>
         </>
     );
