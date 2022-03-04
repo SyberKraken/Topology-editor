@@ -13,6 +13,9 @@ import GeoJSON from 'ol/format/GeoJSON';
 import {Circle as CircleStyle, Fill, Stroke, Style} from 'ol/style';
 import MultiPoint from 'ol/geom/MultiPoint';
 import {Modify, Snap} from 'ol/interaction';
+import DrawPolygon from './DrawPolygon';
+
+
 
 
 
@@ -23,6 +26,7 @@ function MapWrapper({changeSelectedTool, selectTool, changeGeoJsonData, geoJsonD
     mapRef.current = map;
     const [draw, setDraw] = useState()
     const [snap, setSnap] = useState()
+    const [mapSource, setMapSource] = useState()
 
     const projection = getProjection('EPSG:3857');
     const projectionExtent = projection.getExtent();
@@ -34,7 +38,13 @@ function MapWrapper({changeSelectedTool, selectTool, changeGeoJsonData, geoJsonD
         resolutions[z] = size / Math.pow(2, z);
         matrixIds[z] = z;
     }
+    
 
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    const OUTER_SWEDEN_EXTENT = [-1200000, 4700000, 2600000, 8500000];
+    const wmts_3006_resolutions = [4096.0, 2048.0, 1024.0, 512.0, 256.0, 128.0, 64.0, 32.0, 16.0, 8.0];
+    const wmts_3006_matrixIds = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];   
 
     const styles = [
         new Style({
@@ -68,21 +78,87 @@ function MapWrapper({changeSelectedTool, selectTool, changeGeoJsonData, geoJsonD
         }) 
       ];
 
+    const tilegrid = new WMTSTileGrid({
+        tileSize: 256,
+        extent: OUTER_SWEDEN_EXTENT,
+        resolutions: wmts_3006_resolutions,
+        matrixIds: wmts_3006_matrixIds
+    });
 
-    const drawPolygon = () => {
+    const swedenMapLayer = new TileLayer({
+        source: new WMTS({
+            url: "https://api.lantmateriet.se/open/topowebb-ccby/v1/wmts/token/5401f50c-568c-3459-a49f-69426e4ed1c6/?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&LAYER=topowebb&STYLE=default&FORMAT=image/png",
+            layer: "swedenMapLayer",
+            format: 'image/png',
+            matrixSet: '3006',
+            tileGrid: tilegrid,
+            version: '1.0.0',
+            style: 'default',
+            crossOrigin: 'anonymous',
+            projection: "EPSG:3006",
+            useSpatialIndex: 'false',
+        }),
+        style: 'default',
+        wrapX: true,
+    })
+
+    const source = new VectorSource({
+        wrapX: false,
+        url: "http://localhost:4000/file1",
+        format: new GeoJSON({ projection: "EPSG:3006" }),
+
+    });
+
+    const polygonLayer = new VectorLayer({
+        source: source,
+        style: styles
+    });
+
+    
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+useEffect(() => {  
+    console.log(swedenMapLayer)
+
+         const initialMap = new Map({
+            target: mapElement.current,
+            layers: [
+                swedenMapLayer,
+                polygonLayer
+            ],
+            view: new View({
+                center: [609924.45, 6877630.37],
+                zoom: 5.9,
+                minZoom: 5.8,
+                maxZoom: 17,
+
+            }),
+        });
+        
+        setMap(initialMap) 
+},[]);
+
+    const drawInteraction = () => {
+        console.log("Hej")
+        setMapSource(map.getLayers().getArray()[1].getSource())
+
+    }
+
+
+     const drawPolygon = () => {
         setDraw(new Draw({
             source: map.getLayers().getArray()[1].getSource(),
             type: "Polygon",
             geometryName: "Polygon",    //TODO: change to value from tool selection in menu/header.
         }));
         setSnap(new Snap({source: map.getLayers().getArray()[1].getSource()}))
+    } 
 
-    }
-
-    const stopDrawing = () => {
+     const stopDrawing = () => {
         map.removeInteraction(snap)
         map.removeInteraction(draw)
-    }
+    } 
+
     // new terminal run command :  npm run http (for windows)
     //                            npm run httpl (for linux)
     // if you get an excution policy error run:
@@ -138,11 +214,8 @@ function MapWrapper({changeSelectedTool, selectTool, changeGeoJsonData, geoJsonD
             let layers = map.getLayers().getArray()[1].getSource()
             let length = map.getLayers().getArray()[1].getSource().getFeatures().length
             let lastFeature = map.getLayers().getArray()[1].getSource().getFeatures()[length-1]
-
-
             layers.removeFeature(lastFeature)
-            
-            
+                      
         } 
     }
 
@@ -176,122 +249,62 @@ function MapWrapper({changeSelectedTool, selectTool, changeGeoJsonData, geoJsonD
         map.getLayers().getArray()[1].setSource(source)
     }
         
-    const handleMapClick = (evt) => {
-        console.log(evt.map.hasFeatureAtPixel(evt.pixel, evt.map.getLayers().getArray()[1].getSource()))
-        evt.map.forEachFeatureAtPixel(evt.pixel, (feature) => {console.log(feature.getGeometryName())})
-        //evt.map.forEachLayerAtPixel(evt.pixel, (layer) => {console.log(layer.getSource())})
-        //console.log(evt.map.getLayers().getArray()[1].getSource().getFeatures()[0].getGeometryName())
-        /* if (evt.map.hasFeatureAtPixel(evt.pixel)){
-            draw.removeLastPoint()
-        } */
-    }
-
     const currTool = {changeSelectedTool}.changeSelectedTool
     useEffect(() => {
 
         console.log({changeSelectedTool})
         if (currTool === 'Add'){
-            drawPolygon()  
+            //drawPolygon()  
         } else if(map){
-            stopDrawing()
+            //stopDrawing()
         }
 
-        if ({changeSelectedTool}.changeSelectedTool == 'Zoom'){
+        if ({changeSelectedTool}.changeSelectedTool === 'Zoom'){
             zoomToLastPolygon() 
         }
-        else if ({changeSelectedTool}.changeSelectedTool == 'Import'){
+        else if ({changeSelectedTool}.changeSelectedTool === 'Import'){
             loadPolyFromDB()
         }
-        else if({changeSelectedTool}.changeSelectedTool == 'Etc'){
+        else if({changeSelectedTool}.changeSelectedTool === 'Etc'){
             console.log("calling featuresToJson")
             featuresToGeoJSON()
         }
-        else if ({ changeSelectedTool }.changeSelectedTool == 'Save') {
+        else if ({ changeSelectedTool }.changeSelectedTool === 'Save') {
             saveToDatabase()
         }
-        else if ({ changeSelectedTool }.changeSelectedTool == 'Delete') {
+        else if ({ changeSelectedTool }.changeSelectedTool === 'Delete') {
             console.log("deleting")
             deleteLatest()
             //loadGeoJsonData()
         }
 
-        else if ({ changeSelectedTool }.changeSelectedTool == 'AppVariableImport') {
+        else if ({ changeSelectedTool }.changeSelectedTool === 'AppVariableImport') {
             loadGeoJsonData()
         }
-        
-        
+          
     }, [currTool])
 
 
-    useEffect(() => {  
-        const OUTER_SWEDEN_EXTENT = [-1200000, 4700000, 2600000, 8500000];
-        const wmts_3006_resolutions = [4096.0, 2048.0, 1024.0, 512.0, 256.0, 128.0, 64.0, 32.0, 16.0, 8.0];
-        const wmts_3006_matrixIds = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+    /* Initiate map */
+    
 
-        const tilegrid = new WMTSTileGrid({
-            tileSize: 256,
-            extent: OUTER_SWEDEN_EXTENT,
-            resolutions: wmts_3006_resolutions,
-            matrixIds: wmts_3006_matrixIds
-        });
-
-        const swedenMapLayer = new TileLayer({
-            source: new WMTS({
-                url: "https://api.lantmateriet.se/open/topowebb-ccby/v1/wmts/token/5401f50c-568c-3459-a49f-69426e4ed1c6/?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&LAYER=topowebb&STYLE=default&FORMAT=image/png",
-                layer: "swedenMapLayer",
-                format: 'image/png',
-                matrixSet: '3006',
-                tileGrid: tilegrid,
-                version: '1.0.0',
-                style: 'default',
-                crossOrigin: 'anonymous',
-                projection: "EPSG:3006",
-                useSpatialIndex: 'false',
-            }),
-            style: 'default',
-            wrapX: true,
-        })
-
-        const source = new VectorSource({
-            wrapX: false,
-            url: "http://localhost:4000/file1",
-            format: new GeoJSON({ projection: "EPSG:3006" }),
-
-        });
-
-        const polygonLayer = new VectorLayer({
-            source: source,
-            style: styles
-        });
-
-            const initialMap = new Map({
-                target: mapElement.current,
-                layers: [
-                    swedenMapLayer,
-                    polygonLayer
-                ],
-                view: new View({
-                    center: [609924.45, 6877630.37],
-                    zoom: 5.9,
-                    minZoom: 5.8,
-                    maxZoom: 17,
-
-                }),
-            });
-            
-        initialMap.on('click', handleMapClick)
-        setMap(initialMap)
-    }, []);
-
-    useEffect(() => {
+    /* useEffect(() => {
         if (map) {
             map.addInteraction(draw)
             map.addInteraction(snap)
         }
     }, [draw])
-
+ */
+    
     return (
-        <div style={{ height: '100vh', width: '100%' }} ref={mapElement} className="map-container" />
+        <>
+            <div style={{ height: '100vh', width: '100%' }} 
+            ref={mapElement} 
+            className="map-container" >
+
+            <DrawPolygon source={mapSource} onClick={drawInteraction}/>
+            </div>
+        </>
     );
 }
 

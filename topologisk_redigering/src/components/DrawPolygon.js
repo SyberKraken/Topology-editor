@@ -1,9 +1,22 @@
+import { Draw, Snap } from 'ol/interaction'
 import React from 'react'
 
-function DrawPolygon() {
+
+
+ function DrawPolygon(props) {
+
+
+  const drawing = () => { 
+    new Draw({
+    source: props.source,
+    type:"Polygon",
+  })}
+   
   return (
-    <div>DrawPolygon</div>
+    <button onClick={drawing}>
+      Draw Polygon
+    </button>
   )
 }
 
-export default DrawPolygon
+export default DrawPolygon 
