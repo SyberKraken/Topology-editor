@@ -140,11 +140,7 @@ function MapWrapper({changeSelectedTool, selectTool, changeGeoJsonData, geoJsonD
             let layers = map.getLayers().getArray()[1].getSource()
             let length = map.getLayers().getArray()[1].getSource().getFeatures().length
             let lastFeature = map.getLayers().getArray()[1].getSource().getFeatures()[length-1]
-
-
             layers.removeFeature(lastFeature)
-            
-            
         } 
     }
 
@@ -215,6 +211,12 @@ function MapWrapper({changeSelectedTool, selectTool, changeGeoJsonData, geoJsonD
         return jsonObj
     }
 
+    const checkIntersection = (jstsGeometryA, jstsGeometryB) => {
+        debugger
+        let jstsGeometryIntersection = jstsGeometryA.intersection(jstsGeometryB)
+        console.log("checkIntersection finishing")
+    }
+
     const currTool = {changeSelectedTool}.changeSelectedTool
     
     useEffect(() => {
@@ -233,10 +235,22 @@ function MapWrapper({changeSelectedTool, selectTool, changeGeoJsonData, geoJsonD
             loadPolyFromDB()
         }
         else if({changeSelectedTool}.changeSelectedTool == 'Etc'){
-                //let jstsObject = geoJsonToJsts()
-                //let geoJsonObject = jstsToGeoJson(jstsObject)
-                //console.log("jstsObject: ",jstsObject)
-                //console.log("geoJsonObject: ", JSON.stringify(geoJsonObject))
+            console.log("0")
+            let testGeoJsonData = new GeoJSON({ projection: "EPSG:3006" }).writeFeaturesObject(map.getLayers().getArray()[1].getSource().getFeatures())
+            console.log("1")
+            testGeoJsonData["crs"] = {
+                "type": "name",
+                "properties": {
+                    "name": "EPSG:3006"
+                }
+            }
+            let testJstsData = geoJsonToJsts(testGeoJsonData)
+            debugger
+            checkIntersection(testJstsData.features[0], testJstsData.features[1])
+            //let jstsObject = geoJsonToJsts()
+            //let geoJsonObject = jstsToGeoJson(jstsObject)
+            //console.log("jstsObject: ",jstsObject)
+            //console.log("geoJsonObject: ", JSON.stringify(geoJsonObject))
             console.log("thank you for debugging.")
         }
         else if ({ changeSelectedTool }.changeSelectedTool == 'Save') {
