@@ -1,25 +1,25 @@
 import { Draw, Snap } from 'ol/interaction'
-import React from 'react'
 
 
+export const drawPolygon = (map) => {
+  const snap = new Snap({source: getMapSource(map)})
+  const draw = new Draw({
+      source: getMapSource(map),
+      type: "Polygon",
+      geometryName: "Polygon",    //TODO: change to value from tool selection in menu/header.
+  })
 
- function DrawPolygon(props) {
+  map.addInteraction(draw)
+  map.addInteraction(snap)
+
+  draw.addEventListener('drawend', () => {
+    map.removeInteraction(snap)
+    map.removeInteraction(draw)
+  });
 
   
-  const drawing = () => { 
-    console.log("Draw")
-    console.log(props.source)
-    props.selectDraw(new Draw({
-      source: props.source,
-      type:"Polygon",
-    }))
-    }
-   
-  return (
-    <button onClick={drawing}>
-      Draw Polygon
-    </button>
-  )
-}
+} 
 
-export default DrawPolygon 
+const getMapSource = (x) => {
+  return x.getLayers().getArray()[1].getSource()
+}

@@ -1,5 +1,12 @@
 import GeoJSON from "ol/format/GeoJSON"
 
+// new terminal run command :  npm run http (for windows)
+    //                            npm run httpl (for linux)
+    // if you get an excution policy error run:
+    //      Set-ExecutionPolicy Unrestricted (powershell admin to run http-server)
+    // YOU NEED TO INSTALL json-server GLOBALLY FOR THE FOLLOWING FUNCTION TO WORK! (23/2)
+    // npm install -g json-server
+
 export const saveToDatabase = (features) => {
         const jsonObj = new GeoJSON({ projection: "EPSG:3006" }).writeFeaturesObject(features)
         jsonObj["crs"] = {

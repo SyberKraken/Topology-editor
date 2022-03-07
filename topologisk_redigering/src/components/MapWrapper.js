@@ -13,11 +13,11 @@ import GeoJSON from 'ol/format/GeoJSON';
 import {Circle as CircleStyle, Fill, Stroke, Style} from 'ol/style';
 import MultiPoint from 'ol/geom/MultiPoint';
 import {Modify, Snap} from 'ol/interaction';
-import DrawPolygon from './DrawPolygon';
+import { drawPolygon } from './DrawPolygon';
 import { featuresToGeoJSON } from './GeoJsonHandler';
 import { saveToDatabase, GeoJsonObjToFeatureList, loadPolyFromDB } from './DatabaseHandler';
-
-
+import { deleteLatest } from './DeletePolygon'
+import {zoomToLastPolygon} from './ZoomToPolygon'
 
 
 
@@ -140,60 +140,11 @@ function MapWrapper({changeSelectedTool, selectTool, changeGeoJsonData, geoJsonD
 
     },[])
 
-    const getMapSource = () => {
-        return map.getLayers().getArray()[1].getSource()
-    }
-
     const getFeatureList = () => {
         return map.getLayers().getArray()[1].getSource().getFeatures()
     }
 
-
-        const drawPolygon = () => {
-        setDraw(new Draw({
-            source: getMapSource(),
-            type: "Polygon",
-            geometryName: "Polygon",    //TODO: change to value from tool selection in menu/header.
-        }));
-        setSnap(new Snap({source: getMapSource()}))
-    } 
-
-        const stopDrawing = () => {
-        map.removeInteraction(snap)
-        map.removeInteraction(draw)
-    }  
-
-    // new terminal run command :  npm run http (for windows)
-    //                            npm run httpl (for linux)
-    // if you get an excution policy error run:
-    //      Set-ExecutionPolicy Unrestricted (powershell admin to run http-server)
-    // YOU NEED TO INSTALL json-server GLOBALLY FOR THE FOLLOWING FUNCTION TO WORK! (23/2)
-    // npm install -g json-server
-    
-
-
-      //debugging for viewing last drawn polygon
-    const zoomToLastPolygon = () => {
-        let featureList = map.getLayers().getArray()[1].getSource().getFeatures()
-        console.log("fl", featureList)
-        if (featureList.length > 0){
-            map.getView().fit(featureList[featureList.length - 1 ].getGeometry())
-        }
-        else {
-            console.log("No features on map")
-        } 
-    }
-
-    const deleteLatest = () => {
-        if (map) {
-            //console.log(map.getLayers().getArray()[1].getSource().getFeatures())
-            let layers = map.getLayers().getArray()[1].getSource()
-            let length = getFeatureList().length
-            let lastFeature = getFeatureList()[length-1]
-            layers.removeFeature(lastFeature)                      
-        } 
-    }
-
+    //move to geojson functions
     const featuresToGeo = () => {
         let features = [];
         if (map) {features = getFeatureList() }
@@ -201,6 +152,7 @@ function MapWrapper({changeSelectedTool, selectTool, changeGeoJsonData, geoJsonD
         changeGeoJsonData(featuresToGeoJSON(features))
     }
 
+    //unsure how setSource would work in diff file
     const loadGeoJsonData = () => {
         console.log(JSON.stringify(geoJsonData))
         //const featureList = GeoJsonObjToFeatureList(geoJsonData)
@@ -216,12 +168,10 @@ function MapWrapper({changeSelectedTool, selectTool, changeGeoJsonData, geoJsonD
     useEffect(() => {
 
         if (currTool === 'Add'){
-            drawPolygon()  
-        } else if(map){
-            stopDrawing()
-        }
+            drawPolygon(map)
+        } 
         if (currTool === 'Zoom'){
-            zoomToLastPolygon() 
+            zoomToLastPolygon(map) 
         }
         else if (currTool === 'Import'){
             loadPolyFromDB()
@@ -230,25 +180,16 @@ function MapWrapper({changeSelectedTool, selectTool, changeGeoJsonData, geoJsonD
             featuresToGeo()
         }
         else if (currTool === 'Save') {
-            saveToDatabase(map.getLayers().getArray()[1].getSource().getFeatures())
+            saveToDatabase(getFeatureList())
         }
         else if (currTool === 'Delete') {
-            deleteLatest()
+            deleteLatest(map)
         }
         else if (currTool === 'AppVariableImport') {
             loadGeoJsonData()
         }
           
     }, [currTool])
-
-     useEffect(() => {
-        if (map) {
-            console.log("hej")
-            map.addInteraction(draw)
-            map.addInteraction(snap)
-        }
-    }, [draw])
- 
 
     return (
         <>
