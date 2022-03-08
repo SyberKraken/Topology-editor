@@ -5,13 +5,7 @@ import Header from './components/Header';
 import GeoJSON from 'ol/format/GeoJSON';
 
 const App = () => {
-  const [selectedTool, setSelectedTool] = useState('')
   const [geoJsonData, setGeoJsonData] = useState(new GeoJSON())
-
-  const changeSelectedTool = (tool) => {
-    setSelectedTool(tool)
-    //console.log(selectedTool)
-  }
 
   const changeGeoJsonData = (data) => {
       setGeoJsonData(data)
@@ -23,8 +17,7 @@ const App = () => {
 
   return (
   <>
-    <Header selectTool={changeSelectedTool}/>
-    <MapWrapper changeSelectedTool={selectedTool} selectTool={changeSelectedTool} changeGeoJsonData={changeGeoJsonData} geoJsonData={geoJsonData}/>
+    <MapWrapper  changeGeoJsonData={changeGeoJsonData} geoJsonData={geoJsonData}/>
   </>
   )
 }

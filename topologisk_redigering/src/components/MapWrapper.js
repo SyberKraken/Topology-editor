@@ -4,7 +4,6 @@ import TileLayer from 'ol/layer/Tile';
 import 'ol/ol.css';
 import VectorLayer from 'ol/layer/Vector';
 import VectorSource from 'ol/source/Vector';
-import Draw from 'ol/interaction/Draw';
 import WMTSTileGrid from 'ol/tilegrid/WMTS';
 import WMTS from 'ol/source/WMTS';
 import { get as getProjection } from 'ol/proj';
@@ -12,8 +11,7 @@ import { getWidth } from 'ol/extent';
 import GeoJSON from 'ol/format/GeoJSON';
 import {Circle as CircleStyle, Fill, Stroke, Style} from 'ol/style';
 import MultiPoint from 'ol/geom/MultiPoint';
-import {Modify, Snap} from 'ol/interaction';
-import { drawPolygon } from './DrawPolygon';
+import  { drawPolygon } from './DrawPolygon';
 import { featuresToGeoJSON } from './GeoJsonHandler';
 import { saveToDatabase, GeoJsonObjToFeatureList, loadPolyFromDB } from './DatabaseHandler';
 import { deleteLatest } from './DeletePolygon'
@@ -21,15 +19,14 @@ import {zoomToLastPolygon} from './ZoomToPolygon'
 
 
 
-function MapWrapper({changeSelectedTool, selectTool, changeGeoJsonData, geoJsonData}) {
+function MapWrapper({geoJsonData}) {
     const [map, setMap] = useState();
+    const [currentTool, setCurrentTool] = useState('NONE')
     const mapElement = useRef();
     const mapRef = useRef();
     mapRef.current = map;
-    const [draw, setDraw] = useState()
-    const [snap, setSnap] = useState()
-    const [mapSource, setMapSource] = useState()
 
+   
     const projection = getProjection('EPSG:3857');
     const projectionExtent = projection.getExtent();
     const size = getWidth(projectionExtent) / 256;
@@ -135,22 +132,31 @@ function MapWrapper({changeSelectedTool, selectTool, changeGeoJsonData, geoJsonD
                     maxZoom: 17,
 
                 }),
-            });
-            setMap(initialMap)         
+            })     
+            setMap(initialMap)
 
     },[])
+
+    const onMapClickHandler = () => {
+        if (currentTool === "NONE"){
+            console.log("whooop")
+            setCurrentTool('DRAW')
+            drawPolygon(map)
+            
+        }
+        else {}
+    }
+
+    useEffect (() => {
+        console.log(currentTool)
+    }, [currentTool])
 
     const getFeatureList = () => {
         return map.getLayers().getArray()[1].getSource().getFeatures()
     }
 
     //move to geojson functions
-    const featuresToGeo = () => {
-        let features = [];
-        if (map) {features = getFeatureList() }
-        else {features = []}
-        changeGeoJsonData(featuresToGeoJSON(features))
-    }
+    
 
     //unsure how setSource would work in diff file
     const loadGeoJsonData = () => {
@@ -163,39 +169,42 @@ function MapWrapper({changeSelectedTool, selectTool, changeGeoJsonData, geoJsonD
         //console.log(map.getLayers().getArray()[1])
         map.getLayers().getArray()[1].setSource(source)
     }
-        
-    const currTool = {changeSelectedTool}.changeSelectedTool
-    useEffect(() => {
+    
+    
+/*     useEffect(() => {
 
-        if (currTool === 'Add'){
+        if (currentTool === 'Add'){
             drawPolygon(map)
         } 
-        if (currTool === 'Zoom'){
+        if (currentTool === 'Zoom'){
             zoomToLastPolygon(map) 
         }
-        else if (currTool === 'Import'){
+        else if (currentTool === 'Import'){
             loadPolyFromDB()
         }
-        else if(currTool === 'Etc'){
-            featuresToGeo()
+        else if(currentTool === 'Etc'){
+            //featuresToGeo()
         }
-        else if (currTool === 'Save') {
+        else if (currentTool === 'Save') {
             saveToDatabase(getFeatureList())
         }
-        else if (currTool === 'Delete') {
+        else if (currentTool === 'Delete') {
             deleteLatest(map)
         }
-        else if (currTool === 'AppVariableImport') {
+        else if (currentTool === 'AppVariableImport') {
             loadGeoJsonData()
         }
           
-    }, [currTool])
+    }, [currentTool]) */
 
     return (
         <>
+            
             <div style={{ height: '100vh', width: '100%' }} 
             ref={mapElement} 
-            className="map-container" >                
+            className="map-container"
+            onClick={onMapClickHandler}
+            >                
             </div>
         </>
     );
