@@ -4,10 +4,9 @@ import React from 'react'
 
 
 
-  export const drawPolygon = (map) => {
+  export const drawPolygon = (map, setCurrentTool) => {
     if (map) {
 
-      console.log("hellow")
       const snap = new Snap({source: getMapSource(map)})
       const draw = new Draw({
         source: getMapSource(map),
@@ -17,14 +16,14 @@ import React from 'react'
     
     map.addInteraction(draw)
     map.addInteraction(snap)
+    setCurrentTool('DRAW')
 
     draw.addEventListener('drawend', () => {
       map.removeInteraction(snap)
       map.removeInteraction(draw)
-      console.log('bye bye evenlistener')
+      setCurrentTool('DRAWEND')
     })
     
-    console.log('bye bye')
   }
 } 
 

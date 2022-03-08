@@ -138,11 +138,11 @@ function MapWrapper({geoJsonData}) {
     },[])
 
     const onMapClickHandler = () => {
-        if (currentTool === "NONE"){
-            console.log("whooop")
-            setCurrentTool('DRAW')
-            drawPolygon(map)
-            
+        if(currentTool === 'DRAWEND'){
+            setCurrentTool('NONE')
+        }
+        else if (currentTool === "NONE"){
+            drawPolygon(map, setCurrentTool)
         }
         else {}
     }
