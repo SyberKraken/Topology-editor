@@ -142,16 +142,6 @@ function MapWrapper({geoJsonData}) {
         map.getLayers().getArray()[1].setSource(source)
     }
 
-    // new polygon drawn!
-    /* const handleSourceChange = (evt) => {
-        const allPolys = evt.target.getFeatures()
-        if (allPolys.length > 0) {
-            const lastDrawnPoly = allPolys[allPolys.length - 1].getGeometry()
-            const jstsLastDrawnPoly = parser.read(lastDrawnPoly);
-            const isValid = IsValidOp.isValid(jstsLastDrawnPoly);
-            console.log("isValid: ", isValid);
-        }
-    } */
 
     /* useEffect(() => {
 
@@ -214,7 +204,6 @@ function MapWrapper({geoJsonData}) {
 
             }),
         });
-        //source.on('change', handleSourceChange)
         setMap(initialMap)
     }, []);
     

@@ -1,8 +1,8 @@
-import GeoJSON from 'ol/format/GeoJSON';
+import GeoJSON from 'ol/format/GeoJSON.js';
 import GeoJSONReader from 'jsts/org/locationtech/jts/io/GeoJSONReader.js'
 import GeoJSONWriter from 'jsts/org/locationtech/jts/io/GeoJSONWriter.js'
 import { Feature } from 'ol';
-import { Polygon } from 'ol/geom';
+import { Polygon } from 'ol/geom.js';
 
     const getFeatureList = (map) => {
         return map.getLayers().getArray()[1].getSource().getFeatures()
@@ -12,7 +12,7 @@ import { Polygon } from 'ol/geom';
         return (new GeoJSON()).readFeatures(geoJsonData)
     }
 
-    export const featuresToGeoJson = (map) => {
+     export const featuresToGeoJson = (map) => {
         let features = [];
         if (map) {features = getFeatureList(map) }
         else {features = []}
@@ -23,15 +23,15 @@ import { Polygon } from 'ol/geom';
                 "name": "EPSG:3006"
             }
         }
-    }
+    } 
+ 
 
-
-    const geoJsonToJsts = (geoJson) => {
+    export const geoJsonToJsts = (geoJson) => {
         let reader = new GeoJSONReader().read(geoJson)
         return reader
     }
 
-    const jstsToGeoJson = (jstsObject) => {
+    export const jstsToGeoJson = (jstsObject) => {
         let writer = new GeoJSONWriter()
         let featureList = []
 
@@ -53,7 +53,7 @@ import { Polygon } from 'ol/geom';
         return jsonObj
     }
 
-    
+
     /* export const loadGeoJsonData = (map, geoJsonData) => {
         console.log(JSON.stringify(geoJsonData))
         const source = new VectorSource({
