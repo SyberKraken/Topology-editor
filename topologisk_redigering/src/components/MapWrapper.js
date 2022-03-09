@@ -11,11 +11,11 @@ import { getWidth } from 'ol/extent';
 import GeoJSON from 'ol/format/GeoJSON';
 import {Circle as CircleStyle, Fill, Stroke, Style} from 'ol/style';
 import MultiPoint from 'ol/geom/MultiPoint';
-import  { drawPolygon } from './DrawPolygon';
-import { featuresToGeoJSON } from './GeoJsonHandler';
-import { saveToDatabase, GeoJsonObjToFeatureList, loadPolyFromDB } from './DatabaseHandler';
+import { drawPolygon } from '../res/UIFunctions';
+import { featuresToGeoJson } from '../res/GeoJsonFunctions'
+import { saveToDatabase, GeoJsonObjToFeatureList, loadPolyFromDB } from '../res/DatabaseFunctions';
 import { deleteLatest } from './DeletePolygon'
-import {zoomToLastPolygon} from './ZoomToPolygon'
+import { zoomToLastPolygon } from './ZoomToPolygon'
 
 
 
@@ -151,25 +151,6 @@ function MapWrapper({geoJsonData}) {
         console.log(currentTool)
     }, [currentTool])
 
-    const getFeatureList = () => {
-        return map.getLayers().getArray()[1].getSource().getFeatures()
-    }
-
-    //move to geojson functions
-    
-
-    //unsure how setSource would work in diff file
-    const loadGeoJsonData = () => {
-        console.log(JSON.stringify(geoJsonData))
-        //const featureList = GeoJsonObjToFeatureList(geoJsonData)
-        const source = new VectorSource({
-            wrapX: false,
-            features: GeoJsonObjToFeatureList(geoJsonData)
-        });
-        //console.log(map.getLayers().getArray()[1])
-        map.getLayers().getArray()[1].setSource(source)
-    }
-    
     
 /*     useEffect(() => {
 

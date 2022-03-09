@@ -31,9 +31,7 @@ export const saveToDatabase = (features) => {
             .catch(function (res) { console.log(res) })
 }
 
-export const GeoJsonObjToFeatureList = (geoJsonData) => {
-        return (new GeoJSON()).readFeatures(geoJsonData)
-}
+
 
 export const loadPolyFromDB = ([]) => {      
     //Cant load in layer while runnign at the moment.     
