@@ -24,6 +24,9 @@ export const drawPolygon = (map, setCurrentTool) => {
 } 
 
 const getMapSource = (map) => {
+  return map.getLayers().getArray()[1].getSource()
+}
 
-return map.getLayers().getArray()[1].getSource()
+export const highlightPolygon = (map) => {
+  console.log(map)
 }

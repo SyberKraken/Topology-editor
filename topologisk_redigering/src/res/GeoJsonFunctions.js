@@ -53,6 +53,18 @@ import { Polygon } from 'ol/geom.js';
         return jsonObj
     }
 
+    const loadGeoJsonData = () => {
+        console.log(JSON.stringify(geoJsonData))
+        let featureList = []
+        featureList = (new GeoJSON()).readFeatures(geoJsonData) //  GeoJSON.readFeatures(geoJsonData)
+        console.log(featureList)
+        const source = new VectorSource({
+            wrapX: false,
+            features: featureList
+        });
+        console.log(map.getLayers().getArray()[1])
+        map.getLayers().getArray()[1].setSource(source)
+    }
 
     /* export const loadGeoJsonData = (map, geoJsonData) => {
         console.log(JSON.stringify(geoJsonData))

@@ -14,7 +14,7 @@ import MultiPoint from 'ol/geom/MultiPoint';
 import OL3Parser from "jsts/org/locationtech/jts/io/OL3Parser";
 import IsValidOp from "jsts/org/locationtech/jts/operation/valid/IsValidOp";
 import { Point, LineString, LinearRing, Polygon, MultiLineString, MultiPolygon } from 'ol/geom'
-import { drawPolygon } from '../res/UIFunctions';
+import { drawPolygon, highlightPolygon } from '../res/UIFunctions';
 import { featuresToGeoJson } from '../res/GeoJsonFunctions'
 import { saveToDatabase, GeoJsonObjToFeatureList, loadPolyFromDB } from '../res/DatabaseFunctions';
 import { deleteLatest } from './DeletePolygon'
@@ -129,18 +129,7 @@ function MapWrapper({geoJsonData}) {
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     
 
-    const loadGeoJsonData = () => {
-        console.log(JSON.stringify(geoJsonData))
-        let featureList = []
-        featureList = (new GeoJSON()).readFeatures(geoJsonData) //  GeoJSON.readFeatures(geoJsonData)
-        console.log(featureList)
-        const source = new VectorSource({
-            wrapX: false,
-            features: featureList
-        });
-        console.log(map.getLayers().getArray()[1])
-        map.getLayers().getArray()[1].setSource(source)
-    }
+ 
 
 
     /* useEffect(() => {
@@ -209,6 +198,7 @@ function MapWrapper({geoJsonData}) {
     
     
     const onMapClickHandler = () => {
+        highlightPolygon(map)
         if(currentTool === 'DRAWEND'){
             setCurrentTool('NONE')
         }
