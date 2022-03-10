@@ -1,4 +1,5 @@
 import { Draw, Snap } from 'ol/interaction'
+import { Fill, Style } from 'ol/style'
 
 export const drawPolygon = (map, setCurrentTool) => {
   if (map) {
@@ -27,6 +28,16 @@ const getMapSource = (map) => {
   return map.getLayers().getArray()[1].getSource()
 }
 
-export const highlightPolygon = (map) => {
-  console.log(map)
+const style = new Style({
+  fill: new Fill({
+    color: 'rgba(130,20,40,0.3)'
+  })
+})
+
+export const highlightPolygon = (map, pixel) => {
+  
+  if(map.getFeaturesAtPixel(pixel)[0].getGeometryName() === "Polygon"){
+    console.table(map.getFeaturesAtPixel(pixel)[0])
+    map.getFeaturesAtPixel(pixel)[0].setStyle(style)
+  }
 }

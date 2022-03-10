@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Feature, Map, View } from 'ol';
+import { Feature, Map, MapEvent, View } from 'ol';
 import TileLayer from 'ol/layer/Tile';
 import 'ol/ol.css';
 import VectorLayer from 'ol/layer/Vector';
@@ -19,12 +19,14 @@ import { featuresToGeoJson } from '../res/GeoJsonFunctions'
 import { saveToDatabase, GeoJsonObjToFeatureList, loadPolyFromDB } from '../res/DatabaseFunctions';
 import { deleteLatest } from './DeletePolygon'
 import { zoomToLastPolygon } from './ZoomToPolygon'
+import { getRenderPixel } from 'ol/render';
 
 
 
 function MapWrapper({geoJsonData}) {
     const [map, setMap] = useState();
     const [currentTool, setCurrentTool] = useState('NONE')
+    const [currentPixelonMap, setCurrentPixelonMap] = useState()
     const mapElement = useRef();
     const mapRef = useRef();
     mapRef.current = map;
@@ -84,7 +86,7 @@ function MapWrapper({geoJsonData}) {
         }),
         new Style({
             fill: new Fill({
-                color: 'rgba(255,255,0,0.1'
+                color: 'rgba(255,255,0,0.1)'
             })
 
         })
@@ -193,12 +195,16 @@ function MapWrapper({geoJsonData}) {
 
             }),
         });
+        initialMap.on('click', onMapClickGetPixel)
         setMap(initialMap)
     }, []);
     
-    
+    const onMapClickGetPixel = (event) => {
+        highlightPolygon(event.map, event.pixel)
+    }
+
+
     const onMapClickHandler = () => {
-        highlightPolygon(map)
         if(currentTool === 'DRAWEND'){
             setCurrentTool('NONE')
         }
