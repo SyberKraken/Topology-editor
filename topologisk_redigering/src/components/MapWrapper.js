@@ -23,13 +23,14 @@ import { getRenderPixel } from 'ol/render';
 import { createStringXY } from 'ol/coordinate';
 import MousePosition from 'ol/control/MousePosition'
 import { defaults as defaultControls } from 'ol/control'
+import Header from './Header'
 
 
 
 function MapWrapper({geoJsonData}) {
     const [map, setMap] = useState();
     const [currentTool, setCurrentTool] = useState('NONE')
-    const [currentPixelonMap, setCurrentPixelonMap] = useState()
+    //const [currentPixelonMap, setCurrentPixelonMap] = useState()
     const mapElement = useRef();
     const mapRef = useRef();
     mapRef.current = map;
@@ -133,55 +134,6 @@ function MapWrapper({geoJsonData}) {
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     
-
- 
-
-
-    /* useEffect(() => {
-
-        console.log({ changeSelectedTool })
-        if (currTool === 'Add') {
-            drawPolygon()
-        } else if (map) {
-            stopDrawing()
-        }
-
-        if ({ changeSelectedTool }.changeSelectedTool == 'Zoom') {
-            zoomToLastPolygon()
-        }
-        else if ({ changeSelectedTool }.changeSelectedTool == 'Import') {
-            loadPolyFromDB()
-        }
-        else if({changeSelectedTool}.changeSelectedTool == 'Etc'){
-            console.log("0")
-            let testGeoJsonData = new GeoJSON({ projection: "EPSG:3006" }).writeFeaturesObject(map.getLayers().getArray()[1].getSource().getFeatures())
-            console.log("1")
-            testGeoJsonData["crs"] = {
-                "type": "name",
-                "properties": {
-                    "name": "EPSG:3006"
-                }
-            }
-            let testJstsData = geoJsonToJsts(testGeoJsonData)
-            debugger
-            checkIntersection(testJstsData.features[0], testJstsData.features[1])
-        }
-        else if ({ changeSelectedTool }.changeSelectedTool == 'Save') {
-            saveToDatabase()
-        }
-        else if ({ changeSelectedTool }.changeSelectedTool == 'Delete') {
-            console.log("deleting")
-            deleteLatest()
-        }
-
-        else if ({ changeSelectedTool }.changeSelectedTool == 'AppVariableImport') {
-            loadGeoJsonData()
-        }
-
-
-    }, [currTool])
- */
-
     const mousePositionControl = new MousePosition({
         coordinateFormat: createStringXY(2),
         projection: "EPSG:3006",
@@ -204,20 +156,25 @@ function MapWrapper({geoJsonData}) {
 
             }),
         });
-        initialMap.on('click', onMapClickGetPixel)
+        //initialMap.on('click', onMapClickGetPixel)
         setMap(initialMap)
     }, []);
     
     const onMapClickGetPixel = (event) => {
+        /* if (currentTool === "NONE") {
+            drawPolygon(event.map, setCurrentTool)
+            setCurrentTool('DRAW')
+        } */
+
         highlightPolygon(event.map, event.pixel, setCurrentTool)
     }
 
-
     const onMapClickHandler = () => {
+
         if(currentTool === 'DRAWEND'){
             setCurrentTool('NONE')
         }
-        else if (currentTool === "NONE"){
+        else if (currentTool === 'NONE'){
             drawPolygon(map, setCurrentTool)
         }
         else {}
@@ -228,14 +185,53 @@ function MapWrapper({geoJsonData}) {
     }, [currentTool])
 
 
+    useEffect(() => {
+
+        if (currentTool === 'Add') {
+            //drawPolygon()
+        } else if (map) {
+            //stopDrawing()
+        }
+        if (currentTool === 'Zoom') {
+            zoomToLastPolygon()
+        }
+        else if (currentTool === 'Import') {
+            loadPolyFromDB()
+        }
+        else if(currentTool === 'Etc'){
+            console.log("0")
+            let testGeoJsonData = new GeoJSON({ projection: "EPSG:3006" }).writeFeaturesObject(map.getLayers().getArray()[1].getSource().getFeatures())
+            console.log("1")
+            testGeoJsonData["crs"] = {
+                "type": "name",
+                "properties": {
+                    "name": "EPSG:3006"
+                }
+            }
+            //let testJstsData = geoJsonToJsts(testGeoJsonData)
+            debugger
+            //checkIntersection(testJstsData.features[0], testJstsData.features[1])
+        }
+        else if (currentTool === 'Save') {
+            //saveToDatabase()
+        }
+        else if (currentTool === 'Delete') {
+            console.log("deleting")
+            //deleteLatest()
+        }
+        else if (currentTool === 'AppVariableImport') {
+            //loadGeoJsonData()
+        }
+    }, [currentTool])
+
+
     return (
         <>
-            
+            <Header currentTool={currentTool} setCurrentTool={setCurrentTool}/>
             <div style={{ height: '100vh', width: '100%' }} 
             ref={mapElement} 
             className="map-container"
-            onClick={onMapClickHandler}
-            >                
+            onClick={onMapClickHandler} >                
             </div>
         </>
     );
