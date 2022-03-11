@@ -2,9 +2,6 @@ import { jstsToGeoJson, geoJsonToJsts } from '../src/res/GeoJsonFunctions.mjs';
 import assert from 'assert'
 import _ from 'lodash'
 
-
-
-
 const gj = {
   "type": "FeatureCollection",
   "features": [

@@ -14,9 +14,9 @@ import MultiPoint from 'ol/geom/MultiPoint';
 import OL3Parser from "jsts/org/locationtech/jts/io/OL3Parser";
 import IsValidOp from "jsts/org/locationtech/jts/operation/valid/IsValidOp";
 import { Point, LineString, LinearRing, Polygon, MultiLineString, MultiPolygon } from 'ol/geom'
-import { drawPolygon, highlightPolygon } from '../res/UIFunctions';
+import { drawPolygon, highlightPolygon } from '../res/UIFunctions.mjs';
 import { featuresToGeoJson } from '../res/GeoJsonFunctions'
-import { saveToDatabase, GeoJsonObjToFeatureList, loadPolyFromDB } from '../res/DatabaseFunctions';
+import { saveToDatabase, GeoJsonObjToFeatureList, loadPolyFromDB } from '../res/DatabaseFunctions.mjs';
 import { deleteLatest } from './DeletePolygon'
 import { zoomToLastPolygon } from './ZoomToPolygon'
 import { getRenderPixel } from 'ol/render';
