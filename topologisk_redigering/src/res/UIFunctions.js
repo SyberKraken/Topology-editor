@@ -30,14 +30,17 @@ const getMapSource = (map) => {
 
 const style = new Style({
   fill: new Fill({
-    color: 'rgba(130,20,40,0.3)'
+    color: 'rgba(0,157,71,0.3)'
   })
 })
 
-export const highlightPolygon = (map, pixel) => {
-  
-  if(map.getFeaturesAtPixel(pixel)[0].getGeometryName() === "Polygon"){
-    console.table(map.getFeaturesAtPixel(pixel)[0])
-    map.getFeaturesAtPixel(pixel)[0].setStyle(style)
+export const highlightPolygon = (map, pixel, setCurrentTool) => {
+  //console.log(map.getFeaturesAtPixel(pixel).length > 0)
+   if (map){
+    if (map.getFeaturesAtPixel(pixel).length > 0 && map.getFeaturesAtPixel(pixel)[0].getGeometryName() === "Polygon") {
+      setCurrentTool('CONTEXTMENU')
+      console.table(map.getFeaturesAtPixel(pixel)[0].getGeometry().getCoordinates())
+      map.getFeaturesAtPixel(pixel)[0].setStyle(style)
+    }
   }
 }

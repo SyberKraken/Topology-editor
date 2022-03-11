@@ -20,6 +20,9 @@ import { saveToDatabase, GeoJsonObjToFeatureList, loadPolyFromDB } from '../res/
 import { deleteLatest } from './DeletePolygon'
 import { zoomToLastPolygon } from './ZoomToPolygon'
 import { getRenderPixel } from 'ol/render';
+import { createStringXY } from 'ol/coordinate';
+import MousePosition from 'ol/control/MousePosition'
+import { defaults as defaultControls } from 'ol/control'
 
 
 
@@ -179,9 +182,15 @@ function MapWrapper({geoJsonData}) {
     }, [currTool])
  */
 
+    const mousePositionControl = new MousePosition({
+        coordinateFormat: createStringXY(2),
+        projection: "EPSG:3006",
+    })
+
     useEffect(() => {
        
         const initialMap = new Map({
+            controls: defaultControls().extend([mousePositionControl]),
             target: mapElement.current,
             layers: [
                 swedenMapLayer,
@@ -200,7 +209,7 @@ function MapWrapper({geoJsonData}) {
     }, []);
     
     const onMapClickGetPixel = (event) => {
-        highlightPolygon(event.map, event.pixel)
+        highlightPolygon(event.map, event.pixel, setCurrentTool)
     }
 
 
