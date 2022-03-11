@@ -27,8 +27,8 @@ import { Polygon } from 'ol/geom.js';
  
 
     export const geoJsonToJsts = (geoJson) => {
-        let reader = new GeoJSONReader().read(geoJson)
-        return reader
+        let jsts = new GeoJSONReader().read(geoJson)
+        return jsts
     }
 
     export const jstsToGeoJson = (jstsObject) => {
