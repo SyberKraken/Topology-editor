@@ -24,15 +24,16 @@ import { createStringXY } from 'ol/coordinate';
 import MousePosition from 'ol/control/MousePosition'
 import { defaults as defaultControls } from 'ol/control'
 import Header from './Header'
-import { stopPropagation } from 'ol/events/Event';
+import { Select } from 'ol/interaction';
+import {click} from 'ol/events/condition' 
 
 
 
 function MapWrapper({geoJsonData}) {
     const [map, setMap] = useState();
     const [currentTool, setCurrentTool] = useState('NONE')
+    const [selectedPolygon, setSelectedPolygon] = useState()
     let clickHandlerState = 'NONE';
-    //const [currentPixelonMap, setCurrentPixelonMap] = useState()
     const mapElement = useRef();
     const mapRef = useRef();
     mapRef.current = map;
@@ -98,6 +99,33 @@ function MapWrapper({geoJsonData}) {
         })
     ];
 
+    const selectedStyle = [
+        new Style({
+            stroke: new Stroke({
+                color: 'light-blue',
+                width: 3,
+            }),
+            fill: new Fill({
+                color: 'rgba(0, 0, 255, 0.1)',
+            }),
+        }),
+        new Style({
+            image: new CircleStyle({
+                radius: 5,
+                fill: new Fill({
+                    color: 'orange',
+                }),
+            }),
+        }),
+        new Style({
+          fill: new Fill({
+            color: 'rgba(0,157,71,0.3)'
+          })
+        })
+      ];
+
+    const select = new Select({condition: click, style:selectedStyle})
+
     const tilegrid = new WMTSTileGrid({
         tileSize: 256,
         extent: OUTER_SWEDEN_EXTENT,
@@ -159,31 +187,45 @@ function MapWrapper({geoJsonData}) {
             }),
         });
         initialMap.on('click', onMapClickGetPixel)
+        initialMap.addInteraction(select)
         setMap(initialMap)
     }, []);
     
     const onMapClickGetPixel = (event) => {
-        //console.log(clickHandlerState)
-        //console.log(event.type)
-        if (clickHandlerState === 'DRAWEND') {
-            clickHandlerState = 'NONE'
-            //console.log(clickHandlerState)
+        /* Check if clicked on an existing polygon */
+        if (isPolygon(event.map, event.pixel)){
+            console.log(select.getFeatures().getArray()[0])
+            //console.log(event.map.getFeaturesAtPixel(event.pixel)[0])
+            //highlightPolygon(event.map.getFeaturesAtPixel(event.pixel)[0]) 
+            //console.log(event.map.getFeaturesAtPixel(event.pixel)[0])
+        } else {
+            if (clickHandlerState === 'DRAWEND') {
+                clickHandlerState = 'NONE'
+            }
+            else if (clickHandlerState === 'NONE'){
+                clickHandlerState = 'DRAW'
+                drawPolygon(event.map).addEventListener('drawend', () => {
+                    clickHandlerState = 'DRAWEND'
+                    event.map.getInteractions().getArray().pop()
+                    event.map.getInteractions().getArray().pop()
+                })
+            }
+            else {}
+    }
+    }
+
+    useEffect(() => {
+        if (selectedPolygon){
+            highlightPolygon(selectedPolygon)
         }
-        else if (clickHandlerState === 'NONE'){
-            clickHandlerState = 'DRAW'
-            //console.log(clickHandlerState)
-            drawPolygon(event.map).addEventListener('drawend', () => {
-                clickHandlerState = 'DRAWEND'
-                //console.log(clickHandlerState)
-                //console.log(event.map.getInteractions().getArray().length)
-                event.map.getInteractions().getArray().pop()
-                event.map.getInteractions().getArray().pop()
-                //console.log(event.map.getInteractions().getArray().length)
-            })
-        }
-        else {}
+    }, [selectedPolygon])
+
+    const isPolygon = (map, pixel) => {
+        return map.getFeaturesAtPixel(pixel).length > 0 && map.getFeaturesAtPixel(pixel)[0].getGeometryName() === "Polygon"
     }
    
+    
+
     return (
         <>
             <Header currentTool={currentTool} setCurrentTool={setCurrentTool}/>
