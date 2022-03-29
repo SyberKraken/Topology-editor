@@ -24,12 +24,14 @@ import { createStringXY } from 'ol/coordinate';
 import MousePosition from 'ol/control/MousePosition'
 import { defaults as defaultControls } from 'ol/control'
 import Header from './Header'
+import { stopPropagation } from 'ol/events/Event';
 
 
 
 function MapWrapper({geoJsonData}) {
     const [map, setMap] = useState();
     const [currentTool, setCurrentTool] = useState('NONE')
+    let cT = 'NONE';
     //const [currentPixelonMap, setCurrentPixelonMap] = useState()
     const mapElement = useRef();
     const mapRef = useRef();
@@ -156,72 +158,47 @@ function MapWrapper({geoJsonData}) {
 
             }),
         });
-        //initialMap.on('click', onMapClickGetPixel)
+        initialMap.on('click', onMapClickGetPixel)
         setMap(initialMap)
     }, []);
     
     const onMapClickGetPixel = (event) => {
-        /* if (currentTool === "NONE") {
-            drawPolygon(event.map, setCurrentTool)
-            setCurrentTool('DRAW')
-        } */
-
-        highlightPolygon(event.map, event.pixel, setCurrentTool)
-    }
-
-    const onMapClickHandler = () => {
-
-        if(currentTool === 'DRAWEND'){
-            setCurrentTool('NONE')
+        //console.log(cT)
+        //console.log(event.type)
+        if (cT === 'DRAWEND') {
+            cT = 'NONE'
+            //console.log(cT)
         }
-        else if (currentTool === 'NONE'){
-            drawPolygon(map, setCurrentTool)
+        else if (cT === 'NONE'){
+            cT = 'DRAW'
+            //console.log(cT)
+            drawPolygon(event.map).addEventListener('drawend', () => {
+                cT = 'DRAWEND'
+                //console.log(cT)
+                //console.log(event.map.getInteractions().getArray().length)
+                event.map.getInteractions().getArray().pop()
+                event.map.getInteractions().getArray().pop()
+                //console.log(event.map.getInteractions().getArray().length)
+            })
         }
         else {}
     }
 
     useEffect (() => {
-        console.log(currentTool)
+        //console.log(currentTool)
     }, [currentTool])
+
+    /* const drawPolygon_ = (map, setCurrentTool) => {
+        drawPolygon(map, setCurrentTool)
+        console.log(currentTool)
+    } */
 
 
     useEffect(() => {
-
-        if (currentTool === 'Add') {
-            //drawPolygon()
-        } else if (map) {
-            //stopDrawing()
+        if(currentTool === 'DRAW'){
+            drawPolygon(map, setCurrentTool)
         }
-        if (currentTool === 'Zoom') {
-            zoomToLastPolygon()
-        }
-        else if (currentTool === 'Import') {
-            loadPolyFromDB()
-        }
-        else if(currentTool === 'Etc'){
-            console.log("0")
-            let testGeoJsonData = new GeoJSON({ projection: "EPSG:3006" }).writeFeaturesObject(map.getLayers().getArray()[1].getSource().getFeatures())
-            console.log("1")
-            testGeoJsonData["crs"] = {
-                "type": "name",
-                "properties": {
-                    "name": "EPSG:3006"
-                }
-            }
-            //let testJstsData = geoJsonToJsts(testGeoJsonData)
-            debugger
-            //checkIntersection(testJstsData.features[0], testJstsData.features[1])
-        }
-        else if (currentTool === 'Save') {
-            //saveToDatabase()
-        }
-        else if (currentTool === 'Delete') {
-            console.log("deleting")
-            //deleteLatest()
-        }
-        else if (currentTool === 'AppVariableImport') {
-            //loadGeoJsonData()
-        }
+        
     }, [currentTool])
 
 
@@ -231,7 +208,7 @@ function MapWrapper({geoJsonData}) {
             <div style={{ height: '100vh', width: '100%' }} 
             ref={mapElement} 
             className="map-container"
-            onClick={onMapClickHandler} >                
+            /* onClick={onMapClickHandler} */ >                
             </div>
         </>
     );

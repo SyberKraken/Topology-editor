@@ -12,7 +12,7 @@ const style = new Style({
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /* Adds Drawinteraction to map, allowing user to draw a polygon. Interaction is removed when feature is complete */
-export const drawPolygon = (map, setCurrentTool) => {
+export const drawPolygon = (map) => {
   if (map) {
     const draw = new Draw({
       source: getMapSource(map),
@@ -24,13 +24,8 @@ export const drawPolygon = (map, setCurrentTool) => {
 
     map.addInteraction(draw)
     map.addInteraction(snap)
-    setCurrentTool('DRAW')
-
-    draw.addEventListener('drawend', () => {
-      map.removeInteraction(snap)
-      map.removeInteraction(draw)
-      setCurrentTool('DRAWEND')
-    })
+    
+    return draw
 }} 
 
 
