@@ -99,6 +99,7 @@ function MapWrapper({geoJsonData}) {
         })
     ];
 
+    /* style for selected polygon */
     const selectedStyle = [
         new Style({
             stroke: new Stroke({
