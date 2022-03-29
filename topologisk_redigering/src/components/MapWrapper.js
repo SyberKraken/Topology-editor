@@ -31,7 +31,7 @@ import { stopPropagation } from 'ol/events/Event';
 function MapWrapper({geoJsonData}) {
     const [map, setMap] = useState();
     const [currentTool, setCurrentTool] = useState('NONE')
-    let cT = 'NONE';
+    let clickHandlerState = 'NONE';
     //const [currentPixelonMap, setCurrentPixelonMap] = useState()
     const mapElement = useRef();
     const mapRef = useRef();
@@ -163,18 +163,18 @@ function MapWrapper({geoJsonData}) {
     }, []);
     
     const onMapClickGetPixel = (event) => {
-        //console.log(cT)
+        //console.log(clickHandlerState)
         //console.log(event.type)
-        if (cT === 'DRAWEND') {
-            cT = 'NONE'
-            //console.log(cT)
+        if (clickHandlerState === 'DRAWEND') {
+            clickHandlerState = 'NONE'
+            //console.log(clickHandlerState)
         }
-        else if (cT === 'NONE'){
-            cT = 'DRAW'
-            //console.log(cT)
+        else if (clickHandlerState === 'NONE'){
+            clickHandlerState = 'DRAW'
+            //console.log(clickHandlerState)
             drawPolygon(event.map).addEventListener('drawend', () => {
-                cT = 'DRAWEND'
-                //console.log(cT)
+                clickHandlerState = 'DRAWEND'
+                //console.log(clickHandlerState)
                 //console.log(event.map.getInteractions().getArray().length)
                 event.map.getInteractions().getArray().pop()
                 event.map.getInteractions().getArray().pop()
@@ -183,25 +183,7 @@ function MapWrapper({geoJsonData}) {
         }
         else {}
     }
-
-    useEffect (() => {
-        //console.log(currentTool)
-    }, [currentTool])
-
-    /* const drawPolygon_ = (map, setCurrentTool) => {
-        drawPolygon(map, setCurrentTool)
-        console.log(currentTool)
-    } */
-
-
-    useEffect(() => {
-        if(currentTool === 'DRAW'){
-            drawPolygon(map, setCurrentTool)
-        }
-        
-    }, [currentTool])
-
-
+   
     return (
         <>
             <Header currentTool={currentTool} setCurrentTool={setCurrentTool}/>
