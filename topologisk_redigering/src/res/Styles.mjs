@@ -45,7 +45,7 @@ export const selectedStyle = [
         }),
     }),
     new Style({
-        image: new CircleStyle({
+        image: new NodeStyle({
             radius: 5,
             fill: new Fill({
                 color: 'orange',
