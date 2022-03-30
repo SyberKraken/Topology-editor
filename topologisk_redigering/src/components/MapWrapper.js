@@ -205,8 +205,10 @@ function MapWrapper({geoJsonData}) {
 
         /* Check if clicked on an existing polygon */
         if (isPolygon(event.map, event.pixel)){
+
             const clickedPolygon = getPolygon(event.map, event.pixel)
             const selectedPolygon = getSelectedPolygon()
+            /* This done to make sure correct polygon is deleted. Otherwise the previous one is deleted because of delay. */
             if (clickedPolygon === selectedPolygon) {
                 deletePolygon(event.map, select.getFeatures().getArray()[0])
             }
@@ -234,10 +236,12 @@ function MapWrapper({geoJsonData}) {
         return map.getFeaturesAtPixel(pixel).length > 0 && map.getFeaturesAtPixel(pixel)[0].getGeometryName() === "Polygon"
     }
    
+    /* get the polygon we are clicking on */
     const getPolygon = (map, pixel) => {
         return map.getFeaturesAtPixel(pixel)[0]
     }
 
+    /* get the polygon marked by select interaction */
     const getSelectedPolygon = () => {
         return select.getFeatures().getArray()[0]
     }
