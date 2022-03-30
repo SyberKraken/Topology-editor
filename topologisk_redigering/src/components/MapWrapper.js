@@ -17,7 +17,6 @@ import { Point, LineString, LinearRing, Polygon, MultiLineString, MultiPolygon }
 import { drawPolygon, highlightPolygon } from '../res/UIFunctions.mjs';
 import { featuresToGeoJson } from '../res/GeoJsonFunctions'
 import { saveToDatabase, GeoJsonObjToFeatureList, loadPolyFromDB } from '../res/DatabaseFunctions.mjs';
-import { deleteLatest } from './DeletePolygon'
 import { zoomToLastPolygon } from './ZoomToPolygon'
 import { getRenderPixel } from 'ol/render';
 import { createStringXY } from 'ol/coordinate';
@@ -26,6 +25,7 @@ import { defaults as defaultControls } from 'ol/control'
 import Header from './Header'
 import { Select } from 'ol/interaction';
 import {click} from 'ol/events/condition' 
+import {deletePolygon} from '../res/HelperFunctions.mjs'
 
 
 
@@ -196,6 +196,7 @@ function MapWrapper({geoJsonData}) {
         /* Check if clicked on an existing polygon */
         if (isPolygon(event.map, event.pixel)){
             console.log(select.getFeatures().getArray()[0])
+            deletePolygon(event.map, select.getFeatures().getArray()[0])
             //console.log(event.map.getFeaturesAtPixel(event.pixel)[0])
             //highlightPolygon(event.map.getFeaturesAtPixel(event.pixel)[0]) 
             //console.log(event.map.getFeaturesAtPixel(event.pixel)[0])
