@@ -32,7 +32,7 @@ import {deletePolygon} from '../res/HelperFunctions.mjs'
 function MapWrapper({geoJsonData}) {
     const [map, setMap] = useState();
     const [currentTool, setCurrentTool] = useState('NONE')
-    const [selectedPolygon, setSelectedPolygon] = useState()
+    //const [selectedPolygon, setSelectedPolygon] = useState()
     let clickHandlerState = 'NONE';
     const mapElement = useRef();
     const mapRef = useRef();
@@ -192,15 +192,25 @@ function MapWrapper({geoJsonData}) {
         setMap(initialMap)
     }, []);
     
+    const deletePoly = () => {
+        deletePolygon(map, select.getFeatures().getArray()[0])
+    }
+
+
+    /* Contextual clickhandler, different actions depending on if you click on a polygon or somewhere on the map */
     const onMapClickGetPixel = (event) => {
         /* Check if clicked on an existing polygon */
         if (isPolygon(event.map, event.pixel)){
             console.log(select.getFeatures().getArray()[0])
-            deletePolygon(event.map, select.getFeatures().getArray()[0])
-            //console.log(event.map.getFeaturesAtPixel(event.pixel)[0])
-            //highlightPolygon(event.map.getFeaturesAtPixel(event.pixel)[0]) 
-            //console.log(event.map.getFeaturesAtPixel(event.pixel)[0])
-        } else {
+            console.log(getPolygon(event.map, event.pixel))
+            if (select.getFeatures().getArray[0] == getPolygon(event.map, event.pixel)){
+                deletePolygon(event.map, select.getFeatures().getArray()[0])
+            }
+
+        } 
+        /* If we are not clicking on an already existing polygon, draw interaction is added to map, this interaction is removed when a 
+        feature is finished drawing */
+        else {
             if (clickHandlerState === 'DRAWEND') {
                 clickHandlerState = 'NONE'
             }
@@ -216,25 +226,22 @@ function MapWrapper({geoJsonData}) {
     }
     }
 
-    useEffect(() => {
-        if (selectedPolygon){
-            highlightPolygon(selectedPolygon)
-        }
-    }, [selectedPolygon])
 
+    /* check if we are clicking on a polygon*/
     const isPolygon = (map, pixel) => {
         return map.getFeaturesAtPixel(pixel).length > 0 && map.getFeaturesAtPixel(pixel)[0].getGeometryName() === "Polygon"
     }
    
-    
+    const getPolygon = (map, pixel) => {
+        return map.getFeaturesAtPixel(pixel)[0]
+    }
 
     return (
         <>
             <Header currentTool={currentTool} setCurrentTool={setCurrentTool}/>
             <div style={{ height: '100vh', width: '100%' }} 
             ref={mapElement} 
-            className="map-container"
-            /* onClick={onMapClickHandler} */ >                
+            className="map-container">                
             </div>
         </>
     );
