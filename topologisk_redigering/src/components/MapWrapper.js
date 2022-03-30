@@ -9,7 +9,6 @@ import WMTS from 'ol/source/WMTS';
 import { get as getProjection } from 'ol/proj';
 import { getWidth } from 'ol/extent';
 import GeoJSON from 'ol/format/GeoJSON';
-import { Circle as CircleStyle, Fill, Stroke, Style } from 'ol/style';
 import MultiPoint from 'ol/geom/MultiPoint';
 import OL3Parser from "jsts/org/locationtech/jts/io/OL3Parser";
 import IsValidOp from "jsts/org/locationtech/jts/operation/valid/IsValidOp";
@@ -26,6 +25,7 @@ import Header from './Header'
 import { Select } from 'ol/interaction';
 import {click} from 'ol/events/condition' 
 import {deletePolygon} from '../res/HelperFunctions.mjs'
+import {defaultStyle, selectedStyle} from '../res/Styles.mjs'
 
 
 
@@ -67,63 +67,7 @@ function MapWrapper({geoJsonData}) {
     const wmts_3006_resolutions = [4096.0, 2048.0, 1024.0, 512.0, 256.0, 128.0, 64.0, 32.0, 16.0, 8.0];
     const wmts_3006_matrixIds = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];   
 
-    const styles = [
-        new Style({
-            stroke: new Stroke({
-                color: 'light-blue',
-                width: 3,
-            }),
-            fill: new Fill({
-                color: 'rgba(0, 0, 255, 0.1)',
-            }),
-        }),
-        new Style({
-            image: new CircleStyle({
-                radius: 5,
-                fill: new Fill({
-                    color: 'orange',
-                }),
-            }),
-
-            geometry: function (feature) {
-                // return the coordinates of the first ring of the polygon
-                const coordinates = feature.getGeometry().getCoordinates()[0];
-                return new MultiPoint(coordinates);
-            },
-        }),
-        new Style({
-            fill: new Fill({
-                color: 'rgba(255,255,0,0.1)'
-            })
-
-        })
-    ];
-
-    /* style for selected polygon */
-    const selectedStyle = [
-        new Style({
-            stroke: new Stroke({
-                color: 'light-blue',
-                width: 3,
-            }),
-            fill: new Fill({
-                color: 'rgba(0, 0, 255, 0.1)',
-            }),
-        }),
-        new Style({
-            image: new CircleStyle({
-                radius: 5,
-                fill: new Fill({
-                    color: 'orange',
-                }),
-            }),
-        }),
-        new Style({
-          fill: new Fill({
-            color: 'rgba(0,157,71,0.3)'
-          })
-        })
-      ];
+   
 
     const select = new Select({condition: click, style:selectedStyle})
 
@@ -160,7 +104,7 @@ function MapWrapper({geoJsonData}) {
 
     const polygonLayer = new VectorLayer({
         source: source,
-        style: styles
+        style: defaultStyle
     });
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -191,12 +135,6 @@ function MapWrapper({geoJsonData}) {
         initialMap.addInteraction(select)
         setMap(initialMap)
     }, []);
-
-
-    
-    const deletePoly = () => {
-        deletePolygon(map, select.getFeatures().getArray()[0])
-    }
 
 
     /* Contextual clickhandler, different actions depending on if you click on a polygon or somewhere on the map */
