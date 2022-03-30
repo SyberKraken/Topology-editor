@@ -191,6 +191,8 @@ function MapWrapper({geoJsonData}) {
         initialMap.addInteraction(select)
         setMap(initialMap)
     }, []);
+
+
     
     const deletePoly = () => {
         deletePolygon(map, select.getFeatures().getArray()[0])
@@ -199,18 +201,18 @@ function MapWrapper({geoJsonData}) {
 
     /* Contextual clickhandler, different actions depending on if you click on a polygon or somewhere on the map */
     const onMapClickGetPixel = (event) => {
+
+
         /* Check if clicked on an existing polygon */
         if (isPolygon(event.map, event.pixel)){
-            console.log(select.getFeatures().getArray()[0])
-            console.log(getPolygon(event.map, event.pixel))
-            if (select.getFeatures().getArray[0] == getPolygon(event.map, event.pixel)){
+            const clickedPolygon = event.map.getFeaturesAtPixel(event.pixel)[0]
+            const selectedPolygon = select.getFeatures().getArray()[0]
+            if (clickedPolygon === selectedPolygon) {
                 deletePolygon(event.map, select.getFeatures().getArray()[0])
             }
+            
 
-        } 
-        /* If we are not clicking on an already existing polygon, draw interaction is added to map, this interaction is removed when a 
-        feature is finished drawing */
-        else {
+        } else {
             if (clickHandlerState === 'DRAWEND') {
                 clickHandlerState = 'NONE'
             }
