@@ -32,7 +32,6 @@ import {deletePolygon} from '../res/HelperFunctions.mjs'
 function MapWrapper({geoJsonData}) {
     const [map, setMap] = useState();
     const [currentTool, setCurrentTool] = useState('NONE')
-    const [selectedPolygon, setSelectedPolygon] = useState()
     let clickHandlerState = 'NONE';
     const mapElement = useRef();
     const mapRef = useRef();
@@ -191,15 +190,21 @@ function MapWrapper({geoJsonData}) {
         initialMap.addInteraction(select)
         setMap(initialMap)
     }, []);
+
+
     
     const onMapClickGetPixel = (event) => {
+
+
         /* Check if clicked on an existing polygon */
         if (isPolygon(event.map, event.pixel)){
-            console.log(select.getFeatures().getArray()[0])
-            deletePolygon(event.map, select.getFeatures().getArray()[0])
-            //console.log(event.map.getFeaturesAtPixel(event.pixel)[0])
-            //highlightPolygon(event.map.getFeaturesAtPixel(event.pixel)[0]) 
-            //console.log(event.map.getFeaturesAtPixel(event.pixel)[0])
+            const clickedPolygon = event.map.getFeaturesAtPixel(event.pixel)[0]
+            const selectedPolygon = select.getFeatures().getArray()[0]
+            if (clickedPolygon === selectedPolygon) {
+                deletePolygon(event.map, select.getFeatures().getArray()[0])
+            }
+            
+
         } else {
             if (clickHandlerState === 'DRAWEND') {
                 clickHandlerState = 'NONE'
@@ -215,12 +220,6 @@ function MapWrapper({geoJsonData}) {
             else {}
     }
     }
-
-    useEffect(() => {
-        if (selectedPolygon){
-            highlightPolygon(selectedPolygon)
-        }
-    }, [selectedPolygon])
 
     const isPolygon = (map, pixel) => {
         return map.getFeaturesAtPixel(pixel).length > 0 && map.getFeaturesAtPixel(pixel)[0].getGeometryName() === "Polygon"
