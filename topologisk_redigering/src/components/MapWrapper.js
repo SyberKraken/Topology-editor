@@ -17,13 +17,13 @@ import { createStringXY } from 'ol/coordinate';
 import MousePosition from 'ol/control/MousePosition'
 import { defaults as defaultControls } from 'ol/control'
 import Header from './Header'
-import { Modify, Select } from 'ol/interaction';
-import {click} from 'ol/events/condition' 
+import { handleIntersections } from '../res/jsts.mjs';
+import { fixOverlaps } from '../res/PolygonHandler.mjs';
+import { Select } from 'ol/interaction';
+import {click} from "ol/events/condition"
 import {deletePolygon} from '../res/HelperFunctions.mjs'
 import {defaultStyle, selectedStyle} from '../res/Styles.mjs'
 import { Snap } from 'ol/interaction.js'
-
-
 
 function MapWrapper({geoJsonData}) {
     const [map, setMap] = useState();
@@ -44,7 +44,6 @@ function MapWrapper({geoJsonData}) {
         resolutions[z] = size / Math.pow(2, z);
         matrixIds[z] = z;
     }
-    
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -62,8 +61,6 @@ function MapWrapper({geoJsonData}) {
     const OUTER_SWEDEN_EXTENT = [-1200000, 4700000, 2600000, 8500000];
     const wmts_3006_resolutions = [4096.0, 2048.0, 1024.0, 512.0, 256.0, 128.0, 64.0, 32.0, 16.0, 8.0];
     const wmts_3006_matrixIds = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];   
-
-   
 
     const select = new Select({condition: click, style:selectedStyle})
 
@@ -105,6 +102,20 @@ function MapWrapper({geoJsonData}) {
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     
+    //fixes overlaps for the latest polygon added to map
+    const cleanUserInput = (map) => {
+        let newPolygons = fixOverlaps(map)
+
+            let featureList = (new GeoJSON()).readFeatures(newPolygons) //  GeoJSON.readFeatures(geoJsonData)
+
+            const source = new VectorSource({
+                wrapX: false,
+                features: featureList
+            });
+            
+            map.getLayers().getArray()[1].setSource(source)
+    }
+
     const mousePositionControl = new MousePosition({
         coordinateFormat: createStringXY(2),
         projection: "EPSG:3006",
@@ -156,14 +167,25 @@ function MapWrapper({geoJsonData}) {
 
         } else {
             if (clickHandlerState === 'DRAWEND') {
+                console.log("Running checks because polygon is finished drawing")
+                
+                //unkink the drawn polygon HERE
+                    
+                cleanUserInput(event.map)
+    
                 clickHandlerState = 'NONE'
             }
             else if (clickHandlerState === 'NONE'){
                 clickHandlerState = 'DRAW'
+                //console.log(clickHandlerState)
                 drawPolygon(event.map).addEventListener('drawend', () => {
                     clickHandlerState = 'DRAWEND'
+                   // console.log("kartan har ", event.map.getLayers().getArray()[1].getSource().getFeatures(), " features")
+                    //console.log(clickHandlerState)
+                    //console.log(event.map.getInteractions().getArray().length)
                     event.map.getInteractions().getArray().pop()
                     event.map.getInteractions().getArray().pop()
+                    //console.log(event.map.getInteractions().getArray().length)
                 })
             }
             else {}

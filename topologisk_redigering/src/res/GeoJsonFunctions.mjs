@@ -23,8 +23,8 @@ import { Polygon } from 'ol/geom.js';
                 "name": "EPSG:3006"
             }
         }
+        return jsonObj
     } 
- 
 
     export const geoJsonToJsts = (geoJson) => {
         let jsts = new GeoJSONReader().read(geoJson)
@@ -35,12 +35,22 @@ import { Polygon } from 'ol/geom.js';
         let writer = new GeoJSONWriter()
         let featureList = []
 
-        jstsObject.features.forEach(feature => {
-            let writtenGeometry = writer.write(feature.geometry)
-            let polygon = new Polygon(writtenGeometry.coordinates)
-            let featureWrapping = new Feature(polygon)
-            featureList.push(featureWrapping)
-        });
+        if(jstsObject.features) {
+            jstsObject.features.forEach(feature => {
+                let writtenGeometry = writer.write(feature.geometry)
+                let polygon = new Polygon(writtenGeometry.coordinates)
+                let featureWrapping = new Feature(polygon)
+                featureList.push(featureWrapping)
+            });
+        }
+        else {
+            jstsObject.forEach(geom => {
+                let writtenGeometry = writer.write(geom)
+                let polygon = new Polygon(writtenGeometry.coordinates)
+                let featureWrapping = new Feature(polygon)
+                featureList.push(featureWrapping)
+            });
+        }
 
         const jsonObj = new GeoJSON({ projection: "EPSG:3006" }).writeFeaturesObject(featureList)
 
@@ -52,6 +62,7 @@ import { Polygon } from 'ol/geom.js';
         }
         return jsonObj
     }
+
 /* 
     const loadGeoJsonData = (map, geoJsonData) => {
         console.log(JSON.stringify(geoJsonData))

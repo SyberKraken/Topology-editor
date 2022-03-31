@@ -1,12 +1,19 @@
-import GeoJSONReader from 'jsts/org/locationtech/jts/io/GeoJSONReader.js'
-
-let reader = new jsts.io.WKTReader()
-let a = reader.read("POINT (-20 0")
-let b = reader.read("POINT (20 0)")
-
+import OverlayOp from "jsts/org/locationtech/jts/operation/overlay/OverlayOp.js"
 
 export const checkIntersection = (jstsGeometryA, jstsGeometryB) => {
-    debugger
     let jstsGeometryIntersection = jstsGeometryA.intersection(jstsGeometryB)
-    console.log("checkIntersection finishing")
 }
+
+//removes overlapped areas from new geometry
+//takes a jsts geometry and a list of all other jsts geometries.
+export const handleIntersections = (jstsNewGeometry, jstsOtherGeometries) => {
+    
+    jstsOtherGeometries.forEach(jstsGeometry => {
+        jstsNewGeometry = OverlayOp.difference(jstsNewGeometry, jstsGeometry) 
+    });
+
+    return jstsNewGeometry
+}
+
+
+
