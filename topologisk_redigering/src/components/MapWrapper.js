@@ -25,6 +25,9 @@ import MousePosition from 'ol/control/MousePosition'
 import { defaults as defaultControls } from 'ol/control'
 import Header from './Header'
 import { stopPropagation } from 'ol/events/Event';
+import { handleIntersections } from '../res/jsts.mjs';
+import { fixOverlaps } from '../res/PolygonHandler.mjs';
+
 
 
 
@@ -136,6 +139,20 @@ function MapWrapper({geoJsonData}) {
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     
+    //fixes overlaps for the latest polygon added to map
+    const cleanUserInput = (map) => {
+        let newPolygons = fixOverlaps(map)
+
+            let featureList = (new GeoJSON()).readFeatures(newPolygons) //  GeoJSON.readFeatures(geoJsonData)
+
+            const source = new VectorSource({
+                wrapX: false,
+                features: featureList
+            });
+            
+            map.getLayers().getArray()[1].setSource(source)
+    }
+
     const mousePositionControl = new MousePosition({
         coordinateFormat: createStringXY(2),
         projection: "EPSG:3006",
@@ -166,14 +183,20 @@ function MapWrapper({geoJsonData}) {
         //console.log(clickHandlerState)
         //console.log(event.type)
         if (clickHandlerState === 'DRAWEND') {
+            console.log("Running checks because polygon is finished drawing")
+            
+            //unkink the drawn polygon HERE
+                
+            cleanUserInput(event.map)
+
             clickHandlerState = 'NONE'
-            //console.log(clickHandlerState)
         }
         else if (clickHandlerState === 'NONE'){
             clickHandlerState = 'DRAW'
             //console.log(clickHandlerState)
             drawPolygon(event.map).addEventListener('drawend', () => {
                 clickHandlerState = 'DRAWEND'
+               // console.log("kartan har ", event.map.getLayers().getArray()[1].getSource().getFeatures(), " features")
                 //console.log(clickHandlerState)
                 //console.log(event.map.getInteractions().getArray().length)
                 event.map.getInteractions().getArray().pop()
