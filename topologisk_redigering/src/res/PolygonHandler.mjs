@@ -30,9 +30,8 @@ export const fixOverlaps = (map) => {
     let jstsCollection = mapToJstsGeometryCollection(map)
 
     //TODO: OL3parser => uppdelat i olika översättningar
-    
+
     let trimmed = handleIntersections(jstsCollection[jstsCollection.length - 1], jstsCollection.slice(0, jstsCollection.length - 1))
-    console.log("TRIMMED: ", trimmed)
    
     let cleanedJstsCollection = jstsCollection.slice(0, jstsCollection.length - 1)
 
@@ -44,7 +43,7 @@ export const fixOverlaps = (map) => {
     }
 
     //if the polygon has an area (meaning its NOT entirely encapsulated by another polygon), add it.
-    else if(trimmed._shell._points.length > 0) { 
+    else if(trimmed._shell._points._coordinates.length > 0) { 
         cleanedJstsCollection.push(trimmed)
     }
 
