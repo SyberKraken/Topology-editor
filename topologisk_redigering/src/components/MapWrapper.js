@@ -24,7 +24,6 @@ import {click} from "ol/events/condition"
 import {deletePolygon} from '../res/HelperFunctions.mjs'
 import {defaultStyle, selectedStyle, invalidStyle} from '../res/Styles.mjs'
 import { isValid, unkinkPolygon, calcIntersection }  from '../res/unkink.mjs'
-import { Modify } from 'ol/interaction';
 
 import { Snap } from 'ol/interaction.js'
 
@@ -221,7 +220,6 @@ function MapWrapper({geoJsonData}) {
             // check intersection and add unkinked polys to the source
             for (let i = 0; i < unkinkedCollection.length; i++)
             {
-
                 mapSource.addFeatures(unkinkedCollection[i])
             }
         }
