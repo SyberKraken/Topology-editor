@@ -186,7 +186,6 @@ function MapWrapper({geoJsonData}) {
                 drawPolygon(event.map).addEventListener('drawend', (evt) => {
                     handleDrawend(evt, event.map)
                     clickHandlerState = 'DRAWEND'
-                   // console.log("kartan har ", event.map.getLayers().getArray()[1].getSource().getFeatures(), " features")
                     //console.log(clickHandlerState)
                     //console.log(event.map.getInteractions().getArray().length)
                     event.map.getInteractions().getArray().pop()
@@ -198,13 +197,8 @@ function MapWrapper({geoJsonData}) {
         }
     }
 
-    const handleDrawend = (evt, mapS) => {
-        //console.log(Object.keys(evt))
-        // call unkink.js
-        console.log(mapS)
-        const mapSource = mapS.getLayers().getArray()[1].getSource()
-        let drawnPolys = [evt.feature]
-        //polygonDrawend(evt, map)
+    const handleDrawend = (evt, map) => {
+        const mapSource = map.getLayers().getArray()[1].getSource()
 
         // check if valid
         if (!isValid(evt.feature))
@@ -214,16 +208,18 @@ function MapWrapper({geoJsonData}) {
             // return collection of unkinked polys
             const unkinkedCollection = unkinkPolygon(evt.feature)
             // check intersection and add unkinked polys to the source
+            console.log(unkinkedCollection)
             for (let i = 0; i < unkinkedCollection.length; i++)
             {
                 mapSource.addFeatures(unkinkedCollection[i])
             }
+            return unkinkedCollection.length
         }
         else 
         {
             // else add last drawn poly
             mapSource.addFeatures(evt.feature)
-            
+            return 1
         }
     }
 
