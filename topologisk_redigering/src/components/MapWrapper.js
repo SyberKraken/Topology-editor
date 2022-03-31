@@ -110,12 +110,8 @@ function MapWrapper({geoJsonData}) {
 
             let featureList = (new GeoJSON()).readFeatures(newPolygons) //  GeoJSON.readFeatures(geoJsonData)
 
-            const source = new VectorSource({
-                wrapX: false,
-                features: featureList
-            });
-            
-            map.getLayers().getArray()[1].setSource(source)
+            map.getLayers().getArray()[1].getSource().clear()
+            map.getLayers().getArray()[1].getSource().addFeatures(featureList)
     }
 
     const mousePositionControl = new MousePosition({
