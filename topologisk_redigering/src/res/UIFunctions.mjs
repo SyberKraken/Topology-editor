@@ -1,13 +1,35 @@
 import { Draw, Snap } from 'ol/interaction.js'
-import { Fill, Style } from 'ol/style.js'
+import { Circle as CircleStyle, Fill, Stroke, Style } from 'ol/style.js';
+
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-const style = new Style({
-  fill: new Fill({
-    color: 'rgba(0,157,71,0.3)'
+
+
+const style = [
+  new Style({
+      stroke: new Stroke({
+          color: 'light-blue',
+          width: 3,
+      }),
+      fill: new Fill({
+          color: 'rgba(0, 0, 255, 0.1)',
+      }),
+  }),
+  new Style({
+      image: new CircleStyle({
+          radius: 5,
+          fill: new Fill({
+              color: 'orange',
+          }),
+      }),
+  }),
+  new Style({
+    fill: new Fill({
+      color: 'rgba(0,157,71,0.3)'
+    })
   })
-})
+];
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -32,17 +54,13 @@ export const drawPolygon = (map) => {
 /* Get the source from the map */
 const getMapSource = (map) => {
   return map.getLayers().getArray()[1].getSource()
+
 }
 
 
-
-export const highlightPolygon = (map, pixel, setCurrentTool) => {
+export const highlightPolygon = (polygon) => {
   //console.log(map.getFeaturesAtPixel(pixel).length > 0)
-   if (map){
-    if (map.getFeaturesAtPixel(pixel).length > 0 && map.getFeaturesAtPixel(pixel)[0].getGeometryName() === "Polygon") {
-      setCurrentTool('CONTEXTMENU')
-      console.table(map.getFeaturesAtPixel(pixel)[0].getGeometry().getCoordinates())
-      map.getFeaturesAtPixel(pixel)[0].setStyle(style)
+    {
+      polygon.setStyle(style)
     }
-  }
 }

@@ -9,7 +9,6 @@ import WMTS from 'ol/source/WMTS';
 import { get as getProjection } from 'ol/proj';
 import { getWidth } from 'ol/extent';
 import GeoJSON from 'ol/format/GeoJSON';
-import { Circle as CircleStyle, Fill, Stroke, Style } from 'ol/style';
 import MultiPoint from 'ol/geom/MultiPoint';
 import OL3Parser from "jsts/org/locationtech/jts/io/OL3Parser";
 import IsValidOp from "jsts/org/locationtech/jts/operation/valid/IsValidOp";
@@ -17,25 +16,31 @@ import { Point, LineString, LinearRing, Polygon, MultiLineString, MultiPolygon }
 import { drawPolygon, highlightPolygon } from '../res/UIFunctions.mjs';
 import { featuresToGeoJson } from '../res/GeoJsonFunctions'
 import { saveToDatabase, GeoJsonObjToFeatureList, loadPolyFromDB } from '../res/DatabaseFunctions.mjs';
-import { deleteLatest } from './DeletePolygon'
 import { zoomToLastPolygon } from './ZoomToPolygon'
 import { getRenderPixel } from 'ol/render';
 import { createStringXY } from 'ol/coordinate';
 import MousePosition from 'ol/control/MousePosition'
 import { defaults as defaultControls } from 'ol/control'
 import Header from './Header'
+<<<<<<< HEAD
 import { stopPropagation } from 'ol/events/Event';
 import { handleIntersections } from '../res/jsts.mjs';
 import { fixOverlaps } from '../res/PolygonHandler.mjs';
 
+=======
+import { Select } from 'ol/interaction';
+import {click} from 'ol/events/condition' 
+import {deletePolygon} from '../res/HelperFunctions.mjs'
+import {defaultStyle, selectedStyle} from '../res/Styles.mjs'
+>>>>>>> refs/remotes/origin/main
 
 
 
 function MapWrapper({geoJsonData}) {
     const [map, setMap] = useState();
     const [currentTool, setCurrentTool] = useState('NONE')
+    //const [selectedPolygon, setSelectedPolygon] = useState()
     let clickHandlerState = 'NONE';
-    //const [currentPixelonMap, setCurrentPixelonMap] = useState()
     const mapElement = useRef();
     const mapRef = useRef();
     mapRef.current = map;
@@ -69,37 +74,9 @@ function MapWrapper({geoJsonData}) {
     const wmts_3006_resolutions = [4096.0, 2048.0, 1024.0, 512.0, 256.0, 128.0, 64.0, 32.0, 16.0, 8.0];
     const wmts_3006_matrixIds = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];   
 
-    const styles = [
-        new Style({
-            stroke: new Stroke({
-                color: 'light-blue',
-                width: 3,
-            }),
-            fill: new Fill({
-                color: 'rgba(0, 0, 255, 0.1)',
-            }),
-        }),
-        new Style({
-            image: new CircleStyle({
-                radius: 5,
-                fill: new Fill({
-                    color: 'orange',
-                }),
-            }),
+   
 
-            geometry: function (feature) {
-                // return the coordinates of the first ring of the polygon
-                const coordinates = feature.getGeometry().getCoordinates()[0];
-                return new MultiPoint(coordinates);
-            },
-        }),
-        new Style({
-            fill: new Fill({
-                color: 'rgba(255,255,0,0.1)'
-            })
-
-        })
-    ];
+    const select = new Select({condition: click, style:selectedStyle})
 
     const tilegrid = new WMTSTileGrid({
         tileSize: 256,
@@ -134,7 +111,7 @@ function MapWrapper({geoJsonData}) {
 
     const polygonLayer = new VectorLayer({
         source: source,
-        style: styles
+        style: defaultStyle
     });
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -176,10 +153,14 @@ function MapWrapper({geoJsonData}) {
             }),
         });
         initialMap.on('click', onMapClickGetPixel)
+        initialMap.addInteraction(select)
         setMap(initialMap)
     }, []);
-    
+
+
+    /* Contextual clickhandler, different actions depending on if you click on a polygon or somewhere on the map */
     const onMapClickGetPixel = (event) => {
+<<<<<<< HEAD
         //console.log(clickHandlerState)
         //console.log(event.type)
         if (clickHandlerState === 'DRAWEND') {
@@ -205,15 +186,70 @@ function MapWrapper({geoJsonData}) {
             })
         }
         else {}
+=======
+
+
+        /* Check if clicked on an existing polygon */
+        if (isPolygon(event.map, event.pixel)){
+
+            const clickedPolygon = getPolygon(event.map, event.pixel)
+            const selectedPolygon = getSelectedPolygon()
+            /* This done to make sure correct polygon is deleted. Otherwise the previous one is deleted because of delay. */
+            if (clickedPolygon === selectedPolygon) {
+                deletePolygon(event.map, select.getFeatures().getArray()[0])
+            }
+            
+
+        } else {
+            if (clickHandlerState === 'DRAWEND') {
+                console.log("Running checks because polygon is finished drawing")
+                
+                //unkink the drawn polygon HERE
+                    
+                cleanUserInput(event.map)
+    
+                clickHandlerState = 'NONE'
+            }
+            else if (clickHandlerState === 'NONE'){
+                clickHandlerState = 'DRAW'
+                //console.log(clickHandlerState)
+                drawPolygon(event.map).addEventListener('drawend', () => {
+                    clickHandlerState = 'DRAWEND'
+                   // console.log("kartan har ", event.map.getLayers().getArray()[1].getSource().getFeatures(), " features")
+                    //console.log(clickHandlerState)
+                    //console.log(event.map.getInteractions().getArray().length)
+                    event.map.getInteractions().getArray().pop()
+                    event.map.getInteractions().getArray().pop()
+                    //console.log(event.map.getInteractions().getArray().length)
+                })
+            }
+            else {}
+    }
+    }
+
+
+    /* check if we are clicking on a polygon*/
+    const isPolygon = (map, pixel) => {
+        return map.getFeaturesAtPixel(pixel).length > 0 && map.getFeaturesAtPixel(pixel)[0].getGeometryName() === "Polygon"
+>>>>>>> refs/remotes/origin/main
     }
    
+    /* get the polygon we are clicking on */
+    const getPolygon = (map, pixel) => {
+        return map.getFeaturesAtPixel(pixel)[0]
+    }
+
+    /* get the polygon marked by select interaction */
+    const getSelectedPolygon = () => {
+        return select.getFeatures().getArray()[0]
+    }
+
     return (
         <>
             <Header currentTool={currentTool} setCurrentTool={setCurrentTool}/>
             <div style={{ height: '100vh', width: '100%' }} 
             ref={mapElement} 
-            className="map-container"
-            /* onClick={onMapClickHandler} */ >                
+            className="map-container">                
             </div>
         </>
     );
