@@ -22,19 +22,12 @@ import { createStringXY } from 'ol/coordinate';
 import MousePosition from 'ol/control/MousePosition'
 import { defaults as defaultControls } from 'ol/control'
 import Header from './Header'
-<<<<<<< HEAD
-import { stopPropagation } from 'ol/events/Event';
 import { handleIntersections } from '../res/jsts.mjs';
 import { fixOverlaps } from '../res/PolygonHandler.mjs';
-
-=======
 import { Select } from 'ol/interaction';
-import {click} from 'ol/events/condition' 
+import {click} from "ol/events/condition"
 import {deletePolygon} from '../res/HelperFunctions.mjs'
 import {defaultStyle, selectedStyle} from '../res/Styles.mjs'
->>>>>>> refs/remotes/origin/main
-
-
 
 function MapWrapper({geoJsonData}) {
     const [map, setMap] = useState();
@@ -55,7 +48,6 @@ function MapWrapper({geoJsonData}) {
         resolutions[z] = size / Math.pow(2, z);
         matrixIds[z] = z;
     }
-    
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -73,8 +65,6 @@ function MapWrapper({geoJsonData}) {
     const OUTER_SWEDEN_EXTENT = [-1200000, 4700000, 2600000, 8500000];
     const wmts_3006_resolutions = [4096.0, 2048.0, 1024.0, 512.0, 256.0, 128.0, 64.0, 32.0, 16.0, 8.0];
     const wmts_3006_matrixIds = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];   
-
-   
 
     const select = new Select({condition: click, style:selectedStyle})
 
@@ -160,33 +150,6 @@ function MapWrapper({geoJsonData}) {
 
     /* Contextual clickhandler, different actions depending on if you click on a polygon or somewhere on the map */
     const onMapClickGetPixel = (event) => {
-<<<<<<< HEAD
-        //console.log(clickHandlerState)
-        //console.log(event.type)
-        if (clickHandlerState === 'DRAWEND') {
-            console.log("Running checks because polygon is finished drawing")
-            
-            //unkink the drawn polygon HERE
-                
-            cleanUserInput(event.map)
-
-            clickHandlerState = 'NONE'
-        }
-        else if (clickHandlerState === 'NONE'){
-            clickHandlerState = 'DRAW'
-            //console.log(clickHandlerState)
-            drawPolygon(event.map).addEventListener('drawend', () => {
-                clickHandlerState = 'DRAWEND'
-               // console.log("kartan har ", event.map.getLayers().getArray()[1].getSource().getFeatures(), " features")
-                //console.log(clickHandlerState)
-                //console.log(event.map.getInteractions().getArray().length)
-                event.map.getInteractions().getArray().pop()
-                event.map.getInteractions().getArray().pop()
-                //console.log(event.map.getInteractions().getArray().length)
-            })
-        }
-        else {}
-=======
 
 
         /* Check if clicked on an existing polygon */
@@ -231,7 +194,6 @@ function MapWrapper({geoJsonData}) {
     /* check if we are clicking on a polygon*/
     const isPolygon = (map, pixel) => {
         return map.getFeaturesAtPixel(pixel).length > 0 && map.getFeaturesAtPixel(pixel)[0].getGeometryName() === "Polygon"
->>>>>>> refs/remotes/origin/main
     }
    
     /* get the polygon we are clicking on */
