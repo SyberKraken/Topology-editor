@@ -46,7 +46,6 @@ export const drawPolygon = (map) => {
 
     map.addInteraction(draw)
     map.addInteraction(snap)
-    
     return draw
 }} 
 

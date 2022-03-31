@@ -25,7 +25,8 @@ import Header from './Header'
 import { Select } from 'ol/interaction';
 import {click} from 'ol/events/condition' 
 import {deletePolygon} from '../res/HelperFunctions.mjs'
-import {defaultStyle, selectedStyle} from '../res/Styles.mjs'
+import {defaultStyle, selectedStyle, invalidStyle} from '../res/Styles.mjs'
+import unkink, { isValid, unkinkPolygon, calcIntersection }  from '../res/unkink.mjs'
 
 
 
@@ -137,6 +138,14 @@ function MapWrapper({geoJsonData}) {
     }, []);
 
 
+    const handleNewPoly = (evt) => {
+        // when add feature check if valid
+        if (!isValid(evt.feature)) {
+            //deleteLatest()
+            map.getLayers().getArray()[1].getSource().removeFeature(evt.feature)
+        }
+      }
+
     /* Contextual clickhandler, different actions depending on if you click on a polygon or somewhere on the map */
     const onMapClickGetPixel = (event) => {
 
@@ -158,16 +167,54 @@ function MapWrapper({geoJsonData}) {
             }
             else if (clickHandlerState === 'NONE'){
                 clickHandlerState = 'DRAW'
-                drawPolygon(event.map).addEventListener('drawend', () => {
+                drawPolygon(event.map).addEventListener('drawend', (evt) => {
+                    handleDrawend(evt, event.map)
                     clickHandlerState = 'DRAWEND'
                     event.map.getInteractions().getArray().pop()
                     event.map.getInteractions().getArray().pop()
                 })
             }
             else {}
-    }
+        }
     }
 
+    const handleDrawend = (evt, mapS) => {
+        //console.log(Object.keys(evt))
+        // call unkink.js
+        console.log(mapS)
+        const mapSource = mapS.getLayers().getArray()[1].getSource()
+        let drawnPolys = [evt.feature]
+        //polygonDrawend(evt, map)
+
+        // check if valid
+        if (!isValid(evt.feature))
+        {
+            console.log(evt.feature)
+            // if not valid unkink
+            // return collection of unkinked polys
+            const unkinkedCollection = unkinkPolygon(evt.feature)
+            // check intersection and add unkinked polys to the source
+            for (let i = 0; i < unkinkedCollection.length; i++)
+            {
+
+                mapSource.addFeatures(unkinkedCollection[i])
+            }
+        }
+        else 
+        {
+            // else add last drawn poly
+            mapSource.addFeatures(evt.feature)
+            
+        }
+    }
+
+
+    useEffect(() => {
+        if (map) {
+            map.getLayers().getArray()[1].getSource().addEventListener('addfeature', handleNewPoly)
+        }
+    }, [map])
+    
 
     /* check if we are clicking on a polygon*/
     const isPolygon = (map, pixel) => {
