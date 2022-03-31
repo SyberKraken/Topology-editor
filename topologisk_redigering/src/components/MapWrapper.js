@@ -19,7 +19,7 @@ import { defaults as defaultControls } from 'ol/control'
 import Header from './Header'
 import { handleIntersections } from '../res/jsts.mjs';
 import { fixOverlaps } from '../res/PolygonHandler.mjs';
-import { Select } from 'ol/interaction';
+import { Select, Modify } from 'ol/interaction';
 import {click} from "ol/events/condition"
 import {deletePolygon} from '../res/HelperFunctions.mjs'
 import {defaultStyle, selectedStyle} from '../res/Styles.mjs'
