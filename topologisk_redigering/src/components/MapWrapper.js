@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Feature, Map, MapEvent, View } from 'ol';
+import { Map, View } from 'ol';
 import TileLayer from 'ol/layer/Tile';
 import 'ol/ol.css';
 import VectorLayer from 'ol/layer/Vector';
@@ -11,24 +11,22 @@ import { getWidth } from 'ol/extent';
 import GeoJSON from 'ol/format/GeoJSON';
 import MultiPoint from 'ol/geom/MultiPoint';
 import OL3Parser from "jsts/org/locationtech/jts/io/OL3Parser";
-import IsValidOp from "jsts/org/locationtech/jts/operation/valid/IsValidOp";
 import { Point, LineString, LinearRing, Polygon, MultiLineString, MultiPolygon } from 'ol/geom'
-import { drawPolygon, highlightPolygon } from '../res/UIFunctions.mjs';
-import { featuresToGeoJson } from '../res/GeoJsonFunctions'
-import { saveToDatabase, GeoJsonObjToFeatureList, loadPolyFromDB } from '../res/DatabaseFunctions.mjs';
-import { zoomToLastPolygon } from './ZoomToPolygon'
-import { getRenderPixel } from 'ol/render';
+import { drawPolygon } from '../res/UIFunctions.mjs';
 import { createStringXY } from 'ol/coordinate';
 import MousePosition from 'ol/control/MousePosition'
 import { defaults as defaultControls } from 'ol/control'
 import Header from './Header'
+import { handleIntersections } from '../res/jsts.mjs';
+import { fixOverlaps } from '../res/PolygonHandler.mjs';
 import { Select } from 'ol/interaction';
-import {click} from 'ol/events/condition' 
+import {click} from "ol/events/condition"
 import {deletePolygon} from '../res/HelperFunctions.mjs'
 import {defaultStyle, selectedStyle, invalidStyle} from '../res/Styles.mjs'
-import unkink, { isValid, unkinkPolygon, calcIntersection }  from '../res/unkink.mjs'
+import { isValid, unkinkPolygon, calcIntersection }  from '../res/unkink.mjs'
+import { Modify } from 'ol/interaction';
 
-
+import { Snap } from 'ol/interaction.js'
 
 function MapWrapper({geoJsonData}) {
     const [map, setMap] = useState();
@@ -49,7 +47,6 @@ function MapWrapper({geoJsonData}) {
         resolutions[z] = size / Math.pow(2, z);
         matrixIds[z] = z;
     }
-    
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -67,8 +64,6 @@ function MapWrapper({geoJsonData}) {
     const OUTER_SWEDEN_EXTENT = [-1200000, 4700000, 2600000, 8500000];
     const wmts_3006_resolutions = [4096.0, 2048.0, 1024.0, 512.0, 256.0, 128.0, 64.0, 32.0, 16.0, 8.0];
     const wmts_3006_matrixIds = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];   
-
-   
 
     const select = new Select({condition: click, style:selectedStyle})
 
@@ -110,6 +105,20 @@ function MapWrapper({geoJsonData}) {
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     
+    //fixes overlaps for the latest polygon added to map
+    const cleanUserInput = (map) => {
+        let newPolygons = fixOverlaps(map)
+
+            let featureList = (new GeoJSON()).readFeatures(newPolygons) //  GeoJSON.readFeatures(geoJsonData)
+
+            const source = new VectorSource({
+                wrapX: false,
+                features: featureList
+            });
+            
+            map.getLayers().getArray()[1].setSource(source)
+    }
+
     const mousePositionControl = new MousePosition({
         coordinateFormat: createStringXY(2),
         projection: "EPSG:3006",
@@ -134,6 +143,8 @@ function MapWrapper({geoJsonData}) {
         });
         initialMap.on('click', onMapClickGetPixel)
         initialMap.addInteraction(select)
+        initialMap.addInteraction(new Snap({source: source}))
+        //initialMap.addInteraction(new Modify({source: source, hitDetection: true}))
         setMap(initialMap)
     }, []);
 
@@ -148,7 +159,10 @@ function MapWrapper({geoJsonData}) {
 
     /* Contextual clickhandler, different actions depending on if you click on a polygon or somewhere on the map */
     const onMapClickGetPixel = (event) => {
-
+        
+        if(event.map.getFeaturesAtPixel(event.pixel).length > 0){
+            console.log(event.map.getFeaturesAtPixel(event.pixel)[0].getGeometry().getCoordinates())
+        }
 
         /* Check if clicked on an existing polygon */
         if (isPolygon(event.map, event.pixel)){
@@ -157,12 +171,19 @@ function MapWrapper({geoJsonData}) {
             const selectedPolygon = getSelectedPolygon()
             /* This done to make sure correct polygon is deleted. Otherwise the previous one is deleted because of delay. */
             if (clickedPolygon === selectedPolygon) {
-                deletePolygon(event.map, select.getFeatures().getArray()[0])
+                //deletePolygon(event.map, select.getFeatures().getArray()[0])
+                event.map.addInteraction(new Modify({features:select.getFeatures()}))
             }
             
 
         } else {
             if (clickHandlerState === 'DRAWEND') {
+                console.log("Running checks because polygon is finished drawing")
+                
+                //unkink the drawn polygon HERE
+                    
+                cleanUserInput(event.map)
+    
                 clickHandlerState = 'NONE'
             }
             else if (clickHandlerState === 'NONE'){
@@ -170,8 +191,12 @@ function MapWrapper({geoJsonData}) {
                 drawPolygon(event.map).addEventListener('drawend', (evt) => {
                     handleDrawend(evt, event.map)
                     clickHandlerState = 'DRAWEND'
+                   // console.log("kartan har ", event.map.getLayers().getArray()[1].getSource().getFeatures(), " features")
+                    //console.log(clickHandlerState)
+                    //console.log(event.map.getInteractions().getArray().length)
                     event.map.getInteractions().getArray().pop()
                     event.map.getInteractions().getArray().pop()
+                    //console.log(event.map.getInteractions().getArray().length)
                 })
             }
             else {}
