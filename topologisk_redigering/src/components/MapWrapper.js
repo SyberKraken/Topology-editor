@@ -176,7 +176,6 @@ function MapWrapper({geoJsonData}) {
                 console.log("Running checks because polygon is finished drawing")
                 
                 //unkink the drawn polygon HERE
-                    
                 cleanUserInput(event.map)
     
                 clickHandlerState = 'NONE'
@@ -184,7 +183,9 @@ function MapWrapper({geoJsonData}) {
             else if (clickHandlerState === 'NONE'){
                 clickHandlerState = 'DRAW'
                 drawPolygon(event.map).addEventListener('drawend', (evt) => {
+        
                     handleDrawend(evt, event.map)
+                    
                     clickHandlerState = 'DRAWEND'
                     //console.log(clickHandlerState)
                     //console.log(event.map.getInteractions().getArray().length)
@@ -212,13 +213,17 @@ function MapWrapper({geoJsonData}) {
             for (let i = 0; i < unkinkedCollection.length; i++)
             {
                 mapSource.addFeatures(unkinkedCollection[i])
+                cleanUserInput(map)
             }
             return unkinkedCollection.length
         }
         else 
         {
             // else add last drawn poly
-            mapSource.addFeatures(evt.feature)
+
+            //mapSource.addFeatures(evt.feature)
+            cleanUserInput(map)
+
             return 1
         }
     }
