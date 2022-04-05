@@ -32,7 +32,8 @@ export const fixOverlaps = (map) => {
     //TODO: OL3parser => uppdelat i olika översättningar
 
     let trimmed = handleIntersections(jstsCollection[jstsCollection.length - 1], jstsCollection.slice(0, jstsCollection.length - 1))
-   
+    //console.log("TRIMMED: ", trimmed)
+
     let cleanedJstsCollection = jstsCollection.slice(0, jstsCollection.length - 1)
 
     //if the new polygon crosses another polygon, make several polygons from it.

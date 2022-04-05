@@ -107,11 +107,9 @@ function MapWrapper({geoJsonData}) {
     //fixes overlaps for the latest polygon added to map
     const cleanUserInput = (map) => {
         let newPolygons = fixOverlaps(map)
-
             let featureList = (new GeoJSON()).readFeatures(newPolygons) //  GeoJSON.readFeatures(geoJsonData)
-
-            map.getLayers().getArray()[1].getSource().clear()
-            map.getLayers().getArray()[1].getSource().addFeatures(featureList)
+            getSource(map).clear()
+            getSource(map).addFeatures(featureList)
     }
 
     const mousePositionControl = new MousePosition({
@@ -136,8 +134,8 @@ function MapWrapper({geoJsonData}) {
 
             }),
         });
-        initialMap.on('click', onMapClickGetPixel)
         initialMap.addInteraction(select)
+        initialMap.on('click', onMapClickGetPixel)
         initialMap.addInteraction(new Snap({source: source}))
         //initialMap.addInteraction(new Modify({source: source, hitDetection: true}))
         setMap(initialMap)
@@ -155,8 +153,12 @@ function MapWrapper({geoJsonData}) {
     /* Contextual clickhandler, different actions depending on if you click on a polygon or somewhere on the map */
     const onMapClickGetPixel = (event) => {
         
+        //console.log("CLICKED: ", getPolygon(event.map, event.pixel))
+        //console.log("SELECTED: ", getSelectedPolygon())
+       // console.log("SOURCE: ", getSource(event.map))
+
         if(event.map.getFeaturesAtPixel(event.pixel).length > 0){
-            console.log(event.map.getFeaturesAtPixel(event.pixel)[0].getGeometry().getCoordinates())
+            //console.log(event.map.getFeaturesAtPixel(event.pixel)[0].getGeometry().getCoordinates())
         }
 
         /* Check if clicked on an existing polygon */
@@ -165,19 +167,17 @@ function MapWrapper({geoJsonData}) {
             const clickedPolygon = getPolygon(event.map, event.pixel)
             const selectedPolygon = getSelectedPolygon()
             /* This done to make sure correct polygon is deleted. Otherwise the previous one is deleted because of delay. */
-            if (clickedPolygon === selectedPolygon) {
-                //deletePolygon(event.map, select.getFeatures().getArray()[0])
-                event.map.addInteraction(new Modify({features:select.getFeatures()}))
+            if (clickedPolygon.ol_uid === selectedPolygon.ol_uid) {
+                deletePolygon(event.map, select.getFeatures().getArray()[0])
+                //event.map.addInteraction(new Modify({features:select.getFeatures()}))
             }
             
 
         } else {
             if (clickHandlerState === 'DRAWEND') {
                 console.log("Running checks because polygon is finished drawing")
-                
                 //unkink the drawn polygon HERE
                 cleanUserInput(event.map)
-    
                 clickHandlerState = 'NONE'
             }
             else if (clickHandlerState === 'NONE'){
@@ -185,12 +185,11 @@ function MapWrapper({geoJsonData}) {
                 drawPolygon(event.map).addEventListener('drawend', (evt) => {
         
                     handleDrawend(evt, event.map)
-                    
                     clickHandlerState = 'DRAWEND'
                     //console.log(clickHandlerState)
                     //console.log(event.map.getInteractions().getArray().length)
                     event.map.getInteractions().getArray().pop()
-                    event.map.getInteractions().getArray().pop()
+                    //event.map.getInteractions().getArray().pop()
                     //console.log(event.map.getInteractions().getArray().length)
                 })
             }
@@ -238,7 +237,7 @@ function MapWrapper({geoJsonData}) {
 
     /* check if we are clicking on a polygon*/
     const isPolygon = (map, pixel) => {
-        return map.getFeaturesAtPixel(pixel).length > 0 && map.getFeaturesAtPixel(pixel)[0].getGeometryName() === "Polygon"
+        return map.getFeaturesAtPixel(pixel).length > 0 && map.getFeaturesAtPixel(pixel)[0].getGeometry().getType() === "Polygon"
     }
    
     /* get the polygon we are clicking on */
@@ -249,6 +248,10 @@ function MapWrapper({geoJsonData}) {
     /* get the polygon marked by select interaction */
     const getSelectedPolygon = () => {
         return select.getFeatures().getArray()[0]
+    }
+
+    const getSource = (map) => {
+        return map.getLayers().getArray()[1].getSource()
     }
 
     return (

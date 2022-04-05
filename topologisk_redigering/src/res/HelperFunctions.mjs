@@ -1,7 +1,7 @@
 
 export const deletePolygon = (map, polygon) => {
     if (map) {
-        console.log(polygon)
+        //console.log(polygon)
         let layers = map.getLayers().getArray()[1].getSource()
         layers.removeFeature(polygon)                      
     } 
