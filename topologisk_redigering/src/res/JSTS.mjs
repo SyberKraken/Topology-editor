@@ -69,8 +69,6 @@ const geoJsonCorrect = {
 const polygon1 = geoJSONReader.read(geoJsonCorrect.features[0].geometry)
 const polygon2 = geoJSONReader.read(geoJsonCorrect.features[1].geometry)
 console.log(geoJSONWriter.write(polygon1))
-
-
 console.log(geoJSONWriter.write(polygon2))
 
 

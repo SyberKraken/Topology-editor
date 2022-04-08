@@ -181,7 +181,7 @@ function MapWrapper({geoJsonData}) {
                 clickHandlerState = 'DRAW'
                 drawPolygon(event.map).addEventListener('drawend', (evt) => {
         
-                    evt.feature.setProperties({name:"testing"})
+                    evt.feature.setProperties({name:"hourglas"})
 
                     handleDrawend(evt, event.map)
                     clickHandlerState = 'DRAWEND'
