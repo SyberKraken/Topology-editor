@@ -38,8 +38,11 @@ export const isValid = (olPoly) => {
  * returns an openlayers feature array
  */
 export const unkinkPolygon = (poly) => {
+    //console.log("POLY: ",poly)
     const jsonObj = new GeoJSON({ featureProjection: "EPSG:3006" }).writeFeaturesObject([poly])
+    //console.log("JSONOBJ: ",jsonObj)
     const geoJsonCollection = simplepolygon(jsonObj.features[0]).features
+    //console.log("GEOJSONCOLLECTION: ",geoJsonCollection)
 
     const olFeatures = []
     for(let i = 0;  i < geoJsonCollection.length; i++)

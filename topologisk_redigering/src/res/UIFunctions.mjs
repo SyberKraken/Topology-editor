@@ -1,4 +1,4 @@
-import { Draw } from 'ol/interaction.js'
+import { Draw, Snap } from 'ol/interaction.js'
 import { Circle as CircleStyle, Fill, Stroke, Style } from 'ol/style.js';
 
 
@@ -39,13 +39,12 @@ export const drawPolygon = (map) => {
     const draw = new Draw({
       source: getMapSource(map),
       type: "Polygon",
-      geometryName: "Polygon",    
     })
     
-    /* const snap = new Snap({source: getMapSource(map)}) */
+    const snap = new Snap({source: getMapSource(map)}) 
 
     map.addInteraction(draw)
-    /* map.addInteraction(snap) */
+    map.addInteraction(snap) 
     
     return draw
 }} 

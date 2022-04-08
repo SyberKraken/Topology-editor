@@ -16,18 +16,20 @@ const mapToJstsGeometryCollection = (map) => {
     );
 
     let jstsCollection = []
+    let propertiesArray = []
     map.getLayers().getArray()[1].getSource().getFeatures().forEach(function temp(feature) {
+        propertiesArray.push(feature.getProperties())
         let x = parser.read(feature.getGeometry())
         jstsCollection.push(x)
     })
 
-    return jstsCollection
+    return [jstsCollection, propertiesArray]
 } 
 
 //takes map as input and trimms last drawn polygon
 export const fixOverlaps = (map) => {
 
-    let jstsCollection = mapToJstsGeometryCollection(map)
+    let [jstsCollection, propertiesArray] = mapToJstsGeometryCollection(map)
 
     //TODO: OL3parser => uppdelat i olika översättningar
 
@@ -48,5 +50,5 @@ export const fixOverlaps = (map) => {
         cleanedJstsCollection.push(trimmed)
     }
 
-    return jstsToGeoJson(cleanedJstsCollection)
+    return jstsToGeoJson(cleanedJstsCollection, propertiesArray)
 }
