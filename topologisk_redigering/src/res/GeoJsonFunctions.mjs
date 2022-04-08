@@ -31,18 +31,20 @@ import { Polygon } from 'ol/geom.js';
         return jsts
     }
 
-    export const jstsToGeoJson = (jstsObject, propertiesArray) => {
+
+    //takes a featureCollection or an array of geometries and returns a jsts featurelist !REQUIRES USE OF .features can not use normal indexing
+    export const jstsToGeoJson = (jstsObject) => {
+
+        //debugger
+    
         let writer = new GeoJSONWriter()
         let featureList = []
 
-        let i = 0;
         if(jstsObject.features) {
             jstsObject.features.forEach(feature => {
                 let writtenGeometry = writer.write(feature.geometry)
                 let polygon = new Polygon(writtenGeometry.coordinates)
                 let featureWrapping = new Feature(polygon)
-                featureWrapping.setProperties(propertiesArray[i])
-                i++
                 featureList.push(featureWrapping)
             });
         }
@@ -51,8 +53,6 @@ import { Polygon } from 'ol/geom.js';
                 let writtenGeometry = writer.write(geom)
                 let polygon = new Polygon(writtenGeometry.coordinates)
                 let featureWrapping = new Feature(polygon)
-                featureWrapping.setProperties(propertiesArray[i])
-                i++
                 featureList.push(featureWrapping)
             });
         }

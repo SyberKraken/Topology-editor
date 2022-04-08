@@ -1,7 +1,9 @@
 import { getFeatureList, GeoJsonObjToFeatureList, featuresToGeoJson, geoJsonToJsts, jstsToGeoJson } from "./GeoJsonFunctions.mjs"
-import { handleIntersections } from "./jsts.mjs"
+import getMergeableFeatures, { handleIntersections, mergeFeatures } from "./jsts.mjs"
 import OL3Parser from "jsts/org/locationtech/jts/io/OL3Parser.js"
 import {  Point, LineString, LinearRing, Polygon, MultiLineString, MultiPolygon } from 'ol/geom.js'
+import { Overlay } from "ol"
+import OverlayOp from "jsts/org/locationtech/jts/operation/overlay/OverlayOp.js"
 
 const mapToJstsGeometryCollection = (map) => {
 
@@ -16,20 +18,18 @@ const mapToJstsGeometryCollection = (map) => {
     );
 
     let jstsCollection = []
-    let propertiesArray = []
     map.getLayers().getArray()[1].getSource().getFeatures().forEach(function temp(feature) {
-        propertiesArray.push(feature.getProperties())
         let x = parser.read(feature.getGeometry())
         jstsCollection.push(x)
     })
 
-    return [jstsCollection, propertiesArray]
+    return jstsCollection
 } 
 
 //takes map as input and trimms last drawn polygon
 export const fixOverlaps = (map) => {
 
-    let [jstsCollection, propertiesArray] = mapToJstsGeometryCollection(map)
+    let jstsCollection = mapToJstsGeometryCollection(map)
 
     //TODO: OL3parser => uppdelat i olika översättningar
 
@@ -50,5 +50,22 @@ export const fixOverlaps = (map) => {
         cleanedJstsCollection.push(trimmed)
     }
 
-    return jstsToGeoJson(cleanedJstsCollection, propertiesArray)
+    return jstsToGeoJson(cleanedJstsCollection)
+}
+//Takes jsts geometries and ol map and returns geojson geometry
+export const handleMerge = (firstPolygon, secondPolygon, map) => {
+    let mergables = getMergeableFeatures(firstPolygon, map.getLayers().getArray()[1].getSource().getFeatures())
+
+    let status = -1
+    mergables.forEach(function compare(mergablePolygon){
+        console.log(JSON.stringify(secondPolygon))
+        console.log(JSON.stringify(mergablePolygon))
+        if(JSON.stringify(secondPolygon) === JSON.stringify(mergablePolygon)){
+            debugger
+            status = jstsToGeoJson([mergeFeatures(firstPolygon, secondPolygon)]).features[0]
+        }
+    })
+    console.log("STATUS: ",status)
+    return status
+    
 }
