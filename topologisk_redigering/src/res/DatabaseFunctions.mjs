@@ -1,14 +1,18 @@
 import GeoJSON from "ol/format/GeoJSON.js"
 
-// new terminal run command :  npm run http (for windows)
-    //                            npm run httpl (for linux)
+    // new terminal run command :       npm run http (for windows)
+    //                                  npm run httpl (for linux)
+
     // if you get an excution policy error run:
     //      Set-ExecutionPolicy Unrestricted (powershell admin to run http-server)
     // YOU NEED TO INSTALL json-server GLOBALLY FOR THE FOLLOWING FUNCTION TO WORK! (23/2)
     // npm install -g json-server
 
 export const saveToDatabase = (features) => {
+
+        //console.log("BEFORE NEW GEO",features)
         const jsonObj = new GeoJSON({ projection: "EPSG:3006" }).writeFeaturesObject(features)
+        //console.table("AFTER NEW GEO", jsonObj)
         jsonObj["crs"] = {
             "type": "name",
             "properties": {
@@ -16,7 +20,7 @@ export const saveToDatabase = (features) => {
             }
         }
 
-        console.log(JSON.stringify(jsonObj))
+        //console.log(JSON.stringify(jsonObj))
 
         fetch("http://localhost:4000/file1",
             {

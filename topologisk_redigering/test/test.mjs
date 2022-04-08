@@ -1,4 +1,5 @@
 import { jstsToGeoJson, geoJsonToJsts } from '../src/res/GeoJsonFunctions.mjs';
+import GeoJSON from 'ol/format/GeoJSON.js';
 import assert from 'assert'
 import _ from 'lodash'
 
@@ -7,7 +8,7 @@ const gj = {
   "features": [
     {
       "type": "Feature",
-      "properties": null,
+      "properties": {name: "testing"},
       "geometry": {
         "type": "Polygon",
         "coordinates": [
@@ -49,21 +50,52 @@ const gj = {
   }   
 }
 
+const OLGeo = new GeoJSON().readFeatures(gj)
 
-/* 
-  Find mergable polygons
 
-*/
-console.log(JSON.stringify(gj)); //funkar
-console.log()
-console.log(JSON.stringify(jstsToGeoJson(geoJsonToJsts(gj))))
+//indata ol feature, utdata array med koordinat-arrayer
+const testGetFeatureCoordinates = (features) => {
+  return features[0].getGeometry().getCoordinates()[0]
+}
 
+//indata GeoJSON, utdata array med koordinat-arrayer
+const testGetGeoJsonCoordinate = (geojson) => {
+  return geojson.features[0].geometry.coordinates[0]
+}
+ 
+const coordinatesAreEquivalent = (coordinateArray1, coordinateArray2) => {
+  let i = 0;
+  while (coordinateArray2[i] && coordinateArray1[0] != coordinateArray2[i]) {
+    i++;
+  }
+  if(!coordinateArray2[i]){
+    return false
+  }
+  
+  for(j = 0; j < 3; j++, i++){
+    if(coordinateArray1[j] != coordinateArray2[i % coordinateArray2.length]){
+      return false
+    }/*  else {
+      i++
+    } */
+  }
+  return true
+}
+
+
+//describe('')
+
+describe('GeoJson to OL conversion', function () {
+  it('Coordinates in original geojson should be same as coordinates in ol feature', function () {
+    assert.equal(_.isEqual(testGetFeatureCoordinates(OLGeo), testGetGeoJsonCoordinate(gj)), true)
+  })
+})
 
 describe('GeoJson Conversion', function () {
   it('GeoJson should become a jstsobject', function () {
      // _.isEqual(jstsToGeoJson(geoJsonToJsts(gj)), gj).should.equal(true)
-      assert.equal(_.isEqual(jstsToGeoJson(geoJsonToJsts(gj)), gj),true)
-  } )
+      assert.equal(_.isEqual(jstsToGeoJson(geoJsonToJsts(gj), [{name: "testing"}]), gj),true)
+  })
 })
 
 /*

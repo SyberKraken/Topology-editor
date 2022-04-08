@@ -17,15 +17,13 @@ import { createStringXY } from 'ol/coordinate';
 import MousePosition from 'ol/control/MousePosition'
 import { defaults as defaultControls } from 'ol/control'
 import Header from './Header'
-import { handleIntersections } from '../res/jsts.mjs';
 import { fixOverlaps } from '../res/PolygonHandler.mjs';
 import { Select, Modify } from 'ol/interaction';
 import {click} from "ol/events/condition"
 import {deletePolygon} from '../res/HelperFunctions.mjs'
 import {defaultStyle, selectedStyle, invalidStyle} from '../res/Styles.mjs'
 import { isValid, unkinkPolygon, calcIntersection }  from '../res/unkink.mjs'
-
-import { Snap } from 'ol/interaction.js'
+import { saveToDatabase } from '../res/DatabaseFunctions.mjs';
 
 function MapWrapper({geoJsonData}) {
     const [map, setMap] = useState();
@@ -97,6 +95,10 @@ function MapWrapper({geoJsonData}) {
 
     });
 
+    console.log(source.getUrl());
+    //console.log(source.getFormat().readFeaturesFromObject());
+
+
     const polygonLayer = new VectorLayer({
         source: source,
         style: defaultStyle
@@ -110,6 +112,7 @@ function MapWrapper({geoJsonData}) {
             let featureList = (new GeoJSON()).readFeatures(newPolygons) //  GeoJSON.readFeatures(geoJsonData)
             getSource(map).clear()
             getSource(map).addFeatures(featureList)
+            saveToDatabase(featureList)
     }
 
     const mousePositionControl = new MousePosition({
@@ -134,10 +137,9 @@ function MapWrapper({geoJsonData}) {
 
             }),
         });
-        initialMap.addInteraction(select)
         initialMap.on('click', onMapClickGetPixel)
-        initialMap.addInteraction(new Snap({source: source}))
-        //initialMap.addInteraction(new Modify({source: source, hitDetection: true}))
+        initialMap.addInteraction(select)
+        //initialMap.addInteraction(new Snap({source: source}))
         setMap(initialMap)
     }, []);
 
@@ -145,20 +147,15 @@ function MapWrapper({geoJsonData}) {
     const handleNewPoly = (evt) => {
         // when add feature check if valid
         if (!isValid(evt.feature)) {
-            //deleteLatest()
             map.getLayers().getArray()[1].getSource().removeFeature(evt.feature)
         }
       }
 
     /* Contextual clickhandler, different actions depending on if you click on a polygon or somewhere on the map */
     const onMapClickGetPixel = (event) => {
-        
-        //console.log("CLICKED: ", getPolygon(event.map, event.pixel))
-        //console.log("SELECTED: ", getSelectedPolygon())
-       // console.log("SOURCE: ", getSource(event.map))
 
         if(event.map.getFeaturesAtPixel(event.pixel).length > 0){
-            //console.log(event.map.getFeaturesAtPixel(event.pixel)[0].getGeometry().getCoordinates())
+            ourGetProperty(event.map.getFeaturesAtPixel(event.pixel)[0])
         }
 
         /* Check if clicked on an existing polygon */
@@ -184,13 +181,12 @@ function MapWrapper({geoJsonData}) {
                 clickHandlerState = 'DRAW'
                 drawPolygon(event.map).addEventListener('drawend', (evt) => {
         
+                    evt.feature.setProperties({name:"testing"})
+
                     handleDrawend(evt, event.map)
                     clickHandlerState = 'DRAWEND'
-                    //console.log(clickHandlerState)
-                    //console.log(event.map.getInteractions().getArray().length)
                     event.map.getInteractions().getArray().pop()
-                    //event.map.getInteractions().getArray().pop()
-                    //console.log(event.map.getInteractions().getArray().length)
+                    event.map.getInteractions().getArray().pop()
                 })
             }
             else {}
@@ -199,7 +195,6 @@ function MapWrapper({geoJsonData}) {
 
     const handleDrawend = (evt, map) => {
         const mapSource = map.getLayers().getArray()[1].getSource()
-
         // check if valid
         if (!isValid(evt.feature))
         {
@@ -208,7 +203,7 @@ function MapWrapper({geoJsonData}) {
             // return collection of unkinked polys
             const unkinkedCollection = unkinkPolygon(evt.feature)
             // check intersection and add unkinked polys to the source
-            console.log(unkinkedCollection)
+            //console.log(unkinkedCollection)
             for (let i = 0; i < unkinkedCollection.length; i++)
             {
                 mapSource.addFeatures(unkinkedCollection[i])
@@ -219,7 +214,6 @@ function MapWrapper({geoJsonData}) {
         else 
         {
             // else add last drawn poly
-
             //mapSource.addFeatures(evt.feature)
             cleanUserInput(map)
 
@@ -234,6 +228,13 @@ function MapWrapper({geoJsonData}) {
         }
     }, [map])
     
+
+    const printPropertiesFromFeatures = (text,features) => {
+        features.forEach(element => {
+            console.log(text, element.getProperties())
+        });
+    }
+
 
     /* check if we are clicking on a polygon*/
     const isPolygon = (map, pixel) => {
@@ -252,6 +253,15 @@ function MapWrapper({geoJsonData}) {
 
     const getSource = (map) => {
         return map.getLayers().getArray()[1].getSource()
+    }
+
+    const ourGetProperty = (feature) => {
+        const properties = feature.getProperties()
+        for(const [key, value] of Object.entries(properties)){
+            if(key != "geometry"){
+                console.log(`${key}: ${value}`)
+            }
+        }
     }
 
     return (
