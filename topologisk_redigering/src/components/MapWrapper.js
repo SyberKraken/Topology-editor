@@ -17,7 +17,7 @@ import { createStringXY } from 'ol/coordinate';
 import MousePosition from 'ol/control/MousePosition'
 import { defaults as defaultControls } from 'ol/control'
 import Header from './Header'
-import { handleIntersections } from '../res/jsts.mjs';
+import getMergeableFeatures, { handleIntersections } from '../res/jsts.mjs';
 import { fixOverlaps } from '../res/PolygonHandler.mjs';
 import { Select, Modify } from 'ol/interaction';
 import {click} from "ol/events/condition"
@@ -166,11 +166,18 @@ function MapWrapper({geoJsonData}) {
 
             const clickedPolygon = getPolygon(event.map, event.pixel)
             const selectedPolygon = getSelectedPolygon()
+
+            getMergeableFeatures(parser.read(clickedPolygon.getGeometry()), event.map.getLayers().getArray()[1].getSource().getFeatures())
+
             /* This done to make sure correct polygon is deleted. Otherwise the previous one is deleted because of delay. */
-            if (clickedPolygon.ol_uid === selectedPolygon.ol_uid) {
-                deletePolygon(event.map, select.getFeatures().getArray()[0])
-                //event.map.addInteraction(new Modify({features:select.getFeatures()}))
+            //if clicked only needed if running mergable
+            if(clickedPolygon){
+                if (clickedPolygon.ol_uid === selectedPolygon.ol_uid) {
+                    deletePolygon(event.map, select.getFeatures().getArray()[0])
+                    //event.map.addInteraction(new Modify({features:select.getFeatures()}))
+                }
             }
+            
             
 
         } else {

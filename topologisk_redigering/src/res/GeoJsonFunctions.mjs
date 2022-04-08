@@ -31,7 +31,12 @@ import { Polygon } from 'ol/geom.js';
         return jsts
     }
 
+
+    //takes a featureCollection or an array of geometries and returns a jsts featurelist
     export const jstsToGeoJson = (jstsObject) => {
+
+        //debugger
+    
         let writer = new GeoJSONWriter()
         let featureList = []
 
