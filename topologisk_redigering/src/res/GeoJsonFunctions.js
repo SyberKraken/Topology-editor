@@ -4,11 +4,11 @@ import GeoJSONWriter from 'jsts/org/locationtech/jts/io/GeoJSONWriter.js'
 import { Feature } from 'ol';
 import { Polygon } from 'ol/geom.js';
 
-    const getFeatureList = (map) => {
+    export const getFeatureList = (map) => {
         return map.getLayers().getArray()[1].getSource().getFeatures()
     }
 
-    const GeoJsonObjToFeatureList = (geoJsonData) => {
+    export const GeoJsonObjToFeatureList = (geoJsonData) => {
         return (new GeoJSON()).readFeatures(geoJsonData)
     }
 

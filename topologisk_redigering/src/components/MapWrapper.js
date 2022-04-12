@@ -12,20 +12,19 @@ import GeoJSON from 'ol/format/GeoJSON';
 import MultiPoint from 'ol/geom/MultiPoint';
 import OL3Parser from "jsts/org/locationtech/jts/io/OL3Parser";
 import { Point, LineString, LinearRing, Polygon, MultiLineString, MultiPolygon } from 'ol/geom'
-import { drawPolygon } from '../res/UIFunctions.mjs';
+import { drawPolygon } from '../res/UIFunctions';
 import { createStringXY } from 'ol/coordinate';
 import MousePosition from 'ol/control/MousePosition'
 import { defaults as defaultControls } from 'ol/control'
 import Header from './Header'
-import getMergeableFeatures, { handleIntersections, mergeFeatures } from '../res/jsts.mjs';
-import { fixOverlaps, handleMerge } from '../res/PolygonHandler.mjs';
+import getMergeableFeatures, { handleIntersections, mergeFeatures } from '../res/jsts';
+import { fixOverlaps, handleMerge } from '../res/PolygonHandler';
 import { Select, Modify } from 'ol/interaction';
 import {click} from "ol/events/condition"
-import {deletePolygon} from '../res/HelperFunctions.mjs'
-import {defaultStyle, selectedStyle, invalidStyle} from '../res/Styles.mjs'
-import { isValid, unkinkPolygon, calcIntersection }  from '../res/unkink.mjs'
+import {deletePolygon} from '../res/HelperFunctions'
+import {defaultStyle, selectedStyle, invalidStyle} from '../res/Styles'
+import { isValid, unkinkPolygon, calcIntersection }  from '../res/unkink'
 
-import { Snap } from 'ol/interaction.js'
 
 function MapWrapper({geoJsonData}) {
     const [map, setMap] = useState();
@@ -106,7 +105,7 @@ function MapWrapper({geoJsonData}) {
     
     //fixes overlaps for the latest polygon added to map
     const cleanUserInput = (map) => {
-        let newPolygons = fixOverlaps(map)
+        let newPolygons = fixOverlaps(getFeatureList(map))
             let featureList = (new GeoJSON()).readFeatures(newPolygons) //  GeoJSON.readFeatures(geoJsonData)
             getSource(map).clear()
             getSource(map).addFeatures(featureList)
@@ -136,8 +135,6 @@ function MapWrapper({geoJsonData}) {
         });
         initialMap.addInteraction(select)
         initialMap.on('click', onMapClickGetPixel)
-        initialMap.addInteraction(new Snap({source: source}))
-        //initialMap.addInteraction(new Modify({source: source, hitDetection: true}))
         setMap(initialMap)
     }, []);
 
@@ -152,14 +149,6 @@ function MapWrapper({geoJsonData}) {
 
     /* Contextual clickhandler, different actions depending on if you click on a polygon or somewhere on the map */
     const onMapClickGetPixel = (event) => {
-        
-        //console.log("CLICKED: ", getPolygon(event.map, event.pixel))
-        //console.log("SELECTED: ", getSelectedPolygon())
-       // console.log("SOURCE: ", getSource(event.map))
-
-        if(event.map.getFeaturesAtPixel(event.pixel).length > 0){
-            //console.log(event.map.getFeaturesAtPixel(event.pixel)[0].getGeometry().getCoordinates())
-        }
 
         /* Check if clicked on an existing polygon */
         if (isPolygon(event.map, event.pixel)){
@@ -169,8 +158,7 @@ function MapWrapper({geoJsonData}) {
             if(clickedPolygon){
                 if(selectedPolygon){
                     if(clickedPolygon.ol_uid !== selectedPolygon.ol_uid){
-                            //getMergeableFeatures(parser.read(clickedPolygon.getGeometry()), event.map.getLayers().getArray()[1].getSource().getFeatures())
-            
+                        //getMergeableFeatures(parser.read(clickedPolygon.getGeometry()), event.map.getLayers().getArray()[1].getSource().getFeatures())
                         let newPoly = handleMerge(parser.read(clickedPolygon.getGeometry()), parser.read(selectedPolygon.getGeometry()),event.map)
                     
                         if(newPoly !== -1){
@@ -208,11 +196,9 @@ function MapWrapper({geoJsonData}) {
         
                     handleDrawend(evt, event.map)
                     clickHandlerState = 'DRAWEND'
-                    //console.log(clickHandlerState)
-                    //console.log(event.map.getInteractions().getArray().length)
                     event.map.getInteractions().getArray().pop()
-                    //event.map.getInteractions().getArray().pop()
-                    //console.log(event.map.getInteractions().getArray().length)
+                    event.map.getInteractions().getArray().pop()
+
                 })
             }
             else {}
@@ -274,6 +260,12 @@ function MapWrapper({geoJsonData}) {
 
     const getSource = (map) => {
         return map.getLayers().getArray()[1].getSource()
+    }
+
+    /* get the array of features on map */
+    const getFeatureList = (map) => {
+        return map.getLayers().getArray()[1].getSource().getFeatures()
+
     }
 
     return (

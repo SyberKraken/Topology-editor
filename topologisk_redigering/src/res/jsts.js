@@ -4,8 +4,8 @@ import OL3Parser from "jsts/org/locationtech/jts/io/OL3Parser.js";
 import BufferParameters from "jsts/org/locationtech/jts/operation/buffer/BufferParameters.js"
 import BufferOp from "jsts/org/locationtech/jts/operation/buffer/BufferOp.js"
 import { Point, LineString, LinearRing, Polygon, MultiLineString, MultiPolygon } from 'ol/geom.js'
-import polygonsAreConnected from "../res/TopologyValidation.js"
-import { jstsToGeoJson } from './GeoJsonFunctions.mjs';
+import polygonsAreConnected from "./TopologyValidation.js"
+import { jstsToGeoJson } from './GeoJsonFunctions.js';
 
 
 

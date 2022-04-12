@@ -1,11 +1,13 @@
-import { getFeatureList, GeoJsonObjToFeatureList, featuresToGeoJson, geoJsonToJsts, jstsToGeoJson } from "./GeoJsonFunctions.mjs"
-import getMergeableFeatures, { handleIntersections, mergeFeatures } from "./jsts.mjs"
+import { jstsToGeoJson } from "./GeoJsonFunctions.js"
+import getMergeableFeatures, { handleIntersections, mergeFeatures } from "./jsts.js"
 import OL3Parser from "jsts/org/locationtech/jts/io/OL3Parser.js"
 import {  Point, LineString, LinearRing, Polygon, MultiLineString, MultiPolygon } from 'ol/geom.js'
 import { Overlay } from "ol"
 import OverlayOp from "jsts/org/locationtech/jts/operation/overlay/OverlayOp.js"
 
-const mapToJstsGeometryCollection = (map) => {
+const featuresToJstsGeometryCollection = (features) => {
+
+    //console.log("FEATURES_TO_JSTS",features)
 
     const parser = new OL3Parser();
     parser.inject(
@@ -18,7 +20,7 @@ const mapToJstsGeometryCollection = (map) => {
     );
 
     let jstsCollection = []
-    map.getLayers().getArray()[1].getSource().getFeatures().forEach(function temp(feature) {
+    features.forEach(function temp(feature) {
         let x = parser.read(feature.getGeometry())
         jstsCollection.push(x)
     })
@@ -27,15 +29,13 @@ const mapToJstsGeometryCollection = (map) => {
 } 
 
 //takes map as input and trimms last drawn polygon
-export const fixOverlaps = (map) => {
+export const fixOverlaps = (features) => {
 
-    let jstsCollection = mapToJstsGeometryCollection(map)
+    let jstsCollection = featuresToJstsGeometryCollection(features)
 
     //TODO: OL3parser => uppdelat i olika översättningar
 
     let trimmed = handleIntersections(jstsCollection[jstsCollection.length - 1], jstsCollection.slice(0, jstsCollection.length - 1))
-    //console.log("TRIMMED: ", trimmed)
-
     let cleanedJstsCollection = jstsCollection.slice(0, jstsCollection.length - 1)
 
     //if the new polygon crosses another polygon, make several polygons from it.
@@ -52,20 +52,23 @@ export const fixOverlaps = (map) => {
 
     return jstsToGeoJson(cleanedJstsCollection)
 }
+
+
+
 //Takes jsts geometries and ol map and returns geojson geometry
 export const handleMerge = (firstPolygon, secondPolygon, map) => {
     let mergables = getMergeableFeatures(firstPolygon, map.getLayers().getArray()[1].getSource().getFeatures())
 
     let status = -1
     mergables.forEach(function compare(mergablePolygon){
-        console.log(JSON.stringify(secondPolygon))
-        console.log(JSON.stringify(mergablePolygon))
+        //console.log(JSON.stringify(secondPolygon))
+        //console.log(JSON.stringify(mergablePolygon))
         if(JSON.stringify(secondPolygon) === JSON.stringify(mergablePolygon)){
             debugger
             status = jstsToGeoJson([mergeFeatures(firstPolygon, secondPolygon)]).features[0]
         }
     })
-    console.log("STATUS: ",status)
+    //console.log("STATUS: ",status)
     return status
     
 }
