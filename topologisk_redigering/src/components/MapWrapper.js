@@ -106,10 +106,13 @@ function MapWrapper({geoJsonData}) {
     
     //fixes overlaps for the latest polygon added to map
     const cleanUserInput = (map) => {
-        let newPolygons = fixOverlaps(map)
+        if(map.getLayers().getArray()[1].getSource().getFeatures().length > 0)
+        {
+            let newPolygons = fixOverlaps(map)
             let featureList = (new GeoJSON()).readFeatures(newPolygons) //  GeoJSON.readFeatures(geoJsonData)
             getSource(map).clear()
-            getSource(map).addFeatures(featureList)
+            getSource(map).addFeatures(featureList) 
+        }
     }
 
     const mousePositionControl = new MousePosition({
@@ -128,7 +131,7 @@ function MapWrapper({geoJsonData}) {
             ],
             view: new View({
                 center: [609924.45, 6877630.37],
-                zoom: 5.9,
+                zoom: 9,
                 minZoom: 5.8,
                 maxZoom: 17,
 
