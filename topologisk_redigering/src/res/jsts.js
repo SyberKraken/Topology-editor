@@ -6,8 +6,8 @@ import BufferOp from "jsts/org/locationtech/jts/operation/buffer/BufferOp.js"
 import { Point, LineString, LinearRing, Polygon, MultiLineString, MultiPolygon } from 'ol/geom.js'
 import polygonsAreConnected from "./TopologyValidation.js"
 import { jstsToGeoJson } from './GeoJsonFunctions.js';
-
-
+import {default as jstsPoint} from "jsts/org/locationtech/jts/geom/Point";
+import { CoordinateXY } from "jsts/org/locationtech/jts/geom";
 
 export const checkIntersection = (jstsGeometryA, jstsGeometryB) => {
     let jstsGeometryIntersection = jstsGeometryA.intersection(jstsGeometryB)
@@ -63,7 +63,7 @@ export default function getMergeableFeatures(selectedPolygon, allFeatures) { //=
       const intersection = OverlayOp.intersection(selectedPolygon, curPolygon)
       console.log("the intersection is: ", intersection)
       console.log(intersection.isEmpty() === false)
-      return intersection.isEmpty() === false */
+      return intersection.isEmpty() ==getSele= false */
 
   })
 
@@ -89,8 +89,25 @@ export default function getMergeableFeatures(selectedPolygon, allFeatures) { //=
 }
 //takes jsts geometries and return the union in jstsgeometry format
 export function mergeFeatures(firstGeometry, secondGeometry){
-  let x = OverlayOp.union(firstGeometry, secondGeometry)
-  console.log("the things",x)
-  return x
+  let union = OverlayOp.union(firstGeometry, secondGeometry)
+
+  let bufferParameters = new BufferParameters();
+  bufferParameters.setEndCapStyle(BufferParameters.CAP_ROUND);
+  bufferParameters.setJoinStyle(BufferParameters.JOIN_MITRE);
+
+  let unionBuffer = BufferOp.bufferOp(union, -0.001, bufferParameters)
+  debugger
+  let list = union._shell._points._coordinates
+  debugger
+  list.filter(function isColiding(coord){
+    let point = new jstsPoint(new CoordinateXY(coord.x, coord.y))
+    console.log(point)
+    
+    let x = OverlayOp.intersection(bufferParameters, point)
+        
+    return  true })
+  union._shell._points._coordinates = list
+  console.log("the things",unionBuffer)
+  return union
 }
 

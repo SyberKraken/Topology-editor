@@ -159,8 +159,8 @@ function MapWrapper({geoJsonData}) {
 
             const clickedPolygon = getPolygon(event.map, event.pixel)
             const selectedPolygon = getSelectedPolygon()
-            if(clickedPolygon){
-                if(selectedPolygon){
+            if(clickedPolygon !== -1){
+                if(selectedPolygon !== -1){
                     if(clickedPolygon.ol_uid !== selectedPolygon.ol_uid){
                         //getMergeableFeatures(parser.read(clickedPolygon.getGeometry()), event.map.getLayers().getArray()[1].getSource().getFeatures())
                         let newPoly = handleMerge(parser.read(clickedPolygon.getGeometry()), parser.read(selectedPolygon.getGeometry()),event.map)
@@ -250,12 +250,16 @@ function MapWrapper({geoJsonData}) {
    
     /* get the polygon we are clicking on */
     const getPolygon = (map, pixel) => {
-        return map.getFeaturesAtPixel(pixel)[0]
+        let list = map.getFeaturesAtPixel(pixel)
+        if (list.length === 0){return -1}
+        return list[0]
     }
 
     /* get the polygon marked by select interaction */
     const getSelectedPolygon = () => {
-        return select.getFeatures().getArray()[0]
+        let list = select.getFeatures().getArray()
+        if (list.length === 0){return -1}
+        return list[0]
     }
 
     const getSource = (map) => {
