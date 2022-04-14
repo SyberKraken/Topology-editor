@@ -5,10 +5,10 @@ import BufferParameters from "jsts/org/locationtech/jts/operation/buffer/BufferP
 import BufferOp from "jsts/org/locationtech/jts/operation/buffer/BufferOp.js"
 import { Point, LineString, LinearRing, Polygon, MultiLineString, MultiPolygon } from 'ol/geom.js'
 import polygonsAreConnected from "./TopologyValidation.js"
-import { jstsToGeoJson } from './GeoJsonFunctions.js';
+import { geoJsonToJsts, jstsToGeoJson } from './GeoJsonFunctions.js';
 import {default as jstsPoint} from "jsts/org/locationtech/jts/geom/Point";
 import { CoordinateXY } from "jsts/org/locationtech/jts/geom";
-
+import { GeometryFactory } from "jsts/org/locationtech/jts/geom";
 export const checkIntersection = (jstsGeometryA, jstsGeometryB) => {
     let jstsGeometryIntersection = jstsGeometryA.intersection(jstsGeometryB)
 }
@@ -96,16 +96,20 @@ export function mergeFeatures(firstGeometry, secondGeometry){
   bufferParameters.setJoinStyle(BufferParameters.JOIN_MITRE);
 
   let unionBuffer = BufferOp.bufferOp(union, -0.001, bufferParameters)
-  debugger
+  //debugger
   let list = union._shell._points._coordinates
-  debugger
+  //debugger
   list.filter(function isColiding(coord){
-    let point = new jstsPoint(new CoordinateXY(coord.x, coord.y))
+    
+    let factory = new GeometryFactory()
+
+    let point = factory.createPoint(coord)
+    debugger
     console.log(point)
     
     let x = OverlayOp.intersection(bufferParameters, point)
-        
-    return  true })
+        debugger
+    return  x})
   union._shell._points._coordinates = list
   console.log("the things",unionBuffer)
   return union
