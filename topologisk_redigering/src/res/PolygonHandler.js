@@ -54,8 +54,6 @@ export const fixOverlaps = (features) => {
     
 }
 
-
-
 //Takes jsts geometries and ol map and returns geojson geometry
 export const handleMerge = (firstPolygon, secondPolygon, map) => {
     let mergables = getMergeableFeatures(firstPolygon, map.getLayers().getArray()[1].getSource().getFeatures())
