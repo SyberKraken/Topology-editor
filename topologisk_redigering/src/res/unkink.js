@@ -27,8 +27,17 @@ export const olToJsts = (poly) => {
 
 
 export const isValid = (olPoly) => {
-    let jstsLastDrawnPoly = olToJsts(olPoly)
-    return IsValidOp.isValid(jstsLastDrawnPoly);
+    try {
+        let jstsLastDrawnPoly = olToJsts(olPoly)
+        return IsValidOp.isValid(jstsLastDrawnPoly);
+        
+    } catch (error) {
+        console.log("isvalid error")
+        console.log("if illegalArgumentException cause is from mergepolygon")
+        console.log(error)
+    }
+    return false
+ 
 }
 
 
