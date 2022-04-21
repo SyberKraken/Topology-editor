@@ -131,7 +131,7 @@ export function mergeFeatures(firstGeometry, secondGeometry){
       
       if(firstPointList.includes(point2)){return}
       else{
-          console.log(point)
+          
           let x = point._coordinates[0]
       }
 

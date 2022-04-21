@@ -114,8 +114,14 @@ function MapWrapper({geoJsonData}) {
         {
             let newPolygons = fixOverlaps(getFeatureList(map))
             let featureList = (new GeoJSON()).readFeatures(newPolygons) //  GeoJSON.readFeatures(geoJsonData)
-            getSource(map).clear()
-            getSource(map).addFeatures(featureList) 
+            if(featureList.length > 0){
+                getSource(map).clear()
+                getSource(map).addFeatures(featureList) 
+            }else{
+                console.log("cleaned input is empty")
+            }
+
+       
         }
     }
 
