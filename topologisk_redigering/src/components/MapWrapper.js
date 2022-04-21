@@ -51,7 +51,6 @@ function MapWrapper({geoJsonData}) {
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     const attributions = "Click screen to draw, dubble click polygon to remove and to merge click two adjacent polygons"
 
-
     const parser = new OL3Parser();
     parser.inject(
         Point,
