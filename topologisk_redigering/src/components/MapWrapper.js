@@ -163,14 +163,15 @@ function MapWrapper({geoJsonData}) {
                 if(selectedPolygon !== -1){
                     if(clickedPolygon.ol_uid !== selectedPolygon.ol_uid){
                         //getMergeableFeatures(parser.read(clickedPolygon.getGeometry()), event.map.getLayers().getArray()[1].getSource().getFeatures())
+                        
                         let newPoly = handleMerge(parser.read(clickedPolygon.getGeometry()), parser.read(selectedPolygon.getGeometry()),event.map)
                     
                         if(newPoly !== -1){
-                        let OlPoly = (new GeoJSON()).readFeature(newPoly) //  GeoJSON.readFeatures(geoJsonData)
-                        deletePolygon(event.map, clickedPolygon)
-                        deletePolygon(event.map, selectedPolygon)
-                        getSource(event.map).addFeature(OlPoly)
-                            
+                            let OlPoly = (new GeoJSON()).readFeature(newPoly) //  GeoJSON.readFeatures(geoJsonData)
+                            deletePolygon(event.map, clickedPolygon)
+                            deletePolygon(event.map, selectedPolygon)
+                            getSource(event.map).addFeature(OlPoly)
+                                
                         }else{
                             console.log("didnt find the poly ni the list")
                         }
@@ -213,7 +214,14 @@ function MapWrapper({geoJsonData}) {
         const mapSource = map.getLayers().getArray()[1].getSource()
 
         // check if valid
-        if (!isValid(evt.feature))
+        let valid = false
+        try {
+            valid = isValid(evt.feature)
+        } catch (error) {
+            console.log("isvalid error from drawendevent") 
+        }
+        
+        if (!valid)
         {
             console.log(evt.feature)
             // if not valid unkink

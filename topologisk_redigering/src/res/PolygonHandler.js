@@ -63,7 +63,11 @@ export const handleMerge = (firstPolygon, secondPolygon, map) => {
         //console.log(JSON.stringify(secondPolygon))
         //console.log(JSON.stringify(mergablePolygon))
         if(JSON.stringify(secondPolygon) === JSON.stringify(mergablePolygon)){
-            status = jstsToGeoJson([mergeFeatures(firstPolygon, secondPolygon)]).features[0]
+            try {
+                status = jstsToGeoJson([mergeFeatures(firstPolygon, secondPolygon)]).features[0]
+            } catch (error) {
+               console.log("merge error on typeconversion") 
+            }
         }
     })
     //console.log("STATUS: ",status)

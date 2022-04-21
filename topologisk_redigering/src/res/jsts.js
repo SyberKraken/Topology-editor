@@ -94,15 +94,21 @@ export default function getMergeableFeatures(selectedPolygon, allFeatures) { //=
 //takes jsts geometries and return the union in jstsgeometry format
 export function mergeFeatures(firstGeometry, secondGeometry){
 
-  let firstDiff = OverlayOp.difference(firstGeometry, secondGeometry)
-  let secondDiff = OverlayOp.difference(secondGeometry, firstDiff)
+  let union = -1;
+    try {
+        union = OverlayOp.union(firstGeometry, secondGeometry)
+    } catch (error) {
+        console.log("--------error in union--------")
+        console.log(error)
+        console.log(firstGeometry)
+        console.log(secondGeometry)
 
-  let union = OverlayOp.union(firstGeometry, secondGeometry)
-  let intersection = OverlayOp.intersection(firstGeometry, secondGeometry)
-  console.log("intsctrion",intersection)
-//
-  let finished = OverlayOp.union=(firstDiff, intersection)
-//
+
+        
+    }
+    if (union === -1){
+        return -1
+    }
   //let bufferParameters = new BufferParameters();
   //bufferParameters.setEndCapStyle(BufferParameters.CAP_ROUND);
   //bufferParameters.setJoinStyle(BufferParameters.JOIN_MITRE);
