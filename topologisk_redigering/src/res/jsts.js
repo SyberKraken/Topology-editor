@@ -28,19 +28,10 @@ export const handleIntersections = (jstsNewGeometry, jstsOtherGeometries) => {
         }
         catch(err)
         {
-            //console.log(err)
-            //console.log("jstsGeometry", IsValidOp.isValid(jstsGeometry))
-            // jstsnewgeometry is not valid polygon
-            //console.log("jstsNewGeometry", IsValidOp.isValid(jstsNewGeometry))
-            //debugger
             jstsNewGeometry = jstsToGeoJson([jstsNewGeometry])
             let olpoly = new GeoJSON().readFeatures(jstsNewGeometry)
-            console.log(olpoly)
             olpoly = unkinkPolygon(olpoly[0])
-            console.log(olpoly[0][0])
-            console.log(olpoly[1][0])
             jstsNewGeometry = mergeFeatures(olToJsts(olpoly[0][0]), olToJsts(olpoly[1][0]))
-            console.log(jstsNewGeometry)
             jstsNewGeometry = OverlayOp.difference(jstsNewGeometry, jstsGeometry)
         }
     });
