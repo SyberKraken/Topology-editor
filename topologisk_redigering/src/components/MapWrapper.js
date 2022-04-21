@@ -113,8 +113,14 @@ function MapWrapper({geoJsonData}) {
         {
             let newPolygons = fixOverlaps(getFeatureList(map))
             let featureList = (new GeoJSON()).readFeatures(newPolygons) //  GeoJSON.readFeatures(geoJsonData)
-            getSource(map).clear()
-            getSource(map).addFeatures(featureList) 
+            if(featureList.length > 0){
+                getSource(map).clear()
+                getSource(map).addFeatures(featureList) 
+            }else{
+                console.log("cleaned input is empty")
+            }
+
+       
         }
     }
 
@@ -142,6 +148,8 @@ function MapWrapper({geoJsonData}) {
         });
         initialMap.addInteraction(select)
         initialMap.on('click', onMapClickGetPixel)
+        initialMap.addInteraction(modify)
+        modify.on('modifyend', handleModifyend)
         setMap(initialMap)
     }, []);
 
@@ -152,7 +160,26 @@ function MapWrapper({geoJsonData}) {
             //deleteLatest()
             map.getLayers().getArray()[1].getSource().removeFeature(evt.feature)
         }
-      }
+    }
+
+
+    const handleModifyend = (event) => {
+        console.log("End Modify")
+        let map = event.target.map_.getLayers().getArray()[1].getSource().getFeatures()
+        cleanUserInput(event.target.map_)
+        // erros to cry about
+            // unable to assign hole to a shell wut??
+            // side location conflict
+            // found non-noded intersection 
+    }
+
+
+    const modify = new Modify({
+        source: source, 
+        hitDetection: true
+    })
+
+
 
     /* Contextual clickhandler, different actions depending on if you click on a polygon or somewhere on the map */
     const onMapClickGetPixel = (event) => {
@@ -162,18 +189,19 @@ function MapWrapper({geoJsonData}) {
 
             const clickedPolygon = getPolygon(event.map, event.pixel)
             const selectedPolygon = getSelectedPolygon()
-            if(clickedPolygon){
-                if(selectedPolygon){
+            if(clickedPolygon !== -1){
+                if(selectedPolygon !== -1){
                     if(clickedPolygon.ol_uid !== selectedPolygon.ol_uid){
                         //getMergeableFeatures(parser.read(clickedPolygon.getGeometry()), event.map.getLayers().getArray()[1].getSource().getFeatures())
+                        
                         let newPoly = handleMerge(parser.read(clickedPolygon.getGeometry()), parser.read(selectedPolygon.getGeometry()),event.map)
                     
                         if(newPoly !== -1){
-                        let OlPoly = (new GeoJSON()).readFeature(newPoly) //  GeoJSON.readFeatures(geoJsonData)
-                        deletePolygon(event.map, clickedPolygon)
-                        deletePolygon(event.map, selectedPolygon)
-                        getSource(event.map).addFeature(OlPoly)
-                            
+                            let OlPoly = (new GeoJSON()).readFeature(newPoly) //  GeoJSON.readFeatures(geoJsonData)
+                            deletePolygon(event.map, clickedPolygon)
+                            deletePolygon(event.map, selectedPolygon)
+                            getSource(event.map).addFeature(OlPoly)
+                                
                         }else{
                             console.log("didnt find the poly ni the list")
                         }
@@ -216,7 +244,14 @@ function MapWrapper({geoJsonData}) {
         const mapSource = map.getLayers().getArray()[1].getSource()
 
         // check if valid
-        if (!isValid(evt.feature))
+        let valid = false
+        try {
+            valid = isValid(evt.feature)
+        } catch (error) {
+            console.log("isvalid error from drawendevent") 
+        }
+        
+        if (!valid)
         {
             console.log(evt.feature)
             // if not valid unkink
@@ -253,12 +288,16 @@ function MapWrapper({geoJsonData}) {
    
     /* get the polygon we are clicking on */
     const getPolygon = (map, pixel) => {
-        return map.getFeaturesAtPixel(pixel)[0]
+        let list = map.getFeaturesAtPixel(pixel)
+        if (list.length === 0){return -1}
+        return list[0]
     }
 
     /* get the polygon marked by select interaction */
     const getSelectedPolygon = () => {
-        return select.getFeatures().getArray()[0]
+        let list = select.getFeatures().getArray()
+        if (list.length === 0){return -1}
+        return list[0]
     }
 
     const getSource = (map) => {

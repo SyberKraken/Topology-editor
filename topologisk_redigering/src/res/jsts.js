@@ -2,8 +2,13 @@ import OverlayOp from "jsts/org/locationtech/jts/operation/overlay/OverlayOp.js"
 import OL3Parser from "jsts/org/locationtech/jts/io/OL3Parser.js";
 import { Point, LineString, LinearRing, Polygon, MultiLineString, MultiPolygon } from 'ol/geom.js'
 import polygonsAreConnected from "./TopologyValidation.js"
-import { jstsToGeoJson } from './GeoJsonFunctions.js';
-
+import { geoJsonToJsts, jstsToGeoJson } from './GeoJsonFunctions.js';
+import {default as jstsPoint} from "jsts/org/locationtech/jts/geom/Point";
+import { CoordinateXY } from "jsts/org/locationtech/jts/geom";
+import { GeometryFactory } from "jsts/org/locationtech/jts/geom";
+import { LineStringExtracter } from "jsts/org/locationtech/jts/geom/util";
+import GeoJSON from 'ol/format/GeoJSON';
+import { olToJsts, unkinkPolygon } from "./unkink.js";
 
 
 export const checkIntersection = (jstsGeometryA, jstsGeometryB) => {
@@ -15,9 +20,47 @@ export const checkIntersection = (jstsGeometryA, jstsGeometryB) => {
 export const handleIntersections = (jstsNewGeometry, jstsOtherGeometries) => {
     
     jstsOtherGeometries.forEach(jstsGeometry => {
-        jstsNewGeometry = OverlayOp.difference(jstsNewGeometry, jstsGeometry) 
+        try {
+            jstsNewGeometry = OverlayOp.difference(jstsNewGeometry, jstsGeometry) 
+        }
+        catch(err)
+        {
+            jstsNewGeometry = jstsToGeoJson([jstsNewGeometry])
+            let olpoly = new GeoJSON().readFeatures(jstsNewGeometry)
+            olpoly = unkinkPolygon(olpoly[0])
+            try {
+                jstsNewGeometry = mergeFeatures(olToJsts(olpoly[0][0]), olToJsts(olpoly[1][0]))
+            } catch (error) {
+                console.log(error)
+            }
+            
+            jstsNewGeometry = OverlayOp.difference(jstsNewGeometry, jstsGeometry)
+        }
     });
 
+
+    //console.log("JSTSNEWGEOM: ", jstsNewGeometry)
+    return jstsNewGeometry
+}
+
+export const addIntersectionNodes = (jstsNewGeometry, jstsOtherGeometries) => {
+    let jstsNewGeometry_original = jstsNewGeometry
+    try {
+        jstsOtherGeometries.forEach(jstsGeometry => {
+            jstsNewGeometry = OverlayOp.difference(jstsNewGeometry, jstsGeometry) 
+            let intersection = OverlayOp.intersection(jstsNewGeometry_original, jstsGeometry);
+            jstsNewGeometry = OverlayOp.union(jstsNewGeometry, intersection)
+        
+    })
+        
+    } catch (error) {
+        console.log(error)
+        return jstsNewGeometry
+    }
+   
+
+   
+    //console.log("JSTSNEWGEOM: ", jstsNewGeometry)
     return jstsNewGeometry
 }
 
@@ -47,7 +90,7 @@ export default function getMergeableFeatures(selectedPolygon, allFeatures) { //=
       const curPolygon = parser.read(poly.getGeometry())
       //debugger
       const intersection = OverlayOp.intersection(curPolygon, selectedPolygon)
-      console.log("the intersection is: ", intersection)
+      //console.log("the intersection is: ", intersection)
       //debugger
       return intersection
 /*         const curPolygon = parser.read(poly.getGeometry())
@@ -59,7 +102,7 @@ export default function getMergeableFeatures(selectedPolygon, allFeatures) { //=
       const intersection = OverlayOp.intersection(selectedPolygon, curPolygon)
       console.log("the intersection is: ", intersection)
       console.log(intersection.isEmpty() === false)
-      return intersection.isEmpty() === false */
+      return intersection.isEmpty() ==getSele= false */
 
   })
 
@@ -85,8 +128,61 @@ export default function getMergeableFeatures(selectedPolygon, allFeatures) { //=
 }
 //takes jsts geometries and return the union in jstsgeometry format
 export function mergeFeatures(firstGeometry, secondGeometry){
-  let x = OverlayOp.union(firstGeometry, secondGeometry)
-  console.log("the things",x)
-  return x
+
+  let union = -1;
+    try {
+        union = OverlayOp.union(firstGeometry, secondGeometry)
+    } catch (error) {
+        console.log("--------error in union--------")
+        console.log(error)
+        console.log(firstGeometry)
+        console.log(secondGeometry)
+
+
+        
+    }
+    if (union === -1){
+        return -1
+    }
+  //let bufferParameters = new BufferParameters();
+  //bufferParameters.setEndCapStyle(BufferParameters.CAP_ROUND);
+  //bufferParameters.setJoinStyle(BufferParameters.JOIN_MITRE);
+
+  //let unionBuffer = BufferOp.bufferOp(union, -0.1, bufferParameters)
+  //debugger
+  let firstPointList = firstGeometry._shell._points._coordinates
+  let secondPointList = secondGeometry._shell._points._coordinates
+ // let lineList = LineStringExtracter.getLines(firstGeometry)
+//
+ // console.log("before filter things",lineList)
+ let factory = new GeometryFactory;
+ // //debugger
+  firstPointList.forEach(function isColiding(coord){
+  let point = factory.createPoint(coord)
+ 
+  secondPointList.forEach(function(coord2){
+      //check if same cacngle 
+      let point2 =  factory.createPoint(coord2)
+      
+      if(firstPointList.includes(point2)){return}
+      else{
+          
+          let x = point._coordinates[0]
+      }
+  })
+
+
+    //lineList.array.forEach(function coliding2(line){
+    //    let intersection = OverlayOp.intersection(point, line);
+    //    console.log(intersection)
+    //    console.log(line)
+    //   if(intersection){
+    //        
+    //   }
+//
+    //})
+  })
+
+  return union
 }
 
