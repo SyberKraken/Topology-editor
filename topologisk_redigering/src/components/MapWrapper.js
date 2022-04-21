@@ -24,13 +24,12 @@ import {click} from "ol/events/condition"
 import {deletePolygon} from '../res/HelperFunctions'
 import {defaultStyle, selectedStyle, invalidStyle} from '../res/Styles'
 import { isValid, unkinkPolygon, calcIntersection }  from '../res/unkink'
-import QuestionMark from './QuestionMark';
 
 
 
 function MapWrapper({geoJsonData}) {
     const [map, setMap] = useState();
-    const [currentTool, setCurrentTool] = useState('NONE')
+    //const [currentTool, setCurrentTool] = useState('NONE')
     //const [selectedPolygon, setSelectedPolygon] = useState()
     let clickHandlerState = 'NONE';
     const mapElement = useRef();

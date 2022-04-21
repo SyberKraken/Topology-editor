@@ -3,6 +3,7 @@ import GeoJSONReader from 'jsts/org/locationtech/jts/io/GeoJSONReader.js'
 import GeoJSONWriter from 'jsts/org/locationtech/jts/io/GeoJSONWriter.js'
 import { Feature } from 'ol';
 import { Polygon } from 'ol/geom.js';
+import { getJstsGeometryCoordinates } from './getter.mjs';
 
 
 /* 
@@ -92,11 +93,9 @@ export const jstsGeometry2GeoJsonFeature = (jstsGeometry) => {
     let writer = new GeoJSONWriter()
     let newFeature
 
-    jstsGeometry.features.forEach(feature => {
-        let writtenGeometry = writer.write(feature.geometry)
-        let polygon = new Polygon(writtenGeometry.coordinates)
-        newFeature = new Feature(polygon)
-    });
+    let writtenGeometry = writer.write(jstsGeometry)
+    let polygon = new Polygon(writtenGeometry.coordinates)
+    newFeature = new Feature(polygon)
 
     return newFeature
 }

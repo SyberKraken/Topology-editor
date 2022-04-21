@@ -1,4 +1,4 @@
-import { Circle as NodeStyle, Fill, Stroke, Style, CircleStyle } from 'ol/style.js';
+import { Circle as NodeStyle, Fill, Stroke, Style } from 'ol/style.js';
 import MultiPoint from 'ol/geom/MultiPoint.js';
 
  export const defaultStyle = [
