@@ -270,7 +270,7 @@ function MapWrapper({geoJsonData}) {
 
     return (
         <>
-            <Header currentTool={currentTool} setCurrentTool={setCurrentTool}/>
+            {/* <Header currentTool={currentTool} setCurrentTool={setCurrentTool}/> */}
             <div style={{ height: '100vh', width: '100%' }} 
             ref={mapElement} 
             className="map-container">                

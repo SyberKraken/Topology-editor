@@ -44,7 +44,7 @@ export const geoJsonFeatureCollection2FullGeoJSON = (featureCollection) => {
 
 /* Takes a GeoJSON FeatureCollection and returns a GeoJSON Feature */
 export const geoJsonFeatureCollection2GeoJsonFeature = (featureCollection, index) => {
-    return featureCollection[index]
+    return featureCollection.features[index]
 }
 
 /* Takes a GeoJSON Feature and returns a GeoJSON Feature Collection*/
@@ -101,12 +101,6 @@ export const jstsGeometry2GeoJsonFeature = (jstsGeometry) => {
     return newFeature
 }
 
-/* Takes an array of ol features and returns a feature collection */        
-export const olFeatures2GeoJsonFeatureCollection = (features) => {
-    const jsonObj = new GeoJSON({ projection: "EPSG:3006" }).writeFeaturesObject(features)
-    return jsonObj
-} 
-
 /* takes a geoJson feature and returns a jsts geometry  */
 export const geoJsonFeature2JstsGeometry = (feature) => {
     //console.log(feature)
@@ -115,7 +109,11 @@ export const geoJsonFeature2JstsGeometry = (feature) => {
     return jsts.geometry
 }
 
-
+/* Takes an array of ol features and returns a feature collection */        
+export const olFeatures2GeoJsonFeatureCollection = (features) => {
+    const jsonObj = new GeoJSON({ projection: "EPSG:3006" }).writeFeaturesObject(features)
+    return jsonObj
+} 
 
 /* Takes a geoJson featureCollection and returns an Array of features */
 export const geoJsonFeatureCollection2olFeatures = (featureCollection) => {
