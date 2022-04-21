@@ -31,12 +31,38 @@ export const handleIntersections = (jstsNewGeometry, jstsOtherGeometries) => {
             jstsNewGeometry = jstsToGeoJson([jstsNewGeometry])
             let olpoly = new GeoJSON().readFeatures(jstsNewGeometry)
             olpoly = unkinkPolygon(olpoly[0])
-            jstsNewGeometry = mergeFeatures(olToJsts(olpoly[0][0]), olToJsts(olpoly[1][0]))
+            try {
+                jstsNewGeometry = mergeFeatures(olToJsts(olpoly[0][0]), olToJsts(olpoly[1][0]))
+            } catch (error) {
+                console.log(error)
+            }
+            
             jstsNewGeometry = OverlayOp.difference(jstsNewGeometry, jstsGeometry)
         }
     });
 
 
+    //console.log("JSTSNEWGEOM: ", jstsNewGeometry)
+    return jstsNewGeometry
+}
+
+export const addIntersectionNodes = (jstsNewGeometry, jstsOtherGeometries) => {
+    let jstsNewGeometry_original = jstsNewGeometry
+    try {
+        jstsOtherGeometries.forEach(jstsGeometry => {
+            jstsNewGeometry = OverlayOp.difference(jstsNewGeometry, jstsGeometry) 
+            let intersection = OverlayOp.intersection(jstsNewGeometry_original, jstsGeometry);
+            jstsNewGeometry = OverlayOp.union(jstsNewGeometry, intersection)
+        
+    })
+        
+    } catch (error) {
+        console.log(error)
+        return jstsNewGeometry
+    }
+   
+
+   
     //console.log("JSTSNEWGEOM: ", jstsNewGeometry)
     return jstsNewGeometry
 }

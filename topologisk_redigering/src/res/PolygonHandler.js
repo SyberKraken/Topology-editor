@@ -4,7 +4,7 @@ import OL3Parser from "jsts/org/locationtech/jts/io/OL3Parser.js"
 import {  Point, LineString, LinearRing, Polygon, MultiLineString, MultiPolygon } from 'ol/geom.js'
 import { Overlay } from "ol"
 import OverlayOp from "jsts/org/locationtech/jts/operation/overlay/OverlayOp.js"
-
+import { addIntersectionNodes } from "./jsts.js"
 const featuresToJstsGeometryCollection = (features) => {
 
     //console.log("FEATURES_TO_JSTS",features)
@@ -34,11 +34,17 @@ export const fixOverlaps = (features) => {
     let jstsCollection = featuresToJstsGeometryCollection(features)
 
     //TODO: OL3parser => uppdelat i olika översättningar
-    
+        let preTrimmed = jstsCollection[jstsCollection.length - 1]
         let trimmed = handleIntersections(jstsCollection[jstsCollection.length - 1], jstsCollection.slice(0, jstsCollection.length - 1))
-        let cleanedJstsCollection = jstsCollection.slice(0, jstsCollection.length - 1)
+        let cleanedJstsCollection = []//jstsCollection.slice(0, jstsCollection.length - 1)
 
         //if the new polygon crosses another polygon, make several polygons from it.
+        jstsCollection.slice(0, jstsCollection.length - 1).forEach(function f(geom){
+            let diff = (addIntersectionNodes(geom, [preTrimmed]))
+            cleanedJstsCollection.push(diff)
+
+        })
+
         if (trimmed._geometries) {
             trimmed._geometries.forEach(function multiPolygonToPolygons(geom){
                 cleanedJstsCollection.push(geom)
@@ -50,6 +56,7 @@ export const fixOverlaps = (features) => {
             cleanedJstsCollection.push(trimmed)
         }
 
+       
         return jstsToGeoJson(cleanedJstsCollection)
     
 }
