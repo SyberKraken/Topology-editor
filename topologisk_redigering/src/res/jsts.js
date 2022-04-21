@@ -10,6 +10,8 @@ import {default as jstsPoint} from "jsts/org/locationtech/jts/geom/Point";
 import { CoordinateXY } from "jsts/org/locationtech/jts/geom";
 import { GeometryFactory } from "jsts/org/locationtech/jts/geom";
 import { LineStringExtracter } from "jsts/org/locationtech/jts/geom/util";
+import GeoJSON from 'ol/format/GeoJSON';
+import { olToJsts, unkinkPolygon } from "./unkink.js";
 
 
 export const checkIntersection = (jstsGeometryA, jstsGeometryB) => {
@@ -21,9 +23,28 @@ export const checkIntersection = (jstsGeometryA, jstsGeometryB) => {
 export const handleIntersections = (jstsNewGeometry, jstsOtherGeometries) => {
     
     jstsOtherGeometries.forEach(jstsGeometry => {
-        jstsNewGeometry = OverlayOp.difference(jstsNewGeometry, jstsGeometry) 
-
+        try {
+            jstsNewGeometry = OverlayOp.difference(jstsNewGeometry, jstsGeometry) 
+        }
+        catch(err)
+        {
+            //console.log(err)
+            //console.log("jstsGeometry", IsValidOp.isValid(jstsGeometry))
+            // jstsnewgeometry is not valid polygon
+            //console.log("jstsNewGeometry", IsValidOp.isValid(jstsNewGeometry))
+            //debugger
+            jstsNewGeometry = jstsToGeoJson([jstsNewGeometry])
+            let olpoly = new GeoJSON().readFeatures(jstsNewGeometry)
+            console.log(olpoly)
+            olpoly = unkinkPolygon(olpoly[0])
+            console.log(olpoly[0][0])
+            console.log(olpoly[1][0])
+            jstsNewGeometry = mergeFeatures(olToJsts(olpoly[0][0]), olToJsts(olpoly[1][0]))
+            console.log(jstsNewGeometry)
+            jstsNewGeometry = OverlayOp.difference(jstsNewGeometry, jstsGeometry)
+        }
     });
+
 
     //console.log("JSTSNEWGEOM: ", jstsNewGeometry)
     return jstsNewGeometry
@@ -131,12 +152,8 @@ export function mergeFeatures(firstGeometry, secondGeometry){
       
       if(firstPointList.includes(point2)){return}
       else{
-          console.log(point)
           let x = point._coordinates[0]
       }
-
-
-
   })
 
 
