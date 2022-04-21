@@ -24,6 +24,8 @@ import {click} from "ol/events/condition"
 import {deletePolygon} from '../res/HelperFunctions'
 import {defaultStyle, selectedStyle, invalidStyle} from '../res/Styles'
 import { isValid, unkinkPolygon, calcIntersection }  from '../res/unkink'
+import QuestionMark from './QuestionMark';
+
 
 
 function MapWrapper({geoJsonData}) {
@@ -47,6 +49,8 @@ function MapWrapper({geoJsonData}) {
     }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    const attributions = "Click screen to draw, dubble click polygon to remove and to merge click two adjacent polygons"
+
 
     const parser = new OL3Parser();
     parser.inject(
@@ -74,6 +78,7 @@ function MapWrapper({geoJsonData}) {
 
     const swedenMapLayer = new TileLayer({
         source: new WMTS({
+            attributions: attributions,
             url: "https://api.lantmateriet.se/open/topowebb-ccby/v1/wmts/token/5401f50c-568c-3459-a49f-69426e4ed1c6/?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&LAYER=topowebb&STYLE=default&FORMAT=image/png",
             layer: "swedenMapLayer",
             format: 'image/png',
@@ -273,8 +278,9 @@ function MapWrapper({geoJsonData}) {
             {/* <Header currentTool={currentTool} setCurrentTool={setCurrentTool}/> */}
             <div style={{ height: '100vh', width: '100%' }} 
             ref={mapElement} 
-            className="map-container">                
+            className="map-container">    
             </div>
+            
         </>
     );
 }
