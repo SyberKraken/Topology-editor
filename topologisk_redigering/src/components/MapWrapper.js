@@ -149,6 +149,8 @@ function MapWrapper({geoJsonData}) {
         });
         initialMap.addInteraction(select)
         initialMap.on('click', onMapClickGetPixel)
+        initialMap.addInteraction(modify)
+        modify.on('modifyend', handleModifyend)
         setMap(initialMap)
     }, []);
 
@@ -159,7 +161,26 @@ function MapWrapper({geoJsonData}) {
             //deleteLatest()
             map.getLayers().getArray()[1].getSource().removeFeature(evt.feature)
         }
-      }
+    }
+
+
+    const handleModifyend = (event) => {
+        console.log("End Modify")
+        let map = event.target.map_.getLayers().getArray()[1].getSource().getFeatures()
+        cleanUserInput(event.target.map_)
+        // erros to cry about
+            // unable to assign hole to a shell wut??
+            // side location conflict
+            // found non-noded intersection 
+    }
+
+
+    const modify = new Modify({
+        source: source, 
+        hitDetection: true
+    })
+
+
 
     /* Contextual clickhandler, different actions depending on if you click on a polygon or somewhere on the map */
     const onMapClickGetPixel = (event) => {

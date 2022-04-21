@@ -10,6 +10,8 @@ import {default as jstsPoint} from "jsts/org/locationtech/jts/geom/Point";
 import { CoordinateXY } from "jsts/org/locationtech/jts/geom";
 import { GeometryFactory } from "jsts/org/locationtech/jts/geom";
 import { LineStringExtracter } from "jsts/org/locationtech/jts/geom/util";
+import GeoJSON from 'ol/format/GeoJSON';
+import { olToJsts, unkinkPolygon } from "./unkink.js";
 
 
 export const checkIntersection = (jstsGeometryA, jstsGeometryB) => {
@@ -21,9 +23,19 @@ export const checkIntersection = (jstsGeometryA, jstsGeometryB) => {
 export const handleIntersections = (jstsNewGeometry, jstsOtherGeometries) => {
     
     jstsOtherGeometries.forEach(jstsGeometry => {
-        jstsNewGeometry = OverlayOp.difference(jstsNewGeometry, jstsGeometry) 
-
+        try {
+            jstsNewGeometry = OverlayOp.difference(jstsNewGeometry, jstsGeometry) 
+        }
+        catch(err)
+        {
+            jstsNewGeometry = jstsToGeoJson([jstsNewGeometry])
+            let olpoly = new GeoJSON().readFeatures(jstsNewGeometry)
+            olpoly = unkinkPolygon(olpoly[0])
+            jstsNewGeometry = mergeFeatures(olToJsts(olpoly[0][0]), olToJsts(olpoly[1][0]))
+            jstsNewGeometry = OverlayOp.difference(jstsNewGeometry, jstsGeometry)
+        }
     });
+
 
     //console.log("JSTSNEWGEOM: ", jstsNewGeometry)
     return jstsNewGeometry
@@ -134,9 +146,6 @@ export function mergeFeatures(firstGeometry, secondGeometry){
           
           let x = point._coordinates[0]
       }
-
-
-
   })
 
 
