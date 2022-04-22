@@ -5,6 +5,8 @@ import {  Point, LineString, LinearRing, Polygon, MultiLineString, MultiPolygon 
 import { Overlay } from "ol"
 import OverlayOp from "jsts/org/locationtech/jts/operation/overlay/OverlayOp.js"
 import { addIntersectionNodes } from "./jsts.js"
+import { isValid, olToJsts, unkinkPolygon } from "./unkink.js";
+
 const featuresToJstsGeometryCollection = (features) => {
 
     //console.log("FEATURES_TO_JSTS",features)
@@ -31,7 +33,15 @@ const featuresToJstsGeometryCollection = (features) => {
 //takes map as input and trimms last drawn polygon
 export const fixOverlaps = (features) => {
 
+    console.log("in fix overlaps");
+    for(let i=0; i<features.length; i++)
+    {
+        console.log(isValid(features[i]));
+        console.log(features[i]);
+    }
+
     let jstsCollection = featuresToJstsGeometryCollection(features)
+    console.log(jstsCollection.length);
 
     //TODO: OL3parser => uppdelat i olika översättningar
         let preTrimmed = jstsCollection[jstsCollection.length - 1]

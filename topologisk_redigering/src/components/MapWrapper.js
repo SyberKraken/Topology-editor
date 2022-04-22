@@ -24,6 +24,7 @@ import {click} from "ol/events/condition"
 import {deletePolygon} from '../res/HelperFunctions'
 import {defaultStyle, selectedStyle, invalidStyle} from '../res/Styles'
 import { isValid, unkinkPolygon, calcIntersection }  from '../res/unkink'
+import { saveToDatabase } from '../res/DatabaseFunctions';
 
 
 
@@ -116,6 +117,7 @@ function MapWrapper({geoJsonData}) {
             if(featureList.length > 0){
                 getSource(map).clear()
                 getSource(map).addFeatures(featureList) 
+                //saveToDatabase(featureList)
             }else{
                 console.log("cleaned input is empty")
             }
@@ -164,8 +166,24 @@ function MapWrapper({geoJsonData}) {
 
 
     const handleModifyend = (event) => {
-        console.log("End Modify")
-        let map = event.target.map_.getLayers().getArray()[1].getSource().getFeatures()
+        let features = getFeatureList(event.target.map_)
+        console.log(features.length)
+
+        for(let i=0; i<features.length; i++)
+        {
+            console.log(isValid(features[i]));
+            // check if unkink creates the hidden polygon
+            // fill new polygons from unkink with red
+
+            if(!isValid(features[i]))
+            {
+                let olpolyCollection = unkinkPolygon(features[i])
+                let source2 = getSource(event.target.map_)
+                source2.removeFeature(features[i])
+                source2.addFeatures(olpolyCollection.flat())
+            }
+        }
+
         cleanUserInput(event.target.map_)
         // erros to cry about
             // unable to assign hole to a shell wut??

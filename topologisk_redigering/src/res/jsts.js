@@ -8,7 +8,7 @@ import { CoordinateXY } from "jsts/org/locationtech/jts/geom";
 import { GeometryFactory } from "jsts/org/locationtech/jts/geom";
 import { LineStringExtracter } from "jsts/org/locationtech/jts/geom/util";
 import GeoJSON from 'ol/format/GeoJSON';
-import { olToJsts, unkinkPolygon } from "./unkink.js";
+import { isValid, olToJsts, unkinkPolygon } from "./unkink.js";
 
 
 export const checkIntersection = (jstsGeometryA, jstsGeometryB) => {
@@ -20,22 +20,7 @@ export const checkIntersection = (jstsGeometryA, jstsGeometryB) => {
 export const handleIntersections = (jstsNewGeometry, jstsOtherGeometries) => {
     
     jstsOtherGeometries.forEach(jstsGeometry => {
-        try {
             jstsNewGeometry = OverlayOp.difference(jstsNewGeometry, jstsGeometry) 
-        }
-        catch(err)
-        {
-            jstsNewGeometry = jstsToGeoJson([jstsNewGeometry])
-            let olpoly = new GeoJSON().readFeatures(jstsNewGeometry)
-            olpoly = unkinkPolygon(olpoly[0])
-            try {
-                jstsNewGeometry = mergeFeatures(olToJsts(olpoly[0][0]), olToJsts(olpoly[1][0]))
-            } catch (error) {
-                console.log(error)
-            }
-            
-            jstsNewGeometry = OverlayOp.difference(jstsNewGeometry, jstsGeometry)
-        }
     });
 
 
@@ -45,7 +30,7 @@ export const handleIntersections = (jstsNewGeometry, jstsOtherGeometries) => {
 
 export const addIntersectionNodes = (jstsNewGeometry, jstsOtherGeometries) => {
     let jstsNewGeometry_original = jstsNewGeometry
-    try {
+    //try {
         jstsOtherGeometries.forEach(jstsGeometry => {
             jstsNewGeometry = OverlayOp.difference(jstsNewGeometry, jstsGeometry) 
             let intersection = OverlayOp.intersection(jstsNewGeometry_original, jstsGeometry);
@@ -53,15 +38,15 @@ export const addIntersectionNodes = (jstsNewGeometry, jstsOtherGeometries) => {
         
     })
         
-    } catch (error) {
-        console.log(error)
+    //} catch (error) {
+        //console.log(error)
         return jstsNewGeometry
-    }
+    //}
    
 
    
     //console.log("JSTSNEWGEOM: ", jstsNewGeometry)
-    return jstsNewGeometry
+    //return jstsNewGeometry
 }
 
 //takes a JSTSpolygon and a list of Openlayers features and returns a JSTS featurelist
