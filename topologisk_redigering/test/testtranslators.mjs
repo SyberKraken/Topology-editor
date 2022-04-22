@@ -7,6 +7,8 @@ import test from 'tape'
 import GeoJSON from "ol/format/GeoJSON.js";
 import { getFeatureCoordinates, getOlFeatureCoordinates } from "../src/translation/getter.mjs";
 import { geoJsonFeature2geoJsonFeatureCollection } from "../src/translation/translators.mjs";
+import { olFeature2geoJsonFeature } from "../src/translation/translators.mjs";
+import { geoJsonFeature2olFeature } from "../src/translation/translators.mjs";
 
 const featureCollection = () => {
     return {
@@ -234,5 +236,19 @@ test('Convert a FeatureCollection to a list of OL features', function(t){
     t.deepEqual(actual, expected)
     t.end()
 }) 
+
+test('Convert olFeature to geoJson feature', function(t){
+    let actual = olFeature2geoJsonFeature(olFeatureList[0])
+    let expected = feature()
+    t.deepEqual(actual, expected)
+    t.end()
+})
+
+test('Convert geoJsonFeature to olFeature', function(t){
+    let actual = getOlFeatureCoordinates(geoJsonFeature2olFeature(feature()))
+    let expected = getOlFeatureCoordinates(olFeatureList[0])
+    t.deepEqual(actual, expected)
+    t.end()
+})
 
 
