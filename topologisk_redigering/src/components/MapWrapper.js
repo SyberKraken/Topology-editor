@@ -119,8 +119,6 @@ function MapWrapper({geoJsonData}) {
             }else{
                 console.log("cleaned input is empty")
             }
-
-       
         }
     }
 
