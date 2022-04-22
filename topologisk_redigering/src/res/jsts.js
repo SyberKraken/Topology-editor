@@ -47,6 +47,7 @@ export const addIntersectionNodes = (jstsNewGeometry, jstsOtherGeometries) => {
     let jstsNewGeometry_original = jstsNewGeometry
     try {
         jstsOtherGeometries.forEach(jstsGeometry => {
+            console.log("looped item area: -----------------",jstsGeometry.getArea())
             jstsNewGeometry = OverlayOp.difference(jstsNewGeometry, jstsGeometry) 
             let intersection = OverlayOp.intersection(jstsNewGeometry_original, jstsGeometry);
             jstsNewGeometry = OverlayOp.union(jstsNewGeometry, intersection)
@@ -54,6 +55,7 @@ export const addIntersectionNodes = (jstsNewGeometry, jstsOtherGeometries) => {
     })
         
     } catch (error) {
+        console.log("error catch area: -----------------",jstsNewGeometry.getArea())
         console.log(error)
         return jstsNewGeometry
     }

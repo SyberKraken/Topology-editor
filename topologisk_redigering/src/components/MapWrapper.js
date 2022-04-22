@@ -109,7 +109,7 @@ function MapWrapper({geoJsonData}) {
     //fixes overlaps for the latest polygon added to map
     const cleanUserInput = (map) => {
         
-        if(getFeatureList(map).length > 0)
+        if(getFeatureList(map).length > 1)
         {
             let newPolygons = fixOverlaps(getFeatureList(map))
             let featureList = (new GeoJSON()).readFeatures(newPolygons) //  GeoJSON.readFeatures(geoJsonData)
@@ -165,8 +165,14 @@ function MapWrapper({geoJsonData}) {
 
     const handleModifyend = (event) => {
         console.log("End Modify")
-        let map = event.target.map_.getLayers().getArray()[1].getSource().getFeatures()
-        cleanUserInput(event.target.map_)
+        let features = event.target.map_.getLayers().getArray()[1].getSource().getFeatures()
+        //event.target.map_.getLayers().getArray()[1].getSource().clear();
+        for (let i = 0; i < features.length; i++)
+            {
+                event.target.map_.getLayers().getArray()[1].getSource().addFeatures(features[i])
+                cleanUserInput(event.target.map_)
+            }
+        
         // erros to cry about
             // unable to assign hole to a shell wut??
             // side location conflict

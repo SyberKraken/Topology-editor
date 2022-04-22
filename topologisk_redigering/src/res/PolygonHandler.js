@@ -30,7 +30,7 @@ const featuresToJstsGeometryCollection = (features) => {
 
 //takes ol list of features as input and trimms last drawn polygon, returns -1 if conflict in fetaures
 export const fixOverlaps = (features) => {
-
+    let areaOverCircLimit = 10
     let jstsCollection = featuresToJstsGeometryCollection(features)
 
     //TODO: OL3parser => uppdelat i olika översättningar
@@ -48,20 +48,39 @@ export const fixOverlaps = (features) => {
 
         //add intersection nodes to old polygons
         jstsCollection.slice(0, jstsCollection.length - 1).forEach(function f(geom){
-            let diff = (addIntersectionNodes(geom, [preTrimmed]))
-            cleanedJstsCollection.push(diff)
+            let diff = -1
+            try {
+                diff = (addIntersectionNodes(geom, [preTrimmed]))
+            
+            } catch (error) {
+                diff = geom
+            }
+            console.log("-----1--------------", diff.getArea()/diff.getLength())
+            if(diff.getArea()/diff.getLength() > areaOverCircLimit){
+                cleanedJstsCollection.push(diff)
+            }
+            
 
         })
+       
+        
         try {
             if (trimmed._geometries) {
                 trimmed._geometries.forEach(function multiPolygonToPolygons(geom){
-                    cleanedJstsCollection.push(geom)
+                    console.log("-------2------------", geom.getArea()/geom.getLength())
+                    if(geom.getArea()/geom.getLength() > areaOverCircLimit){
+                        cleanedJstsCollection.push(geom)
+                    }
                 }) 
             }
     
             //if the polygon has an area (meaning its NOT entirely encapsulated by another polygon), add it.
             else if(trimmed._shell._points._coordinates.length > 0) { 
-                cleanedJstsCollection.push(trimmed)
+                console.log("-------3------------", trimmed.getArea()/trimmed.getLength())
+
+                if(trimmed.getArea()/trimmed.getLength() > areaOverCircLimit){
+                    cleanedJstsCollection.push(trimmed)
+                }
             }
     
            
