@@ -24,7 +24,7 @@ import {click} from "ol/events/condition"
 import {deletePolygon} from '../res/HelperFunctions'
 import {defaultStyle, selectedStyle, invalidStyle} from '../res/Styles'
 import { isValid, unkinkPolygon, calcIntersection }  from '../res/unkink'
-import { geoJsonFeatureCollection2olFeatures, olFeatures2GeoJsonFeatureCollection } from '../translation/translators.mjs';
+import { geoJsonFeatureCollection2olFeatures, olFeature2geoJsonFeature, olFeatures2GeoJsonFeatureCollection } from '../translation/translators.mjs';
 
 
 
@@ -154,7 +154,7 @@ function MapWrapper({geoJsonData}) {
 
     const handleNewPoly = (evt) => {
         // when add feature check if valid
-        if (!isValid(evt.feature)) {
+        if (!isValid(olFeature2geoJsonFeature(evt.feature))) {
             //deleteLatest()
             map.getLayers().getArray()[1].getSource().removeFeature(evt.feature)
         }
@@ -244,7 +244,7 @@ function MapWrapper({geoJsonData}) {
         // check if valid
         let valid = false
         try {
-            valid = isValid(evt.feature)
+            valid = isValid(olFeature2geoJsonFeature(evt.feature))
         } catch (error) {
             console.log("isvalid error from drawendevent") 
         }
