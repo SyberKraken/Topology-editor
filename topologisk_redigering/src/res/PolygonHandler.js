@@ -28,36 +28,51 @@ const featuresToJstsGeometryCollection = (features) => {
     return jstsCollection
 } 
 
-//takes map as input and trimms last drawn polygon
+//takes ol list of features as input and trimms last drawn polygon, returns -1 if conflict in fetaures
 export const fixOverlaps = (features) => {
 
     let jstsCollection = featuresToJstsGeometryCollection(features)
 
     //TODO: OL3parser => uppdelat i olika översättningar
         let preTrimmed = jstsCollection[jstsCollection.length - 1]
-        let trimmed = handleIntersections(jstsCollection[jstsCollection.length - 1], jstsCollection.slice(0, jstsCollection.length - 1))
+        let trimmed = -1
+        try {
+             trimmed = handleIntersections(jstsCollection[jstsCollection.length - 1], jstsCollection.slice(0, jstsCollection.length - 1))
+
+        } catch (error) {
+            console.log(error)
+            return -1
+        }
+       
         let cleanedJstsCollection = []//jstsCollection.slice(0, jstsCollection.length - 1)
 
-        //if the new polygon crosses another polygon, make several polygons from it.
+        //add intersection nodes to old polygons
         jstsCollection.slice(0, jstsCollection.length - 1).forEach(function f(geom){
             let diff = (addIntersectionNodes(geom, [preTrimmed]))
             cleanedJstsCollection.push(diff)
 
         })
-
-        if (trimmed._geometries) {
-            trimmed._geometries.forEach(function multiPolygonToPolygons(geom){
-                cleanedJstsCollection.push(geom)
-            }) 
+        try {
+            if (trimmed._geometries) {
+                trimmed._geometries.forEach(function multiPolygonToPolygons(geom){
+                    cleanedJstsCollection.push(geom)
+                }) 
+            }
+    
+            //if the polygon has an area (meaning its NOT entirely encapsulated by another polygon), add it.
+            else if(trimmed._shell._points._coordinates.length > 0) { 
+                cleanedJstsCollection.push(trimmed)
+            }
+    
+           
+            return jstsToGeoJson(cleanedJstsCollection)
+            
+        } catch (error) {
+            console.log(error)
+            //TODO error gives reading points on trimmed._geometriesz
         }
-
-        //if the polygon has an area (meaning its NOT entirely encapsulated by another polygon), add it.
-        else if(trimmed._shell._points._coordinates.length > 0) { 
-            cleanedJstsCollection.push(trimmed)
-        }
-
-       
-        return jstsToGeoJson(cleanedJstsCollection)
+        return -1
+        
     
 }
 
