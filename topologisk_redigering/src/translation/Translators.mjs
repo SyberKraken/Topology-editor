@@ -44,20 +44,22 @@ export const geoJsonFeatureCollection2FullGeoJSON = (featureCollection) => {
 
 
 /* Takes a GeoJSON FeatureCollection and returns a GeoJSON Feature */
-export const geoJsonFeatureCollection2GeoJsonFeature = (featureCollection, index) => {
-    return featureCollection.features[index]
+export const geoJsonFeatureCollection2GeoJsonFeature = (geoJsonFeatureCollection, index) => {
+    geoJsonFeature = geoJsonFeatureCollection.features[index]
+    return geoJsonFeature
 }
 
-/* Takes a GeoJSON Feature and returns a GeoJSON Feature Collection*/
-export const geoJsonFeature2geoJsonFeatureCollection = (feature) => {
-    // return featureCollection
+/* Takes a GeoJSON Feature and returns a GeoJSON Feature Collection with a single*/
+export const geoJsonFeature2geoJsonFeatureCollection = (geoJsonFeature) => {
+    geoJsonFeatureCollection = new GeoJSON({ projection: "EPSG:3006" }).writeFeaturesObject([geoJsonFeature])
+    return geoJsonFeatureCollection
 }
 
 /* Takes a featureCollection and returns an array of jsts geometries */
-export const geoJsonFeatureCollection2JstsGeometries = (featureCollection) => {
+export const geoJsonFeatureCollection2JstsGeometries = (geoJsonFeatureCollection) => {
     
     let geometries = []
-    featureCollection.features.forEach(feature => {
+    geoJsonFeatureCollection.features.forEach(feature => {
         let geometry = geoJsonFeature2JstsGeometry(feature)
         //console.log("GEOMETRY", geometry)
         geometries.push(geometry)
@@ -69,12 +71,12 @@ export const geoJsonFeatureCollection2JstsGeometries = (featureCollection) => {
 
 
 /* takes an array of geometries and returns a FeatureCollection */
-export const jstsGeometries2GeoJsonFeatureCollection = (geometries) => {
+export const jstsGeometries2GeoJsonFeatureCollection = (jstsGeometries) => {
 
     let writer = new GeoJSONWriter()
     let featureList = []
 
-    geometries.forEach(geom => {
+    jstsGeometries.forEach(geom => {
         let writtenGeometry = writer.write(geom)
         let polygon = new Polygon(writtenGeometry.coordinates)
         let featureWrapping = new Feature(polygon)
@@ -87,6 +89,13 @@ export const jstsGeometries2GeoJsonFeatureCollection = (geometries) => {
 
 // ........ The functions above this line are where  want them to be
 
+/* takes a geoJson feature and returns a jsts geometry  */
+export const geoJsonFeature2JstsGeometry = (geoJsonFeature) => {
+    //console.log(feature)
+    const reader = new GeoJSONReader()
+    let jsts = reader.read(geoJsonFeature)
+    return jsts.geometry
+}
 
 /* Takes a jsts geometry and returns a geoJson feature */
 export const jstsGeometry2GeoJsonFeature = (jstsGeometry) => {
@@ -100,17 +109,9 @@ export const jstsGeometry2GeoJsonFeature = (jstsGeometry) => {
     return newFeature
 }
 
-/* takes a geoJson feature and returns a jsts geometry  */
-export const geoJsonFeature2JstsGeometry = (feature) => {
-    //console.log(feature)
-    const reader = new GeoJSONReader()
-    let jsts = reader.read(feature)
-    return jsts.geometry
-}
-
 /* Takes an array of ol features and returns a feature collection */        
-export const olFeatures2GeoJsonFeatureCollection = (features) => {
-    const jsonObj = new GeoJSON({ projection: "EPSG:3006" }).writeFeaturesObject(features)
+export const olFeatures2GeoJsonFeatureCollection = (olFeatures) => {
+    const jsonObj = new GeoJSON({ projection: "EPSG:3006" }).writeFeaturesObject(olFeatures)
     return jsonObj
 } 
 
@@ -119,36 +120,14 @@ export const geoJsonFeatureCollection2olFeatures = (featureCollection) => {
     return new GeoJSON().readFeatures(featureCollection)
 }
 
+export const olFeature2geoJsonFeature = (olFeature) => {
 
+    return geoJsonFeature
+}
 
-//////////////////////////////////////////////////////////
-
-export const jstsToGeoJson = (jstsObject) => {
-
-    //debugger
-
-    let writer = new GeoJSONWriter()
-    let featureList = []
-
-    if(jstsObject.features) {
-        jstsObject.features.forEach(feature => {
-            let writtenGeometry = writer.write(feature.geometry)
-            let polygon = new Polygon(writtenGeometry.coordinates)
-            let featureWrapping = new Feature(polygon)
-            featureList.push(featureWrapping)
-        });
-    }
-    else {
-        jstsObject.forEach(geom => {
-            let writtenGeometry = writer.write(geom)
-            let polygon = new Polygon(writtenGeometry.coordinates)
-            let featureWrapping = new Feature(polygon)
-            featureList.push(featureWrapping)
-        });
-    }}
-
-
-
+export const geoJsonFeature2olFeature = (geoJsonFeature) => {
+    return olFeature
+}
 
 
 
