@@ -28,12 +28,12 @@ const featuresToJstsGeometryCollection = (features) => {
     return jstsCollection
 } 
 
-//takes geoJson FeatureCollection as input and trimms last drawn polygon, 
-//returns -1 if conflict in features else returns geoJsonFeatureCollection
-export const fixOverlaps = (featureCollection) => {
+//takes ol list of features as input and trimms last drawn polygon, returns -1 if conflict in fetaures
+export const fixOverlaps = (features) => {
+    let areaOverCircLimit = 10
+    let jstsCollection = geoJsonFeatureCollection2JstsGeometries(features)
 
-    let jstsCollection = geoJsonFeatureCollection2JstsGeometries(featureCollection)//featuresToJstsGeometryCollection(features)
-    
+    //TODO: OL3parser => uppdelat i olika översättningar
         let preTrimmed = jstsCollection[jstsCollection.length - 1]
         let trimmed = -1
         try {
@@ -48,20 +48,38 @@ export const fixOverlaps = (featureCollection) => {
 
         //add intersection nodes to old polygons
         jstsCollection.slice(0, jstsCollection.length - 1).forEach(function f(geom){
-            let diff = (addIntersectionNodes(geom, [preTrimmed]))
-            cleanedJstsCollection.push(diff)
+            let diff = -1
+            try {
+                console.log(geom)
+                diff = (addIntersectionNodes(geom, [preTrimmed]))
+            
+            } catch (error) {
+                diff = geom
+            }
+            if(diff.getArea()/diff.getLength() > areaOverCircLimit){
+                cleanedJstsCollection.push(diff)
+            }
+            
 
         })
+       
+        
         try {
             if (trimmed._geometries) {
                 trimmed._geometries.forEach(function multiPolygonToPolygons(geom){
-                    cleanedJstsCollection.push(geom)
+                
+                    if(geom.getArea()/geom.getLength() > areaOverCircLimit){
+                        cleanedJstsCollection.push(geom)
+                    }
                 }) 
             }
     
             //if the polygon has an area (meaning its NOT entirely encapsulated by another polygon), add it.
             else if(trimmed._shell._points._coordinates.length > 0) { 
-                cleanedJstsCollection.push(trimmed)
+
+                if(trimmed.getArea()/trimmed.getLength() > areaOverCircLimit){
+                    cleanedJstsCollection.push(trimmed)
+                }
             }
     
            
