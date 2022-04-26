@@ -185,4 +185,3 @@ export function mergeFeatures(firstGeometry, secondGeometry){
 
   return union
 }
-
