@@ -16,16 +16,17 @@ import { drawPolygon } from '../res/UIFunctions';
 import { createStringXY } from 'ol/coordinate';
 import MousePosition from 'ol/control/MousePosition'
 import { defaults as defaultControls } from 'ol/control'
-import Header from './Header'
-import getMergeableFeatures, { handleIntersections, mergeFeatures } from '../res/jsts';
+//import getMergeableFeatures, { handleIntersections, mergeFeatures } from '../res/jsts';
 import { fixOverlaps, handleMerge } from '../res/PolygonHandler';
 import { Select, Modify } from 'ol/interaction';
 import {click} from "ol/events/condition"
 import {deletePolygon} from '../res/HelperFunctions'
 import {defaultStyle, selectedStyle, invalidStyle} from '../res/Styles'
 import { isValid, unkinkPolygon, calcIntersection }  from '../res/unkink'
+import { geoJsonFeature2olFeature, geoJsonFeatureCollection2olFeatures, olFeature2geoJsonFeature, olFeatures2GeoJsonFeatureCollection } from '../translation/translators.mjs';
+import simplepolygon from 'simplepolygon'
 import { saveToDatabase } from '../res/DatabaseFunctions';
-import { geoJsonFeatureCollection2olFeatures, olFeature2geoJsonFeature, olFeatures2GeoJsonFeatureCollection } from '../translation/translators.mjs';
+//import { geoJsonFeatureCollection2olFeatures, olFeature2geoJsonFeature, olFeatures2GeoJsonFeatureCollection } from '../translation/translators.mjs';
 
 
 
@@ -271,16 +272,14 @@ function MapWrapper({geoJsonData}) {
         if (!valid)
         {
             // if not valid unkink
-            // return collection of unkinked polys
-            const unkinkedCollection = unkinkPolygon(evt.feature)
+            // return geoJsonFeatureCollection
+            const unkinkedCollection = simplepolygon(olFeature2geoJsonFeature(evt.feature))
+            
             // check intersection and add unkinked polys to the source
-            console.log(unkinkedCollection)
-            for (let i = 0; i < unkinkedCollection.length; i++)
-            {
-                mapSource.addFeatures(unkinkedCollection[i])
-                cleanUserInput(map)
-            }
-            return unkinkedCollection.length
+            const olFeatures = geoJsonFeatureCollection2olFeatures(unkinkedCollection)
+            mapSource.addFeatures(olFeatures)
+            cleanUserInput(map)
+            return unkinkedCollection.features.length
         }
         else 
         {
