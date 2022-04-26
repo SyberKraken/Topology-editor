@@ -169,11 +169,12 @@ function MapWrapper({geoJsonData}) {
 
         for(let i=0; i<features.length; i++)
         {
-            console.log(isValid(features[i]));
+            
+            console.log(isValid(olFeature2geoJsonFeature(features[i])));
             // check if unkink creates the hidden polygon
             // fill new polygons from unkink with red
 
-            if(!isValid(features[i]))
+            if(!isValid(olFeature2geoJsonFeature(features[i])))
             {
                 let olpolyCollection = unkinkPolygon(features[i])
                 let source2 = getSource(event.target.map_)
@@ -269,7 +270,6 @@ function MapWrapper({geoJsonData}) {
         
         if (!valid)
         {
-            console.log(evt.feature)
             // if not valid unkink
             // return collection of unkinked polys
             const unkinkedCollection = unkinkPolygon(evt.feature)

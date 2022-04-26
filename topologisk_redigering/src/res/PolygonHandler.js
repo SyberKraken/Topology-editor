@@ -4,9 +4,8 @@ import OL3Parser from "jsts/org/locationtech/jts/io/OL3Parser.js"
 import {  Point, LineString, LinearRing, Polygon, MultiLineString, MultiPolygon } from 'ol/geom.js'
 import { Overlay } from "ol"
 import OverlayOp from "jsts/org/locationtech/jts/operation/overlay/OverlayOp.js"
-
+import { addIntersectionNodes } from "./jsts.js"
 import { geoJsonFeatureCollection2JstsGeometries, jstsGeometries2GeoJsonFeatureCollection } from "../translation/translators.mjs"
-
 const featuresToJstsGeometryCollection = (features) => {
 
     //console.log("FEATURES_TO_JSTS",features)
