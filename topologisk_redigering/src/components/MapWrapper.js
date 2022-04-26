@@ -24,7 +24,7 @@ import {click} from "ol/events/condition"
 import {deletePolygon} from '../res/HelperFunctions'
 import {defaultStyle, selectedStyle, invalidStyle} from '../res/Styles'
 import { isValid, unkinkPolygon, calcIntersection }  from '../res/unkink'
-import { geoJsonFeatureCollection2olFeatures, olFeature2geoJsonFeature, olFeatures2GeoJsonFeatureCollection } from '../translation/translators.mjs';
+import { geoJsonFeature2olFeature, geoJsonFeatureCollection2olFeatures, olFeature2geoJsonFeature, olFeatures2GeoJsonFeatureCollection } from '../translation/translators.mjs';
 
 
 
@@ -251,7 +251,6 @@ function MapWrapper({geoJsonData}) {
         
         if (!valid)
         {
-            console.log(evt.feature)
             // if not valid unkink
             // return collection of unkinked polys
             const unkinkedCollection = unkinkPolygon(evt.feature)

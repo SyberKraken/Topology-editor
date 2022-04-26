@@ -7,7 +7,7 @@ import GeoJSON from 'ol/format/GeoJSON.js';
 import BufferParameters from 'jsts/org/locationtech/jts/operation/buffer/BufferParameters.js'
 import BufferOp from 'jsts/org/locationtech/jts/operation/buffer/BufferOp.js'
 import OverlayOp from "jsts/org/locationtech/jts/operation/overlay/OverlayOp.js"
-import { geoJsonFeature2olFeature } from '../translation/translators.mjs';
+import { geoJsonFeature2olFeature, olFeatures2GeoJsonFeatureCollection } from '../translation/translators.mjs';
 
 
 const parser = new OL3Parser();
@@ -48,6 +48,7 @@ export const isValid = (geoJsonFeature) => {
  * @poly = openlayers feature
  * returns an openlayers feature array
  */
+
 export const unkinkPolygon = (poly) => {
     const jsonObj = new GeoJSON({ featureProjection: "EPSG:3006" }).writeFeaturesObject([poly])
     const geoJsonCollection = simplepolygon(jsonObj.features[0]).features
@@ -61,6 +62,21 @@ export const unkinkPolygon = (poly) => {
     return olFeatures
 }
 
+/* export const unkinkPolygon = (geoJsonFeature) => {
+    //const jsonObj = new GeoJSON({ featureProjection: "EPSG:3006" }).writeFeaturesObject([poly])
+    const geoJsonCollection = simplepolygon(geoJsonFeature).features
+    let featureCollection = {
+        "type":"FeatureCollection",
+        "features":[]
+    } 
+    geoJsonCollection.forEach(feature => {
+        featureCollection.features.push(feature)
+    })
+    console.log("GEOJSONCOLLECTION",featureCollection)
+
+    return featureCollection
+}
+ */
 
 /*
  * return true if @lastDrawnPoly intersects any of the polys in @allPolys
