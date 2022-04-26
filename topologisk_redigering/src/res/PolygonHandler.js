@@ -5,6 +5,7 @@ import {  Point, LineString, LinearRing, Polygon, MultiLineString, MultiPolygon 
 import { Overlay } from "ol"
 import OverlayOp from "jsts/org/locationtech/jts/operation/overlay/OverlayOp.js"
 import { addIntersectionNodes } from "./jsts.js"
+import { geoJsonFeatureCollection2JstsGeometries, jstsGeometries2GeoJsonFeatureCollection } from "../translation/translators.mjs"
 const featuresToJstsGeometryCollection = (features) => {
 
     //console.log("FEATURES_TO_JSTS",features)
@@ -83,7 +84,7 @@ export const fixOverlaps = (features) => {
             }
     
            
-            return jstsToGeoJson(cleanedJstsCollection)
+            return jstsGeometries2GeoJsonFeatureCollection(cleanedJstsCollection)
             
         } catch (error) {
             console.log(error)

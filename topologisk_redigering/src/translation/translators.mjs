@@ -45,13 +45,17 @@ export const geoJsonFeatureCollection2FullGeoJSON = (featureCollection) => {
 
 /* Takes a GeoJSON FeatureCollection and returns a GeoJSON Feature */
 export const geoJsonFeatureCollection2GeoJsonFeature = (geoJsonFeatureCollection, index) => {
-    geoJsonFeature = geoJsonFeatureCollection.features[index]
+    let geoJsonFeature = geoJsonFeatureCollection.features[index]
     return geoJsonFeature
 }
 
 /* Takes a GeoJSON Feature and returns a GeoJSON Feature Collection with a single*/
 export const geoJsonFeature2geoJsonFeatureCollection = (geoJsonFeature) => {
-    geoJsonFeatureCollection = new GeoJSON({ projection: "EPSG:3006" }).writeFeaturesObject([geoJsonFeature])
+    let geoJsonFeatureCollection = {
+        "type":"FeatureCollection",
+        "features":[]
+    }
+    geoJsonFeatureCollection.features.push(geoJsonFeature)
     return geoJsonFeatureCollection
 }
 
@@ -61,11 +65,8 @@ export const geoJsonFeatureCollection2JstsGeometries = (geoJsonFeatureCollection
     let geometries = []
     geoJsonFeatureCollection.features.forEach(feature => {
         let geometry = geoJsonFeature2JstsGeometry(feature)
-        //console.log("GEOMETRY", geometry)
         geometries.push(geometry)
     })
-
-    //console.log(geometries)
     return geometries
 }
 
@@ -91,7 +92,6 @@ export const jstsGeometries2GeoJsonFeatureCollection = (jstsGeometries) => {
 
 /* takes a geoJson feature and returns a jsts geometry  */
 export const geoJsonFeature2JstsGeometry = (geoJsonFeature) => {
-    //console.log(feature)
     const reader = new GeoJSONReader()
     let jsts = reader.read(geoJsonFeature)
     return jsts.geometry
@@ -111,6 +111,7 @@ export const jstsGeometry2GeoJsonFeature = (jstsGeometry) => {
 
 /* Takes an array of ol features and returns a feature collection */        
 export const olFeatures2GeoJsonFeatureCollection = (olFeatures) => {
+    console.log(olFeatures)
     const jsonObj = new GeoJSON({ projection: "EPSG:3006" }).writeFeaturesObject(olFeatures)
     return jsonObj
 } 
@@ -121,13 +122,16 @@ export const geoJsonFeatureCollection2olFeatures = (featureCollection) => {
 }
 
 export const olFeature2geoJsonFeature = (olFeature) => {
-
+    let geoJsonFeature = new GeoJSON().writeFeatureObject(olFeature)
     return geoJsonFeature
 }
 
 export const geoJsonFeature2olFeature = (geoJsonFeature) => {
+    let olFeature = new GeoJSON().readFeature(geoJsonFeature)
     return olFeature
 }
 
-
+export const geoJsonFeatureList2geoJsonFeatureCollection = (geoJsonFeatureList) => {
+   
+}
 

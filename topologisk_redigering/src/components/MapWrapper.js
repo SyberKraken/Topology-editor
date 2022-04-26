@@ -24,6 +24,8 @@ import {click} from "ol/events/condition"
 import {deletePolygon} from '../res/HelperFunctions'
 import {defaultStyle, selectedStyle, invalidStyle} from '../res/Styles'
 import { isValid, unkinkPolygon, calcIntersection }  from '../res/unkink'
+import { saveToDatabase } from '../res/DatabaseFunctions';
+import { geoJsonFeatureCollection2olFeatures, olFeature2geoJsonFeature, olFeatures2GeoJsonFeatureCollection } from '../translation/translators.mjs';
 
 
 
@@ -111,17 +113,15 @@ function MapWrapper({geoJsonData}) {
         
         if(getFeatureList(map).length > 1)
         {
-            let newPolygons = fixOverlaps(getFeatureList(map))
-            let featureList = (new GeoJSON()).readFeatures(newPolygons) 
-            //debugger//  GeoJSON.readFeatures(geoJsonData)
+            let newPolygons = fixOverlaps(olFeatures2GeoJsonFeatureCollection(getFeatureList(map)))
+            let featureList = geoJsonFeatureCollection2olFeatures(newPolygons) //  GeoJSON.readFeatures(geoJsonData)
             if(featureList.length > 0){
                 getSource(map).clear()
                 getSource(map).addFeatures(featureList) 
+                //saveToDatabase(featureList)
             }else{
                 console.log("cleaned input is empty")
             }
-
-       
         }
     }
 
@@ -131,7 +131,6 @@ function MapWrapper({geoJsonData}) {
     })
 
     useEffect(() => {
-       
         const initialMap = new Map({
             controls: defaultControls().extend([mousePositionControl]),
             target: mapElement.current,
@@ -157,7 +156,7 @@ function MapWrapper({geoJsonData}) {
 
     const handleNewPoly = (evt) => {
         // when add feature check if valid
-        if (!isValid(evt.feature)) {
+        if (!isValid(olFeature2geoJsonFeature(evt.feature))) {
             //deleteLatest()
             map.getLayers().getArray()[1].getSource().removeFeature(evt.feature)
         }
@@ -165,14 +164,26 @@ function MapWrapper({geoJsonData}) {
 
 
     const handleModifyend = (event) => {
-        let features = event.target.map_.getLayers().getArray()[1].getSource().getFeatures()
-        //event.target.map_.getLayers().getArray()[1].getSource().clear();
-        for (let i = 0; i < features.length; i++)
+        let features = getFeatureList(event.target.map_)
+        console.log(features.length)
+
+        for(let i=0; i<features.length; i++)
+        {
+            
+            console.log(isValid(olFeature2geoJsonFeature(features[i])));
+            // check if unkink creates the hidden polygon
+            // fill new polygons from unkink with red
+
+            if(!isValid(olFeature2geoJsonFeature(features[i])))
             {
-                event.target.map_.getLayers().getArray()[1].getSource().addFeatures(features[i])
-                cleanUserInput(event.target.map_)
+                let olpolyCollection = unkinkPolygon(features[i])
+                let source2 = getSource(event.target.map_)
+                source2.removeFeature(features[i])
+                source2.addFeatures(olpolyCollection.flat())
             }
-        
+        }
+
+        cleanUserInput(event.target.map_)
         // erros to cry about
             // unable to assign hole to a shell wut??
             // side location conflict
@@ -252,14 +263,13 @@ function MapWrapper({geoJsonData}) {
         // check if valid
         let valid = false
         try {
-            valid = isValid(evt.feature)
+            valid = isValid(olFeature2geoJsonFeature(evt.feature))
         } catch (error) {
             console.log("isvalid error from drawendevent") 
         }
         
         if (!valid)
         {
-            console.log(evt.feature)
             // if not valid unkink
             // return collection of unkinked polys
             const unkinkedCollection = unkinkPolygon(evt.feature)
