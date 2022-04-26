@@ -25,6 +25,7 @@ import {deletePolygon} from '../res/HelperFunctions'
 import {defaultStyle, selectedStyle, invalidStyle} from '../res/Styles'
 import { isValid, unkinkPolygon, calcIntersection }  from '../res/unkink'
 import { geoJsonFeature2olFeature, geoJsonFeatureCollection2olFeatures, olFeature2geoJsonFeature, olFeatures2GeoJsonFeatureCollection } from '../translation/translators.mjs';
+import simplepolygon from 'simplepolygon'
 
 
 
@@ -163,7 +164,6 @@ function MapWrapper({geoJsonData}) {
 
     const handleModifyend = (event) => {
         console.log("End Modify")
-        let map = event.target.map_.getLayers().getArray()[1].getSource().getFeatures()
         cleanUserInput(event.target.map_)
         // erros to cry about
             // unable to assign hole to a shell wut??
@@ -252,16 +252,14 @@ function MapWrapper({geoJsonData}) {
         if (!valid)
         {
             // if not valid unkink
-            // return collection of unkinked polys
-            const unkinkedCollection = unkinkPolygon(evt.feature)
+            // return geoJsonFeatureCollection
+            const unkinkedCollection = simplepolygon(olFeature2geoJsonFeature(evt.feature))
+            
             // check intersection and add unkinked polys to the source
-            console.log(unkinkedCollection)
-            for (let i = 0; i < unkinkedCollection.length; i++)
-            {
-                mapSource.addFeatures(unkinkedCollection[i])
-                cleanUserInput(map)
-            }
-            return unkinkedCollection.length
+            const olFeatures = geoJsonFeatureCollection2olFeatures(unkinkedCollection)
+            mapSource.addFeatures(olFeatures)
+            cleanUserInput(map)
+            return unkinkedCollection.features.length
         }
         else 
         {

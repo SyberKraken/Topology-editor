@@ -49,34 +49,9 @@ export const isValid = (geoJsonFeature) => {
  * returns an openlayers feature array
  */
 
-export const unkinkPolygon = (poly) => {
-    const jsonObj = new GeoJSON({ featureProjection: "EPSG:3006" }).writeFeaturesObject([poly])
-    const geoJsonCollection = simplepolygon(jsonObj.features[0]).features
-
-    const olFeatures = []
-    for(let i = 0;  i < geoJsonCollection.length; i++)
-    {
-        olFeatures.push(new GeoJSON().readFeatures(geoJsonCollection[i]))
-    }
-
-    return olFeatures
+export const unkinkPolygon = (poly) => { //POLY ska vara geojson
+    return simplepolygon(poly)
 }
-
-/* export const unkinkPolygon = (geoJsonFeature) => {
-    //const jsonObj = new GeoJSON({ featureProjection: "EPSG:3006" }).writeFeaturesObject([poly])
-    const geoJsonCollection = simplepolygon(geoJsonFeature).features
-    let featureCollection = {
-        "type":"FeatureCollection",
-        "features":[]
-    } 
-    geoJsonCollection.forEach(feature => {
-        featureCollection.features.push(feature)
-    })
-    console.log("GEOJSONCOLLECTION",featureCollection)
-
-    return featureCollection
-}
- */
 
 /*
  * return true if @lastDrawnPoly intersects any of the polys in @allPolys
