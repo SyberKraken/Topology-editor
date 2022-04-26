@@ -1,11 +1,12 @@
-const test = require('tape')
-import './testmodules.mjs'
-
-test('Should return -1 when the value is not present in Array', function (t) {
+import { test } from 'tape'
+import simplepolygon from 'simplepolygon'
+import _ from 'lodash'
+import {fixOverlaps, handleMerge} from '../src/res/PolygonHandler.mjs'
+/* test('Should return -1 when the value is not present in Array', function (t) {
   t.equal(-1, [1,2,3].indexOf(4))
   t.end()
 })
-
+ */
 
 
 
@@ -116,8 +117,63 @@ const overlapPolygons = {
   }]
 }
 
-const unkinkedPolygon = unkinkPolygon(geoToOl(hourglassBefore)[0])
-const cleanedOverlap = fixOverlaps(featuresToGeoJson(new GeoJSON().readFeatures(overlapPolygons)));
+const polygon1 = {
+  "type":"Feature",
+  "properties": null,
+  "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+      [
+         [0, 0],
+         [1, 1],
+         [0, 1],
+         [0, 0]
+      ]
+    ]
+  }
+}
+
+const polygon2 = {
+  "type":"Feature",
+  "properties": null,
+  "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+      [
+         [0, 0],
+         [1, 0],
+         [1, 1],
+         [0, 0]
+      ]
+    ]
+  }
+}
+
+const mergeFeatureCollection = {
+  "type": "FeatureCollection",
+  "features": [polygon1,polygon2]
+}
+
+const mergedPolygon = {
+  "type":"Feature",
+  "properties": null,
+  "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+      [
+         [0, 0],
+         [1, 0],
+         [1, 1],
+         [0, 1],
+         [0, 0]
+      ]
+    ]
+  }
+}
+
+
+const unkinkedPolygon = simplepolygon(hourglassBefore.features[0])
+
 
 //[[[0,0], [1,0], [1,1], [0,1], [0,0]], [[1,0], [2,0], [2,1], [1,1], [1,0]], [[2,0], [3,0], [3,1], [2,1], [2,0]]]
 
@@ -126,11 +182,6 @@ const cleanedOverlap = fixOverlaps(featuresToGeoJson(new GeoJSON().readFeatures(
 /*Functions*/
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-const geoToOl = (geo) => {
-  const newGeo = new GeoJSON().readFeatures(geo)
-  return newGeo
-
-}
 
 //indata ol feature, utdata array med koordinat-arrayer
 const testGetFeatureCoordinates = (features, f = 0) => {
@@ -140,6 +191,10 @@ const testGetFeatureCoordinates = (features, f = 0) => {
 //indata GeoJSON, utdata array med koordinat-arrayer
 const testGetGeoJsonCoordinate = (geojson, f = 0) => {
   return geojson.features[f].geometry.coordinates[0]
+}
+
+const testGetGeoJsonSingleFeatureCoordinate = (geojson) => {
+  return geojson.geometry.coordinates[0]
 }
  
 const coordinatesAreEquivalent = (coordinateArray1, coordinateArray2) => {
@@ -162,43 +217,15 @@ const coordinatesAreEquivalent = (coordinateArray1, coordinateArray2) => {
 /*Tests*/
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-//trial test
-test('Should return -1 when the value is not present in Array', function (t) {
-  t.equal(-1, [1,2,3].indexOf(4))
-  t.end()
-})
-
-/*Testing coordinates */
+/*Testing coordinates after unkinked */
 test('Should return matching coordinates',function(t) {
-  t.equal(testGetFeatureCoordinates(unkinkedPolygon[0]), [[0,0],[2,0],[1,1],[0,0]])
-  t.equal(testGetFeatureCoordinates(unkinkedPolygon[1]), [[1,1],[0,2],[2,2],[1,1]])
+  t.deepEqual(testGetGeoJsonCoordinate(unkinkedPolygon,0), [[0,0],[2,0],[1,1],[0,0]])
+  t.deepEqual(testGetGeoJsonCoordinate(unkinkedPolygon,1), [[1,1],[0,2],[2,2],[1,1]])
   t.end()
 })
 
-
-/*
-describe('Compare coordinates', function () {
-  it('coordinates should match', function () {
-    assert(coordinatesAreEquivalent(testGetFeatureCoordinates(unkinkedPolygon[0]), [[0,0],[2,0],[1,1],[0,0]]), true)
-    assert(coordinatesAreEquivalent(testGetFeatureCoordinates(unkinkedPolygon[1]), [[1,1],[0,2],[2,2],[1,1]]), true)
-  })
+test('Merge two polygons', function(t){
+  t.deepEqual(testGetGeoJsonSingleFeatureCoordinate(handleMerge(polygon1,polygon2, mergeFeatureCollection),0), testGetGeoJsonSingleFeatureCoordinate(mergedPolygon),0)
+  t.end()
 })
-
-describe('GeoJson to OL conversion', function () {
-  it('Coordinates in original geojson should be same as coordinates in ol feature', function () {
-    assert.equal(_.isEqual(testGetFeatureCoordinates(geoToOl(gj)), testGetGeoJsonCoordinate(gj)), true)
-  })
-})
-
-describe('GeoJson Conversion', function () {
-  it('GeoJson should become a jstsobject', function () {
-      assert.equal(_.isEqual(jstsToGeoJson(geoJsonToJsts(gj), [{name: "testing"}]), gj),true)
-  })
-})
-
-/*
-describe('Merge two polygons', function() {
-  it('', function () {
-
-  })
-}) */
+ 

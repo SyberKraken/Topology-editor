@@ -12,20 +12,20 @@ import GeoJSON from 'ol/format/GeoJSON';
 import MultiPoint from 'ol/geom/MultiPoint';
 import OL3Parser from "jsts/org/locationtech/jts/io/OL3Parser";
 import { Point, LineString, LinearRing, Polygon, MultiLineString, MultiPolygon } from 'ol/geom'
-import { drawPolygon } from '../res/UIFunctions';
+import { drawPolygon } from '../res/UIFunctions.mjs';
 import { createStringXY } from 'ol/coordinate';
 import MousePosition from 'ol/control/MousePosition'
 import { defaults as defaultControls } from 'ol/control'
 //import getMergeableFeatures, { handleIntersections, mergeFeatures } from '../res/jsts';
-import { fixOverlaps, handleMerge } from '../res/PolygonHandler';
+import { fixOverlaps, handleMerge } from '../res/PolygonHandler.mjs';
 import { Select, Modify } from 'ol/interaction';
 import {click} from "ol/events/condition"
-import {deletePolygon} from '../res/HelperFunctions'
-import {defaultStyle, selectedStyle, invalidStyle} from '../res/Styles'
-import { isValid }  from '../res/unkink'
+import {deletePolygon} from '../res/HelperFunctions.mjs'
+import {defaultStyle, selectedStyle, invalidStyle} from '../res/Styles.mjs'
+import { isValid }  from '../res/unkink.mjs'
 import { geoJsonFeature2olFeature, geoJsonFeatureCollection2olFeatures, olFeature2geoJsonFeature, olFeatures2GeoJsonFeatureCollection } from '../translation/translators.mjs';
 import simplepolygon from 'simplepolygon'
-import { saveToDatabase } from '../res/DatabaseFunctions';
+import { saveToDatabase } from '../res/DatabaseFunctions.mjs';
 
 
 

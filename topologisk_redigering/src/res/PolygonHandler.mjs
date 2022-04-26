@@ -1,10 +1,10 @@
-import { jstsToGeoJson } from "./GeoJsonFunctions.js"
-import getMergeableFeatures, { handleIntersections, mergeFeatures } from "./jsts.js"
+import { jstsToGeoJson } from "./GeoJsonFunctions.mjs"
+import getMergeableFeatures, { handleIntersections, mergeFeatures } from "./jsts.mjs"
 import OL3Parser from "jsts/org/locationtech/jts/io/OL3Parser.js"
 import {  Point, LineString, LinearRing, Polygon, MultiLineString, MultiPolygon } from 'ol/geom.js'
 import { Overlay } from "ol"
 import OverlayOp from "jsts/org/locationtech/jts/operation/overlay/OverlayOp.js"
-import { addIntersectionNodes } from "./jsts.js"
+import { addIntersectionNodes } from "./jsts.mjs"
 import { geoJsonFeature2JstsGeometry, geoJsonFeatureCollection2JstsGeometries, geoJsonFeatureCollection2olFeatures, jstsGeometries2GeoJsonFeatureCollection } from "../translation/translators.mjs"
 
 const featuresToJstsGeometryCollection = (features) => {

@@ -1,14 +1,14 @@
 import OverlayOp from "jsts/org/locationtech/jts/operation/overlay/OverlayOp.js"
 import OL3Parser from "jsts/org/locationtech/jts/io/OL3Parser.js";
 import { Point, LineString, LinearRing, Polygon, MultiLineString, MultiPolygon } from 'ol/geom.js'
-import polygonsAreConnected from "./TopologyValidation.js"
-import { geoJsonToJsts, jstsToGeoJson } from './GeoJsonFunctions.js';
-import {default as jstsPoint} from "jsts/org/locationtech/jts/geom/Point";
-import { CoordinateXY } from "jsts/org/locationtech/jts/geom";
-import { GeometryFactory } from "jsts/org/locationtech/jts/geom";
-import { LineStringExtracter } from "jsts/org/locationtech/jts/geom/util";
-import GeoJSON from 'ol/format/GeoJSON';
-import { olToJsts } from "./unkink.js";
+import polygonsAreConnected from "./TopologyValidation.mjs"
+import { geoJsonToJsts, jstsToGeoJson } from './GeoJsonFunctions.mjs';
+import {default as jstsPoint} from "jsts/org/locationtech/jts/geom/Point.js";
+import { CoordinateXY } from "jsts/org/locationtech/jts/geom.js";
+import { GeometryFactory } from "jsts/org/locationtech/jts/geom.js";
+import { LineStringExtracter } from "jsts/org/locationtech/jts/geom/util.js";
+import GeoJSON from 'ol/format/GeoJSON.js';
+import { olToJsts } from "./unkink.mjs";
 
 
 export const checkIntersection = (jstsGeometryA, jstsGeometryB) => {
