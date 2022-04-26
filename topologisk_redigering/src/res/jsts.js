@@ -32,18 +32,23 @@ export const addIntersectionNodes = (jstsNewGeometry, jstsOtherGeometries) => {
     let jstsNewGeometry_original = jstsNewGeometry
     try {
         jstsOtherGeometries.forEach(jstsGeometry => {   
-            jstsNewGeometry = OverlayOp.difference(jstsNewGeometry, jstsGeometry) 
+            let jstsNewGeometryTemp = OverlayOp.difference(jstsNewGeometry, jstsGeometry) 
             let intersection = OverlayOp.intersection(jstsNewGeometry_original, jstsGeometry);
-            jstsNewGeometry = OverlayOp.union(jstsNewGeometry, intersection)
+            console.log("-----------",jstsNewGeometryTemp)
+            console.log("-----------",intersection)
+                //NOTE mbe check both multi
+            jstsNewGeometry = OverlayOp.union(jstsNewGeometryTemp, intersection)
+            
+            
         
-    })
+        })
         
     } catch (error) {
         console.log(error)
-        return jstsNewGeometry
+        return jstsNewGeometry_original
     }
    
-
+    
    
     //console.log("JSTSNEWGEOM: ", jstsNewGeometry)
     return jstsNewGeometry

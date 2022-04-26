@@ -176,10 +176,22 @@ function MapWrapper() {
 
             if(!isValid(olFeature2geoJsonFeature(features[i])))
             {
-                let olpolyCollection = simplepolygon(features[i])
-                let source2 = getSource(event.target.map_)
-                source2.removeFeature(features[i])
-                source2.addFeatures(olpolyCollection.flat())
+                try {
+                    let geoJsonCollection = simplepolygon( olFeature2geoJsonFeature(features[i]))
+                    let source2 = getSource(event.target.map_)
+                    source2.removeFeature(features[i])
+                    //debugger
+                    for (let index = 0; index < geoJsonCollection.features.length; index++) {
+                        const geoJsonfeature = geoJsonCollection.features[index];
+                        source2.addFeature(geoJsonFeature2olFeature(geoJsonfeature))
+                    }
+                    
+                } catch (error) {
+                    console.log(error)
+                    
+                }
+               
+                
             }
         }
 

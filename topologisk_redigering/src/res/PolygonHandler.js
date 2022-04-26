@@ -50,12 +50,13 @@ export const fixOverlaps = (features) => {
         jstsCollection.slice(0, jstsCollection.length - 1).forEach(function f(geom){
             let diff = -1
             try {
-                console.log(geom)
                 diff = (addIntersectionNodes(geom, [preTrimmed]))
             
             } catch (error) {
+                //return original polygon
                 diff = geom
             }
+            //removes to small polygons
             if(diff.getArea()/diff.getLength() > areaOverCircLimit){
                 cleanedJstsCollection.push(diff)
             }
