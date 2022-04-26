@@ -7,6 +7,7 @@ import GeoJSON from 'ol/format/GeoJSON.js';
 import BufferParameters from 'jsts/org/locationtech/jts/operation/buffer/BufferParameters.js'
 import BufferOp from 'jsts/org/locationtech/jts/operation/buffer/BufferOp.js'
 import OverlayOp from "jsts/org/locationtech/jts/operation/overlay/OverlayOp.js"
+import { geoJsonFeature2olFeature } from '../translation/translators.mjs';
 
 
 const parser = new OL3Parser();
@@ -26,7 +27,8 @@ export const olToJsts = (poly) => {
 }
 
 
-export const isValid = (olPoly) => {
+export const isValid = (geoJsonFeature) => {
+    let olPoly = geoJsonFeature2olFeature(geoJsonFeature)
     try {
         let jstsLastDrawnPoly = olToJsts(olPoly)
         return IsValidOp.isValid(jstsLastDrawnPoly);

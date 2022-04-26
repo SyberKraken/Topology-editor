@@ -4,8 +4,8 @@ import OL3Parser from "jsts/org/locationtech/jts/io/OL3Parser.js"
 import {  Point, LineString, LinearRing, Polygon, MultiLineString, MultiPolygon } from 'ol/geom.js'
 import { Overlay } from "ol"
 import OverlayOp from "jsts/org/locationtech/jts/operation/overlay/OverlayOp.js"
-import { addIntersectionNodes } from "./jsts.js"
-import { isValid, olToJsts, unkinkPolygon } from "./unkink.js";
+
+import { geoJsonFeatureCollection2JstsGeometries, jstsGeometries2GeoJsonFeatureCollection } from "../translation/translators.mjs"
 
 const featuresToJstsGeometryCollection = (features) => {
 
@@ -30,44 +30,51 @@ const featuresToJstsGeometryCollection = (features) => {
     return jstsCollection
 } 
 
-//takes map as input and trimms last drawn polygon
-export const fixOverlaps = (features) => {
+//takes geoJson FeatureCollection as input and trimms last drawn polygon, 
+//returns -1 if conflict in features else returns geoJsonFeatureCollection
+export const fixOverlaps = (featureCollection) => {
 
-    console.log("in fix overlaps");
-    for(let i=0; i<features.length; i++)
-    {
-        console.log(isValid(features[i]));
-        console.log(features[i]);
-    }
-
-    let jstsCollection = featuresToJstsGeometryCollection(features)
-    console.log(jstsCollection.length);
-
-    //TODO: OL3parser => uppdelat i olika översättningar
+    let jstsCollection = geoJsonFeatureCollection2JstsGeometries(featureCollection)//featuresToJstsGeometryCollection(features)
+    
         let preTrimmed = jstsCollection[jstsCollection.length - 1]
-        let trimmed = handleIntersections(jstsCollection[jstsCollection.length - 1], jstsCollection.slice(0, jstsCollection.length - 1))
+        let trimmed = -1
+        try {
+             trimmed = handleIntersections(jstsCollection[jstsCollection.length - 1], jstsCollection.slice(0, jstsCollection.length - 1))
+
+        } catch (error) {
+            console.log(error)
+            return -1
+        }
+       
         let cleanedJstsCollection = []//jstsCollection.slice(0, jstsCollection.length - 1)
 
-        //if the new polygon crosses another polygon, make several polygons from it.
+        //add intersection nodes to old polygons
         jstsCollection.slice(0, jstsCollection.length - 1).forEach(function f(geom){
             let diff = (addIntersectionNodes(geom, [preTrimmed]))
             cleanedJstsCollection.push(diff)
 
         })
-
-        if (trimmed._geometries) {
-            trimmed._geometries.forEach(function multiPolygonToPolygons(geom){
-                cleanedJstsCollection.push(geom)
-            }) 
+        try {
+            if (trimmed._geometries) {
+                trimmed._geometries.forEach(function multiPolygonToPolygons(geom){
+                    cleanedJstsCollection.push(geom)
+                }) 
+            }
+    
+            //if the polygon has an area (meaning its NOT entirely encapsulated by another polygon), add it.
+            else if(trimmed._shell._points._coordinates.length > 0) { 
+                cleanedJstsCollection.push(trimmed)
+            }
+    
+           
+            return jstsGeometries2GeoJsonFeatureCollection(cleanedJstsCollection)
+            
+        } catch (error) {
+            console.log(error)
+            //TODO error gives reading points on trimmed._geometriesz
         }
-
-        //if the polygon has an area (meaning its NOT entirely encapsulated by another polygon), add it.
-        else if(trimmed._shell._points._coordinates.length > 0) { 
-            cleanedJstsCollection.push(trimmed)
-        }
-
-       
-        return jstsToGeoJson(cleanedJstsCollection)
+        return -1
+        
     
 }
 
