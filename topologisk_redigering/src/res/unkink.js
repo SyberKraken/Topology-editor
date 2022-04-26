@@ -43,16 +43,6 @@ export const isValid = (geoJsonFeature) => {
 }
 
 
-/* 
- * creates several openlayer features from one self-intersecting polygon
- * @poly = openlayers feature
- * returns an openlayers feature array
- */
-
-export const unkinkPolygon = (poly) => { //POLY ska vara geojson
-    return simplepolygon(poly)
-}
-
 /*
  * return true if @lastDrawnPoly intersects any of the polys in @allPolys
  * @lastDrawnPoly = openlayers feature
@@ -76,4 +66,4 @@ export function calcIntersection(lastDrawnPoly, allPolys) {
 }
 
 
-export default { isValid, unkinkPolygon, calcIntersection } ;
+export default { isValid,  calcIntersection } ;
