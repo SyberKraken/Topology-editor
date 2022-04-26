@@ -38,9 +38,7 @@ export const addIntersectionNodes = (jstsNewGeometry, jstsOtherGeometries) => {
             console.log("-----------",intersection)
                 //NOTE mbe check both multi
             jstsNewGeometry = OverlayOp.union(jstsNewGeometryTemp, intersection)
-            
-            
-        
+
         })
         
     } catch (error) {
@@ -48,7 +46,7 @@ export const addIntersectionNodes = (jstsNewGeometry, jstsOtherGeometries) => {
         return jstsNewGeometry_original
     }
    
-    
+
    
     //console.log("JSTSNEWGEOM: ", jstsNewGeometry)
     return jstsNewGeometry

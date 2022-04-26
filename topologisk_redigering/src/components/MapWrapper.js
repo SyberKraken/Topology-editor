@@ -194,7 +194,7 @@ function MapWrapper() {
                 
             }
         }
-
+        
         cleanUserInput(event.target.map_)
         // erros to cry about
             // unable to assign hole to a shell wut??

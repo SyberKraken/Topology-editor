@@ -6,6 +6,7 @@ import { Overlay } from "ol"
 import OverlayOp from "jsts/org/locationtech/jts/operation/overlay/OverlayOp.js"
 import { addIntersectionNodes } from "./jsts.js"
 import { geoJsonFeatureCollection2JstsGeometries, jstsGeometries2GeoJsonFeatureCollection } from "../translation/translators.mjs"
+import { slice } from "lodash"
 
 const featuresToJstsGeometryCollection = (features) => {
 
@@ -32,7 +33,9 @@ const featuresToJstsGeometryCollection = (features) => {
 export const fixOverlaps = (features) => {
     let areaOverCircLimit = 10
     let jstsCollection = geoJsonFeatureCollection2JstsGeometries(features)
-
+ 
+    console.log("---0----", jstsCollection.length)
+    
     //TODO: OL3parser => uppdelat i olika översättningar
         let preTrimmed = jstsCollection[jstsCollection.length - 1]
         let trimmed = -1
@@ -45,7 +48,7 @@ export const fixOverlaps = (features) => {
         }
        
         let cleanedJstsCollection = []//jstsCollection.slice(0, jstsCollection.length - 1)
-
+        console.log("---1----", jstsCollection.length)
         //add intersection nodes to old polygons
         jstsCollection.slice(0, jstsCollection.length - 1).forEach(function f(geom){
             let diff = -1
@@ -54,6 +57,7 @@ export const fixOverlaps = (features) => {
             
             } catch (error) {
                 //return original polygon
+                console.log(error)
                 diff = geom
             }
             //removes to small polygons
@@ -63,6 +67,7 @@ export const fixOverlaps = (features) => {
             
 
         })
+        console.log("---2----", jstsCollection.length)
        
         
         try {
