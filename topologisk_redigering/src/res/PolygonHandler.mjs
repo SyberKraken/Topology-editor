@@ -1,5 +1,5 @@
-import { jstsToGeoJson } from "./GeoJsonFunctions.js"
-import getMergeableFeatures, { handleIntersections, mergeFeatures } from "./jsts.js"
+import { jstsToGeoJson } from "./GeoJsonFunctions.mjs"
+import getMergeableFeatures, { handleIntersections, mergeFeatures } from "./jsts.mjs"
 import OL3Parser from "jsts/org/locationtech/jts/io/OL3Parser.js"
 import {  Point, LineString, LinearRing, Polygon, MultiLineString, MultiPolygon } from 'ol/geom.js'
 import { Overlay } from "ol"
@@ -100,14 +100,20 @@ export const fixOverlaps = (features) => {
     
 }
 
-//Takes jsts geometries and ol map and returns geojson geometry
-export const handleMerge = (firstPolygon, secondPolygon, map) => {
-    let mergables = getMergeableFeatures(firstPolygon, map.getLayers().getArray()[1].getSource().getFeatures())
+//Takes geojsonFeatures and a featureCollection and returns geojson geometry
+export const handleMerge = (firstInputPolygon, secondInputPolygon, featureCollection) => {
+
+    //convert to ol Feature List
+    let olFeatures = geoJsonFeatureCollection2olFeatures(featureCollection)
+
+    //convert to jsts geometries
+    let firstPolygon = geoJsonFeature2JstsGeometry(firstInputPolygon)
+    let secondPolygon = geoJsonFeature2JstsGeometry(secondInputPolygon)
+
+    let mergables = getMergeableFeatures(firstPolygon, olFeatures)
 
     let status = -1
     mergables.forEach(function compare(mergablePolygon){
-        //console.log(JSON.stringify(secondPolygon))
-        //console.log(JSON.stringify(mergablePolygon))
         if(JSON.stringify(secondPolygon) === JSON.stringify(mergablePolygon)){
             try {
                 status = jstsToGeoJson([mergeFeatures(firstPolygon, secondPolygon)]).features[0]
@@ -116,7 +122,7 @@ export const handleMerge = (firstPolygon, secondPolygon, map) => {
             }
         }
     })
-    //console.log("STATUS: ",status)
+    
     return status
     
 }
