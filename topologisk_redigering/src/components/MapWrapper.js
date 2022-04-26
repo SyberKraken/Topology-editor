@@ -22,7 +22,7 @@ import { Select, Modify } from 'ol/interaction';
 import {click} from "ol/events/condition"
 import {deletePolygon} from '../res/HelperFunctions'
 import {defaultStyle, selectedStyle, invalidStyle} from '../res/Styles'
-import { isValid, calcIntersection }  from '../res/unkink'
+import { isValid }  from '../res/unkink'
 import { geoJsonFeature2olFeature, geoJsonFeatureCollection2olFeatures, olFeature2geoJsonFeature, olFeatures2GeoJsonFeatureCollection } from '../translation/translators.mjs';
 import simplepolygon from 'simplepolygon'
 import { saveToDatabase } from '../res/DatabaseFunctions';
@@ -209,9 +209,9 @@ function MapWrapper() {
             if(clickedPolygon !== -1){
                 if(selectedPolygon !== -1){
                     if(clickedPolygon.ol_uid !== selectedPolygon.ol_uid){
-                        //getMergeableFeatures(parser.read(clickedPolygon.getGeometry()), event.map.getLayers().getArray()[1].getSource().getFeatures())
                         
-                        let newPoly = handleMerge(parser.read(clickedPolygon.getGeometry()), parser.read(selectedPolygon.getGeometry()),event.map)
+                        let featureList = olFeatures2GeoJsonFeatureCollection(getFeatureList(event.map))
+                        let newPoly = handleMerge(olFeature2geoJsonFeature(clickedPolygon), olFeature2geoJsonFeature(selectedPolygon),featureList)
                     
                         if(newPoly !== -1){
                             let OlPoly = (new GeoJSON()).readFeature(newPoly) //  GeoJSON.readFeatures(geoJsonData)
@@ -229,12 +229,9 @@ function MapWrapper() {
                 //if clicked only needed if running mergable
                 if (clickedPolygon.ol_uid === selectedPolygon.ol_uid) {
                     deletePolygon(event.map, select.getFeatures().getArray()[0])
-                    //event.map.addInteraction(new Modify({features:select.getFeatures()}))
                 }
             }
             
-            
-
         } else {
             if (clickHandlerState === 'DRAWEND') {
                 console.log("Running checks because polygon is finished drawing")

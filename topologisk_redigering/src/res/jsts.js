@@ -78,7 +78,8 @@ export default function getMergeableFeatures(selectedPolygon, allFeatures) { //=
       //console.log("the intersection is: ", intersection)
       //debugger
       return intersection
-/*         const curPolygon = parser.read(poly.getGeometry())
+      
+/*    const curPolygon = parser.read(poly.getGeometry())
       let bufferParameters = new BufferParameters();
       bufferParameters.setEndCapStyle(BufferParameters.CAP_ROUND);
       bufferParameters.setJoinStyle(BufferParameters.JOIN_MITRE);
