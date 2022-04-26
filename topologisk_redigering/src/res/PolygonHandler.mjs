@@ -4,31 +4,10 @@ import OL3Parser from "jsts/org/locationtech/jts/io/OL3Parser.js"
 import {  Point, LineString, LinearRing, Polygon, MultiLineString, MultiPolygon } from 'ol/geom.js'
 import { Overlay } from "ol"
 import OverlayOp from "jsts/org/locationtech/jts/operation/overlay/OverlayOp.js"
-import { addIntersectionNodes } from "./jsts.js"
+import { addIntersectionNodes } from "./jsts.mjs"
 import { geoJsonFeatureCollection2JstsGeometries, jstsGeometries2GeoJsonFeatureCollection } from "../translation/translators.mjs"
 import { slice } from "lodash"
-
-const featuresToJstsGeometryCollection = (features) => {
-
-    const parser = new OL3Parser();
-    parser.inject(
-        Point,
-        LineString,
-        LinearRing,
-        Polygon,
-        MultiLineString,
-        MultiPolygon
-    );
-
-    let jstsCollection = []
-    features.forEach(function temp(feature) {
-        let x = parser.read(feature.getGeometry())
-        jstsCollection.push(x)
-    })
-
-    return jstsCollection
-} 
-
+import { geoJsonFeatureCollection2olFeatures, geoJsonFeature2JstsGeometry} from "../translation/translators.mjs"
 //takes ol list of features as input and trimms last drawn polygon, returns -1 if conflict in fetaures
 export const fixOverlaps = (features) => {
     let areaOverCircLimit = 10
