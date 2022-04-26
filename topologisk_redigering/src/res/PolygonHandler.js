@@ -50,12 +50,12 @@ export const fixOverlaps = (features) => {
         jstsCollection.slice(0, jstsCollection.length - 1).forEach(function f(geom){
             let diff = -1
             try {
+                console.log(geom)
                 diff = (addIntersectionNodes(geom, [preTrimmed]))
             
             } catch (error) {
                 diff = geom
             }
-            console.log("-----1--------------", diff.getArea()/diff.getLength())
             if(diff.getArea()/diff.getLength() > areaOverCircLimit){
                 cleanedJstsCollection.push(diff)
             }
@@ -67,7 +67,7 @@ export const fixOverlaps = (features) => {
         try {
             if (trimmed._geometries) {
                 trimmed._geometries.forEach(function multiPolygonToPolygons(geom){
-                    console.log("-------2------------", geom.getArea()/geom.getLength())
+                
                     if(geom.getArea()/geom.getLength() > areaOverCircLimit){
                         cleanedJstsCollection.push(geom)
                     }
@@ -76,7 +76,6 @@ export const fixOverlaps = (features) => {
     
             //if the polygon has an area (meaning its NOT entirely encapsulated by another polygon), add it.
             else if(trimmed._shell._points._coordinates.length > 0) { 
-                console.log("-------3------------", trimmed.getArea()/trimmed.getLength())
 
                 if(trimmed.getArea()/trimmed.getLength() > areaOverCircLimit){
                     cleanedJstsCollection.push(trimmed)

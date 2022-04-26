@@ -30,11 +30,12 @@ export const handleIntersections = (jstsNewGeometry, jstsOtherGeometries) => {
             olpoly = unkinkPolygon(olpoly[0])
             try {
                 jstsNewGeometry = mergeFeatures(olToJsts(olpoly[0][0]), olToJsts(olpoly[1][0]))
+                jstsNewGeometry = OverlayOp.difference(jstsNewGeometry, jstsGeometry)
             } catch (error) {
                 console.log(error)
             }
             
-            jstsNewGeometry = OverlayOp.difference(jstsNewGeometry, jstsGeometry)
+            
         }
     });
 
@@ -46,8 +47,7 @@ export const handleIntersections = (jstsNewGeometry, jstsOtherGeometries) => {
 export const addIntersectionNodes = (jstsNewGeometry, jstsOtherGeometries) => {
     let jstsNewGeometry_original = jstsNewGeometry
     try {
-        jstsOtherGeometries.forEach(jstsGeometry => {
-            console.log("looped item area: -----------------",jstsGeometry.getArea())
+        jstsOtherGeometries.forEach(jstsGeometry => {   
             jstsNewGeometry = OverlayOp.difference(jstsNewGeometry, jstsGeometry) 
             let intersection = OverlayOp.intersection(jstsNewGeometry_original, jstsGeometry);
             jstsNewGeometry = OverlayOp.union(jstsNewGeometry, intersection)
@@ -55,7 +55,6 @@ export const addIntersectionNodes = (jstsNewGeometry, jstsOtherGeometries) => {
     })
         
     } catch (error) {
-        console.log("error catch area: -----------------",jstsNewGeometry.getArea())
         console.log(error)
         return jstsNewGeometry
     }

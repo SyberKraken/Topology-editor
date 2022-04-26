@@ -112,7 +112,8 @@ function MapWrapper({geoJsonData}) {
         if(getFeatureList(map).length > 1)
         {
             let newPolygons = fixOverlaps(getFeatureList(map))
-            let featureList = (new GeoJSON()).readFeatures(newPolygons) //  GeoJSON.readFeatures(geoJsonData)
+            let featureList = (new GeoJSON()).readFeatures(newPolygons) 
+            //debugger//  GeoJSON.readFeatures(geoJsonData)
             if(featureList.length > 0){
                 getSource(map).clear()
                 getSource(map).addFeatures(featureList) 
@@ -164,7 +165,6 @@ function MapWrapper({geoJsonData}) {
 
 
     const handleModifyend = (event) => {
-        console.log("End Modify")
         let features = event.target.map_.getLayers().getArray()[1].getSource().getFeatures()
         //event.target.map_.getLayers().getArray()[1].getSource().clear();
         for (let i = 0; i < features.length; i++)
