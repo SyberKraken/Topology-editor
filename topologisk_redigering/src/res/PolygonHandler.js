@@ -6,33 +6,12 @@ import { Overlay } from "ol"
 import OverlayOp from "jsts/org/locationtech/jts/operation/overlay/OverlayOp.js"
 import { addIntersectionNodes } from "./jsts.js"
 import { geoJsonFeatureCollection2JstsGeometries, jstsGeometries2GeoJsonFeatureCollection } from "../translation/translators.mjs"
-const featuresToJstsGeometryCollection = (features) => {
 
-    //console.log("FEATURES_TO_JSTS",features)
-
-    const parser = new OL3Parser();
-    parser.inject(
-        Point,
-        LineString,
-        LinearRing,
-        Polygon,
-        MultiLineString,
-        MultiPolygon
-    );
-
-    let jstsCollection = []
-    features.forEach(function temp(feature) {
-        let x = parser.read(feature.getGeometry())
-        jstsCollection.push(x)
-    })
-
-    return jstsCollection
-} 
 
 //takes ol list of features as input and trimms last drawn polygon, returns -1 if conflict in fetaures
 export const fixOverlaps = (features) => {
     let areaOverCircLimit = 10
-    let jstsCollection = featuresToJstsGeometryCollection(features)
+    let jstsCollection = geoJsonFeatureCollection2JstsGeometries(features)
 
     //TODO: OL3parser => uppdelat i olika översättningar
         let preTrimmed = jstsCollection[jstsCollection.length - 1]
