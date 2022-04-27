@@ -2,11 +2,8 @@ import { test } from 'tape'
 import simplepolygon from 'simplepolygon'
 import _ from 'lodash'
 import {fixOverlaps, handleMerge} from '../src/res/PolygonHandler.mjs'
-/* test('Should return -1 when the value is not present in Array', function (t) {
-  t.equal(-1, [1,2,3].indexOf(4))
-  t.end()
-})
- */
+import { fixCoordinateRotation } from '../src/res/HelperFunctions.mjs'
+
 
 
 
@@ -133,6 +130,23 @@ const polygon1 = {
   }
 }
 
+const polygon1Clockwise = {
+  "type":"Feature",
+  "properties": null,
+  "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+      [
+         [0, 0],
+         [0, 1],
+         [1, 1],
+         [0, 0]
+      ]
+    ]
+  }
+}
+
+
 const polygon2 = {
   "type":"Feature",
   "properties": null,
@@ -154,7 +168,7 @@ const mergeFeatureCollection = {
   "features": [polygon1,polygon2]
 }
 
-const mergedPolygon = {
+const mergedPolygonExpected = {
   "type":"Feature",
   "properties": null,
   "geometry": {
@@ -218,14 +232,28 @@ const coordinatesAreEquivalent = (coordinateArray1, coordinateArray2) => {
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /*Testing coordinates after unkinked */
+test('Should rotate coordinates correctly', function(t) {
+  t.deepEqual(fixCoordinateRotation(polygon1Clockwise), polygon1)
+  t.end()
+})
+
 test('Should return matching coordinates',function(t) {
-  t.deepEqual(testGetGeoJsonCoordinate(unkinkedPolygon,0), [[0,0],[2,0],[1,1],[0,0]])
-  t.deepEqual(testGetGeoJsonCoordinate(unkinkedPolygon,1), [[1,1],[0,2],[2,2],[1,1]])
+  //unkinked1 = unkinkedpolygon[0], unkinked2 = unk[1]
+  let unkinked1 = unkinkedPolygon.features[0]
+  let unkinked2 = unkinkedPolygon.features[1]
+  unkinked1 = fixCoordinateRotation(unkinked1)
+  unkinked2 = fixCoordinateRotation(unkinked2)
+
+
+  t.deepEqual(testGetGeoJsonSingleFeatureCoordinate(unkinked1), [[0,0],[2,0],[1,1],[0,0]]) //TODO: different starting coordinates should be allowed.
+  t.assert(coordinatesAreEquivalent(testGetGeoJsonSingleFeatureCoordinate(unkinked1), [[0,0],[2,0],[1,1],[0,0]]))
+  t.deepEqual(testGetGeoJsonSingleFeatureCoordinate(unkinked2), [[1,1],[2,2],[0,2],[1,1]])
   t.end()
 })
 
 test('Merge two polygons', function(t){
-  t.deepEqual(testGetGeoJsonSingleFeatureCoordinate(handleMerge(polygon1,polygon2, mergeFeatureCollection),0), testGetGeoJsonSingleFeatureCoordinate(mergedPolygon),0)
+  const mergedPolygonActual = fixCoordinateRotation(handleMerge(polygon1,polygon2, mergeFeatureCollection))
+  t.deepEqual(testGetGeoJsonSingleFeatureCoordinate(mergedPolygonActual), testGetGeoJsonSingleFeatureCoordinate(mergedPolygonExpected))
   t.end()
 })
  
