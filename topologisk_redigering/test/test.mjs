@@ -4,6 +4,7 @@ import _ from 'lodash'
 import {fixOverlaps, handleMerge} from '../src/res/PolygonHandler.mjs'
 import { fixCoordinateRotation } from '../src/res/HelperFunctions.mjs'
 import { assert } from 'chai'
+import  { unkink } from '../src/res/unkink.mjs'
 
 
 
@@ -187,7 +188,7 @@ const mergedPolygonExpected = {
 }
 
 
-const unkinkedPolygon = simplepolygon(hourglassBefore.features[0])
+const unkinkedPolygon = unkink(hourglassBefore.features[0])
 
 
 //[[[0,0], [1,0], [1,1], [0,1], [0,0]], [[1,0], [2,0], [2,1], [1,1], [1,0]], [[2,0], [3,0], [3,1], [2,1], [2,0]]]
@@ -241,11 +242,8 @@ test('Should rotate coordinates correctly', function(t) {
 })
 
 test('Should return matching coordinates',function(t) {
-  //unkinked1 = unkinkedpolygon[0], unkinked2 = unk[1]
   let unkinked1 = unkinkedPolygon.features[0]
   let unkinked2 = unkinkedPolygon.features[1]
-  unkinked1 = fixCoordinateRotation(unkinked1)
-  unkinked2 = fixCoordinateRotation(unkinked2)
 
   t.assert(coordinatesAreEquivalent(testGetGeoJsonSingleFeatureCoordinate(unkinked1), [[0,0],[2,0],[1,1],[0,0]]))
   t.assert(coordinatesAreEquivalent(testGetGeoJsonSingleFeatureCoordinate(unkinked2), [[1,1],[2,2],[0,2],[1,1]]))

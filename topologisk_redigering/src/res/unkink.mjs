@@ -8,6 +8,7 @@ import BufferParameters from 'jsts/org/locationtech/jts/operation/buffer/BufferP
 import BufferOp from 'jsts/org/locationtech/jts/operation/buffer/BufferOp.js'
 import OverlayOp from "jsts/org/locationtech/jts/operation/overlay/OverlayOp.js"
 import { geoJsonFeature2olFeature, olFeatures2GeoJsonFeatureCollection } from '../translation/translators.mjs';
+import { fixCoordinateRotation } from './HelperFunctions.mjs';
 
 
 const parser = new OL3Parser();
@@ -65,5 +66,14 @@ export function calcIntersection(lastDrawnPoly, allPolys) {
     return result.length > 0
 }
 
+
+export const unkink = (polygon) => {
+    let unkinkedPolygons = simplepolygon(polygon)
+    unkinkedPolygons.features.forEach(polygon => {
+        polygon = fixCoordinateRotation(polygon)
+    })
+
+    return unkinkedPolygons
+}
 
 export default { isValid,  calcIntersection } ;

@@ -22,9 +22,8 @@ import { Select, Modify } from 'ol/interaction';
 import {click} from "ol/events/condition"
 import {deletePolygon} from '../res/HelperFunctions.mjs'
 import {defaultStyle, selectedStyle, invalidStyle} from '../res/Styles.mjs'
-import { isValid }  from '../res/unkink.mjs'
+import { isValid, unkink }  from '../res/unkink.mjs'
 import { geoJsonFeature2olFeature, geoJsonFeatureCollection2olFeatures, olFeature2geoJsonFeature, olFeatures2GeoJsonFeatureCollection } from '../translation/translators.mjs';
-import simplepolygon from 'simplepolygon'
 import { saveToDatabase } from '../res/DatabaseFunctions.mjs';
 
 
@@ -177,7 +176,7 @@ function MapWrapper() {
             if(!isValid(olFeature2geoJsonFeature(features[i])))
             {
                 try {
-                    let geoJsonCollection = simplepolygon( olFeature2geoJsonFeature(features[i]))
+                    let geoJsonCollection = unkink( olFeature2geoJsonFeature(features[i]))
                     let source2 = getSource(event.target.map_)
                     source2.removeFeature(features[i])
                     //debugger
@@ -281,7 +280,7 @@ function MapWrapper() {
         {
             // if not valid unkink
             // return geoJsonFeatureCollection
-            const unkinkedCollection = simplepolygon(olFeature2geoJsonFeature(evt.feature))
+            const unkinkedCollection = unkink(olFeature2geoJsonFeature(evt.feature))
             
             // check intersection and add unkinked polys to the source
             const olFeatures = geoJsonFeatureCollection2olFeatures(unkinkedCollection)
