@@ -112,7 +112,6 @@ export default function getMergeableFeatures(selectedPolygon, allFeatures) { //=
   }
   
 
-  console.log("finished mergeable with: ", jstsFeatureList)
   return jstsFeatureList;
 }
 //takes jsts geometries and return the union in jstsgeometry format

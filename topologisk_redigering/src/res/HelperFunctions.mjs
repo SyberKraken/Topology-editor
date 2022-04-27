@@ -1,7 +1,6 @@
 
 export const deletePolygon = (map, polygon) => {
     if (map) {
-        //console.log(polygon)
         let layers = map.getLayers().getArray()[1].getSource()
         layers.removeFeature(polygon)                      
     } 
@@ -13,8 +12,6 @@ const isClockwise = (polygon) => {
   for (let i = 0; i + 1 < coordinates.length; i++) {
     sum += (coordinates[i+1][0]-coordinates[i][0])*(coordinates[i+1][1]+coordinates[i][1])
   }
-
-  console.log("SUM:", sum)
 
   return sum > 0
 }

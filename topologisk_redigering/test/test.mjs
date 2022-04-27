@@ -3,6 +3,7 @@ import simplepolygon from 'simplepolygon'
 import _ from 'lodash'
 import {fixOverlaps, handleMerge} from '../src/res/PolygonHandler.mjs'
 import { fixCoordinateRotation } from '../src/res/HelperFunctions.mjs'
+import { assert } from 'chai'
 
 
 
@@ -233,7 +234,9 @@ const coordinatesAreEquivalent = (coordinateArray1, coordinateArray2) => {
 
 /*Testing coordinates after unkinked */
 test('Should rotate coordinates correctly', function(t) {
-  t.deepEqual(fixCoordinateRotation(polygon1Clockwise), polygon1)
+  const actualCoordinates = testGetGeoJsonSingleFeatureCoordinate(fixCoordinateRotation(polygon1Clockwise))
+  const expectedCoordinates = testGetGeoJsonSingleFeatureCoordinate(polygon1)
+  t.assert(coordinatesAreEquivalent(actualCoordinates, expectedCoordinates))
   t.end()
 })
 
@@ -244,16 +247,14 @@ test('Should return matching coordinates',function(t) {
   unkinked1 = fixCoordinateRotation(unkinked1)
   unkinked2 = fixCoordinateRotation(unkinked2)
 
-
-  t.deepEqual(testGetGeoJsonSingleFeatureCoordinate(unkinked1), [[0,0],[2,0],[1,1],[0,0]]) //TODO: different starting coordinates should be allowed.
   t.assert(coordinatesAreEquivalent(testGetGeoJsonSingleFeatureCoordinate(unkinked1), [[0,0],[2,0],[1,1],[0,0]]))
-  t.deepEqual(testGetGeoJsonSingleFeatureCoordinate(unkinked2), [[1,1],[2,2],[0,2],[1,1]])
+  t.assert(coordinatesAreEquivalent(testGetGeoJsonSingleFeatureCoordinate(unkinked2), [[1,1],[2,2],[0,2],[1,1]]))
   t.end()
 })
 
 test('Merge two polygons', function(t){
   const mergedPolygonActual = fixCoordinateRotation(handleMerge(polygon1,polygon2, mergeFeatureCollection))
-  t.deepEqual(testGetGeoJsonSingleFeatureCoordinate(mergedPolygonActual), testGetGeoJsonSingleFeatureCoordinate(mergedPolygonExpected))
+  t.assert(coordinatesAreEquivalent(testGetGeoJsonSingleFeatureCoordinate(mergedPolygonActual), testGetGeoJsonSingleFeatureCoordinate(mergedPolygonExpected)))
   t.end()
 })
  
