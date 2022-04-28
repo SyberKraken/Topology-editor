@@ -199,25 +199,15 @@ function MapWrapper() {
             // fill new polygons from unkink with red
             if(!isValid(olFeature2geoJsonFeature(features[i])))
             {
-                try {
-                    let geoJsonCollection = simplepolygon( olFeature2geoJsonFeature(features[i]))
-                    console.log(geoJsonCollection)
-                    source2.removeFeature(features[i])
-                    //debugger
-                    let biggestAreaFeature=geoJsonCollection.features[0];
-                    for (let index = 0; index < geoJsonCollection.features.length; index++) {
-                        const geoJsonfeature = geoJsonCollection.features[index];
-                        source2.addFeature(geoJsonFeature2olFeature(geoJsonfeature))
-                        cleanUserInput(event.target.map_)
-                    }
-                    console.log("Feature with biggest area, ", getArea(biggestAreaFeature))
-
-                } catch (error) {
-                    console.log(error)
-                    
+                let geoJsonCollection = simplepolygon( olFeature2geoJsonFeature(features[i]))
+                console.log(geoJsonCollection)
+                source2.removeFeature(features[i])
+                //debugger
+                for (let index = 0; index < geoJsonCollection.features.length; index++) {
+                    const geoJsonfeature = geoJsonCollection.features[index];
+                    source2.addFeature(geoJsonFeature2olFeature(geoJsonfeature))
+                    cleanUserInput(event.target.map_)
                 }
-               
-                
             }
         }
         
