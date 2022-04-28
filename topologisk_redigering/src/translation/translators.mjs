@@ -38,7 +38,6 @@ export const geoJsonFeatureCollection2FullGeoJSON = (featureCollection) => {
             "name": "EPSG:3006"
             }
         }
-    //console.log(featureCollection)
     return featureCollection
 }
 
@@ -111,7 +110,6 @@ export const jstsGeometry2GeoJsonFeature = (jstsGeometry) => {
 
 /* Takes an array of ol features and returns a feature collection */        
 export const olFeatures2GeoJsonFeatureCollection = (olFeatures) => {
-    console.log(olFeatures)
     const jsonObj = new GeoJSON({ projection: "EPSG:3006" }).writeFeaturesObject(olFeatures)
     return jsonObj
 } 
