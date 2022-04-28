@@ -16,22 +16,22 @@ import { drawPolygon } from '../res/UIFunctions.mjs';
 import { createStringXY } from 'ol/coordinate';
 import MousePosition from 'ol/control/MousePosition'
 import { defaults as defaultControls } from 'ol/control'
-//import getMergeableFeatures, { handleIntersections, mergeFeatures } from '../res/jsts';
 import { fixOverlaps, handleMerge } from '../res/PolygonHandler.mjs';
 import { Select, Modify } from 'ol/interaction';
 import {click} from "ol/events/condition"
 import {deletePolygon} from '../res/HelperFunctions.mjs'
-import {defaultStyle, selectedStyle, invalidStyle} from '../res/Styles.mjs'
+import {defaultStyle, selectedStyle} from '../res/Styles.mjs'
 import { isValid, unkink }  from '../res/unkink.mjs'
 import { geoJsonFeature2olFeature, geoJsonFeatureCollection2olFeatures, olFeature2geoJsonFeature, olFeatures2GeoJsonFeatureCollection } from '../translation/translators.mjs';
 import { saveToDatabase } from '../res/DatabaseFunctions.mjs';
+import UploadFileIcon from '@mui/icons-material/UploadFile';
+import SaveIcon from '@mui/icons-material/Save';
 
+import { Button } from '@mui/material';
 
 
 function MapWrapper() {
     const [map, setMap] = useState();
-    //const [currentTool, setCurrentTool] = useState('NONE')
-    //const [selectedPolygon, setSelectedPolygon] = useState()
     let clickHandlerState = 'NONE';
     const mapElement = useRef();
     const mapRef = useRef();
@@ -156,7 +156,6 @@ function MapWrapper() {
     const handleNewPoly = (evt) => {
         // when add feature check if valid
         if (!isValid(olFeature2geoJsonFeature(evt.feature))) {
-            //deleteLatest()
             map.getLayers().getArray()[1].getSource().removeFeature(evt.feature)
         }
     }
@@ -219,6 +218,8 @@ function MapWrapper() {
             const selectedPolygon = getSelectedPolygon()
             if(clickedPolygon !== -1){
                 if(selectedPolygon !== -1){
+                    console.log(clickedPolygon.ol_uid)
+                    console.log(selectedPolygon.ol_uid)
                     if(clickedPolygon.ol_uid !== selectedPolygon.ol_uid){
                         
                         let featureList = olFeatures2GeoJsonFeatureCollection(getFeatureList(event.map))
@@ -231,7 +232,7 @@ function MapWrapper() {
                             getSource(event.map).addFeature(OlPoly)
                                 
                         }else{
-                            console.log("didnt find the poly ni the list")
+                            console.log("didnt find the poly in the list")
                         }
                     }
                 }
@@ -252,14 +253,14 @@ function MapWrapper() {
             }
             else if (clickHandlerState === 'NONE'){
                 clickHandlerState = 'DRAW'
-                drawPolygon(event.map).addEventListener('drawend', (evt) => {
+                /* drawPolygon(event.map).addEventListener('drawend', (evt) => {
         
                     handleDrawend(evt, event.map)
                     clickHandlerState = 'DRAWEND'
                     event.map.getInteractions().getArray().pop()
                     event.map.getInteractions().getArray().pop()
 
-                })
+                }) */
             }
             else {}
         }
@@ -332,9 +333,13 @@ function MapWrapper() {
 
     }
 
+
     return (
         <>
-            {/* <Header currentTool={currentTool} setCurrentTool={setCurrentTool}/> */}
+            <nav>
+            <Button value="Import File" color="success" size='large'><UploadFileIcon/></Button>
+            <Button value="Save" color="success" size='large'><SaveIcon/></Button>
+            </nav>
             <div style={{ height: '100vh', width: '100%' }} 
             ref={mapElement} 
             className="map-container">    
