@@ -26,6 +26,8 @@ import { isValid }  from '../res/unkink.mjs'
 import { geoJsonFeature2olFeature, geoJsonFeatureCollection2olFeatures, olFeature2geoJsonFeature, olFeatures2GeoJsonFeatureCollection } from '../translation/translators.mjs';
 import simplepolygon from 'simplepolygon'
 import { saveToDatabase } from '../res/DatabaseFunctions.mjs';
+import { forEach } from 'lodash';
+import {getArea, getLength} from 'ol/sphere';
 
 
 
@@ -109,11 +111,13 @@ function MapWrapper() {
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     
     //fixes overlaps for the latest polygon added to map
-    const cleanUserInput = (map) => {
+    const cleanUserInput = (map, modifiedFeatures=1) => {
         
+        
+
         if(getFeatureList(map).length > 1)
         {
-            let newPolygons = fixOverlaps(olFeatures2GeoJsonFeatureCollection(getFeatureList(map)))
+            let newPolygons = fixOverlaps(olFeatures2GeoJsonFeatureCollection(getFeatureList(map)), modifiedFeatures)
             let featureList = geoJsonFeatureCollection2olFeatures(newPolygons) //  GeoJSON.readFeatures(geoJsonData)
             if(featureList.length > 0){
                 getSource(map).clear()
@@ -129,6 +133,13 @@ function MapWrapper() {
         coordinateFormat: createStringXY(2),
         projection: "EPSG:3006",
     })
+
+    const cleanself = (evt) => {
+        //alt 1: run this on all polygons who change. Stop propagation to hinder repeated firing.
+        //alt 2: getPointClosestToPixel, get all features who share pixel, run cleanuserinput/handleintersections on all of them.
+        
+        //console.log("Feature change event provides:", evt.target)
+    }
 
     useEffect(() => {
         const initialMap = new Map({
@@ -146,8 +157,15 @@ function MapWrapper() {
 
             }),
         });
+        const featurelist = getFeatureList(initialMap)
+        if(featurelist.length > 0)
+        {
+            featurelist.forEach((feature) => {
+                feature.on('change', cleanself)
+            })
+        }
         initialMap.addInteraction(select)
-        initialMap.on('click', onMapClickGetPixel)
+        initialMap.on('click', onMapClickGetPixel) // can I get closest pixel from here?
         initialMap.addInteraction(modify)
         modify.on('modifyend', handleModifyend)
         setMap(initialMap)
@@ -159,33 +177,41 @@ function MapWrapper() {
         if (!isValid(olFeature2geoJsonFeature(evt.feature))) {
             //deleteLatest()
             map.getLayers().getArray()[1].getSource().removeFeature(evt.feature)
+        } else {
+            evt.feature.on('change', cleanself)
         }
     }
-
+    
 
     const handleModifyend = (event) => {
-        let features = getFeatureList(event.target.map_)
-        console.log(features.length)
-
+        console.log("modifyend event.target: ", event.features.getArray())
+        console.log("modifyend event.target.length: ", event.features.getArray().length)
+        let features = event.features.getArray()
+        //remove the latest modified features temporarily from the map source.
+        features.forEach((latestFeature) => {
+            event.target.map_.getLayers().getArray()[1].getSource().removeFeature(latestFeature)
+        })
+        let source2 = getSource(event.target.map_)
         for(let i=0; i<features.length; i++)
         {
-            
             console.log(isValid(olFeature2geoJsonFeature(features[i])));
             // check if unkink creates the hidden polygon
             // fill new polygons from unkink with red
-
             if(!isValid(olFeature2geoJsonFeature(features[i])))
             {
                 try {
                     let geoJsonCollection = simplepolygon( olFeature2geoJsonFeature(features[i]))
-                    let source2 = getSource(event.target.map_)
+                    console.log(geoJsonCollection)
                     source2.removeFeature(features[i])
                     //debugger
+                    let biggestAreaFeature=geoJsonCollection.features[0];
                     for (let index = 0; index < geoJsonCollection.features.length; index++) {
                         const geoJsonfeature = geoJsonCollection.features[index];
                         source2.addFeature(geoJsonFeature2olFeature(geoJsonfeature))
+                        cleanUserInput(event.target.map_)
                     }
-                    
+                    console.log("Feature with biggest area, ", getArea(biggestAreaFeature))
+
                 } catch (error) {
                     console.log(error)
                     
@@ -195,7 +221,12 @@ function MapWrapper() {
             }
         }
         
-        cleanUserInput(event.target.map_)
+        features.forEach((feature) => {
+            source2.addFeature(feature)
+            cleanUserInput(event.target.map_)
+        })
+        
+        
         // erros to cry about
             // unable to assign hole to a shell wut??
             // side location conflict

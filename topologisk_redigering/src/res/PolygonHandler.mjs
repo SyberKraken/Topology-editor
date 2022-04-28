@@ -9,7 +9,7 @@ import { geoJsonFeatureCollection2JstsGeometries, jstsGeometries2GeoJsonFeatureC
 //import { slice } from "lodash"
 import { geoJsonFeatureCollection2olFeatures, geoJsonFeature2JstsGeometry} from "../translation/translators.mjs"
 //takes ol list of features as input and trimms last drawn polygon, returns -1 if conflict in fetaures
-export const fixOverlaps = (features) => {
+export const fixOverlaps = (features, modifiedFeatures=1) => {
     let areaOverCircLimit = 10
     let jstsCollection = geoJsonFeatureCollection2JstsGeometries(features)
  
