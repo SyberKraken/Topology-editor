@@ -29,49 +29,67 @@ export const fixOverlaps = (features, modifiedFeatures=1) => {
         let cleanedJstsCollection = []//jstsCollection.slice(0, jstsCollection.length - 1)
         console.log("---1----", jstsCollection.length)
         //add intersection nodes to old polygons
-        jstsCollection.slice(0, jstsCollection.length - 1).forEach(function f(geom){
-            let diff = -1
+       // jstsCollection.slice(0, jstsCollection.length - 1).forEach(function f(geom){
+            let collectionWithNewNodes = -1
             try {
-                diff = (addIntersectionNodes(geom, [preTrimmed]))
-            
+                collectionWithNewNodes = (addIntersectionNodes(trimmed, jstsCollection.slice(0,jstsCollection.length-1)))
             } catch (error) {
                 //return original polygon
-                console.log(error)
-                diff = geom
+                //TODO: change this
+                console.log("ERROR! collectionWithNewNodes dropped.")
+                collectionWithNewNodes = -1
             }
             //removes to small polygons
-            if(diff.getArea()/diff.getLength() > areaOverCircLimit){
-                cleanedJstsCollection.push(diff)
+            //TODO: lös något som motsvarar ifsatsen under
+            console.log("about to test the diffs")
+            //debugger
+            for (let i = 0; i < collectionWithNewNodes.length; i++) {
+                let diff = collectionWithNewNodes[i];
+                if(diff.getArea()/diff.getLength() > areaOverCircLimit) {//&& //collectionWithNewNodes != -1){
+                    console.log("yes, we add this")
+                    cleanedJstsCollection.push(diff)
+                }
+                else {
+                    console.log("no, not adding this")
+                }
             }
             
 
-        })
+       // })
         console.log("---2----", jstsCollection.length)
        
         
         try {
             if (trimmed._geometries) {
                 trimmed._geometries.forEach(function multiPolygonToPolygons(geom){
-                
+                console.log("0")
                     if(geom.getArea()/geom.getLength() > areaOverCircLimit){
-                        cleanedJstsCollection.push(geom)
+                        //cleanedJstsCollection.push(geom)
+                        console.log(" ")
                     }
                 }) 
             }
     
             //if the polygon has an area (meaning its NOT entirely encapsulated by another polygon), add it.
             else if(trimmed._shell._points._coordinates.length > 0) { 
-
+                console.log("1")
                 if(trimmed.getArea()/trimmed.getLength() > areaOverCircLimit){
-                    cleanedJstsCollection.push(trimmed)
+                    console.log("3")
+                    //cleanedJstsCollection.push(trimmed)
                 }
             }
-    
+
+            console.log("cleanJSTSCollection")
+            console.log(cleanedJstsCollection)
            
-            return jstsGeometries2GeoJsonFeatureCollection(cleanedJstsCollection)
+            if (cleanedJstsCollection != -1 ) {
+                console.log("cleaned collection is not -1, fixoverlaps success!")
+                return jstsGeometries2GeoJsonFeatureCollection(cleanedJstsCollection)
+            }
+            return jstsGeometries2GeoJsonFeatureCollection(jstsCollection)
             
         } catch (error) {
-            console.log(error)
+            console.log("!!!ERROR!!!")
             //TODO error gives reading points on trimmed._geometriesz
         }
         return -1

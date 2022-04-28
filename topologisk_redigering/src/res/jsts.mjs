@@ -9,6 +9,7 @@ import { GeometryFactory } from "jsts/org/locationtech/jts/geom.js";
 import { LineStringExtracter } from "jsts/org/locationtech/jts/geom/util.js";
 import GeoJSON from 'ol/format/GeoJSON.js';
 import { olToJsts } from "./unkink.mjs";
+import { difference } from "lodash";
 
 
 export const checkIntersection = (jstsGeometryA, jstsGeometryB) => {
@@ -20,36 +21,49 @@ export const checkIntersection = (jstsGeometryA, jstsGeometryB) => {
 export const handleIntersections = (jstsNewGeometry, jstsOtherGeometries) => {
     
     jstsOtherGeometries.forEach(jstsGeometry => {
-        
             jstsNewGeometry = OverlayOp.difference(jstsNewGeometry, jstsGeometry) 
-       
     });
     //console.log("JSTSNEWGEOM: ", jstsNewGeometry)
     return jstsNewGeometry
 }
 
 export const addIntersectionNodes = (jstsNewGeometry, jstsOtherGeometries) => {
+    console.log("addintersectionnodes taking in this many geoms:", jstsOtherGeometries.length+1)
     let jstsNewGeometry_original = jstsNewGeometry
+    let jstsNewGeometryCollection = []
     try {
         jstsOtherGeometries.forEach(jstsGeometry => {   
-            let jstsNewGeometryTemp = OverlayOp.difference(jstsNewGeometry, jstsGeometry) 
+            let jstsNewGeometryTemp = OverlayOp.difference(jstsNewGeometry, jstsGeometry);
             let intersection = OverlayOp.intersection(jstsNewGeometry_original, jstsGeometry);
            // console.log("-----------jstsNewGeometryTemp",jstsNewGeometryTemp)
             //console.log("-----------intersection",intersection)
                 //NOTE mbe check both multi
             jstsNewGeometry = OverlayOp.union(jstsNewGeometryTemp, intersection)
-
+           console.log("diff: ")
+           //debugger
+            console.log(intersection)
+            
+            jstsNewGeometryCollection.push(OverlayOp.difference(jstsGeometry, jstsNewGeometry_original))
+            /* if (intersection._shell._points._coordinates.length == 0) {
+                console.log("these do not overlap")
+                jstsNewGeometryCollection.push(jstsGeometry)
+            }
+            else {
+                jstsNewGeometryCollection.push(OverlayOp.difference(jstsGeometry, jstsNewGeometry_original))
+            } */
         })
-        
+        jstsNewGeometryCollection.push(jstsNewGeometry)
     } catch (error) {
-        console.log(error)
-        return jstsNewGeometry_original
+        console.log("FATAL ERROR ADDINTERSECTIONNODES")
+        return -1;
+        //return jstsNewGeometry_original
     }
    
-
-   
     //console.log("JSTSNEWGEOM: ", jstsNewGeometry)
-    return jstsNewGeometry
+    console.log("ADDINTERSECTIONODES returning with this many things in collection")
+    console.log(jstsNewGeometryCollection.length)
+    return jstsNewGeometryCollection
+    //return jstsNewGeometry
 }
 
 //takes a JSTSpolygon and a list of Openlayers features and returns a JSTS featurelist
