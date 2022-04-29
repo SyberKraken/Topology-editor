@@ -413,7 +413,6 @@ test('Merge two polygons', function(t){
 test('addInterSection adds new nodes', function(t){
   const test = testAddIntersectionNodes(addIntersectionInner, addIntersectionOuter)
   t.assert(coordinatesAreEquivalent(test.geometry.coordinates[0], addIntersectionInnerWanted.geometry.coordinates[0]))
-  //console.log(test)
   t.end()
 })
 

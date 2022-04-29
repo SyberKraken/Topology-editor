@@ -4,47 +4,42 @@ import { addIntersectionNodes } from "./jsts.mjs"
 import { geoJsonFeatureCollection2JstsGeometries, jstsGeometries2GeoJsonFeatureCollection, jstsGeometry2GeoJsonFeature } from "../translation/translators.mjs"
 import { geoJsonFeatureCollection2olFeatures, geoJsonFeature2JstsGeometry} from "../translation/translators.mjs"
 import { getJstsGeometryCoordinates } from "../translation/getter.mjs"
+import { coordinatesAreEquivalent } from "./HelperFunctions.mjs"
+
+
 //takes ol list of features as input and trimms last drawn polygon, returns -1 if conflict in fetaures
 export const fixOverlaps = (features, modifiedFeatures=1) => {
     let areaOverCircLimit = 10
     let jstsCollection = geoJsonFeatureCollection2JstsGeometries(features)
  
-    console.log("---0----", jstsCollection.length)
+    let preTrimmed = jstsCollection[jstsCollection.length - 1]
+    let trimmed = -1
+    try {
+        trimmed = handleIntersections(jstsCollection[jstsCollection.length - 1], jstsCollection.slice(0, jstsCollection.length - 1))
+    } catch (error) {
+        console.log(error)
+        return -1
+    }
     
-    //TODO: OL3parser => uppdelat i olika översättningar
-        let preTrimmed = jstsCollection[jstsCollection.length - 1]
-        let trimmed = -1
+    let cleanedJstsCollection = []
+    //console.log("---1----", jstsCollection.length)
+    //add intersection nodes to old polygons
+    jstsCollection.slice(0, jstsCollection.length - 1).forEach(function f(geom){
+        let diff = -1
         try {
-             trimmed = handleIntersections(jstsCollection[jstsCollection.length - 1], jstsCollection.slice(0, jstsCollection.length - 1))
-
-        } catch (error) {
-            console.log(error)
-            return -1
-        }
-
-
-        let cleanedJstsCollection = []//jstsCollection.slice(0, jstsCollection.length - 1)
+            diff = (addIntersectionNodes(geom, [preTrimmed]))
         
-        //add intersection nodes to old polygons
-        jstsCollection.slice(0, jstsCollection.length - 1).forEach(function f(geom){
-            let diff = -1
-            try {
-                diff = (addIntersectionNodes(geom, [preTrimmed]))
-            
-            } catch (error) {
-                //return original polygon
-                console.log(error)
-                diff = geom
-            }
-            //removes to small polygons
-            if(diff.getArea()/diff.getLength() > areaOverCircLimit){
-                cleanedJstsCollection.push(diff)
-            }
-            
-
+        } catch (error) {
+            //return original polygon
+            console.log(error)
+            diff = geom
+        }
+        //removes to small polygons
+        if(diff.getArea()/diff.getLength() > areaOverCircLimit){
+            cleanedJstsCollection.push(diff)
+        }
         })
-        console.log("---2----", jstsCollection.length)
-       
+        //console.log("---2----", jstsCollection.length)
         
         try {
             if (trimmed._geometries) {
@@ -63,7 +58,6 @@ export const fixOverlaps = (features, modifiedFeatures=1) => {
                     cleanedJstsCollection.push(trimmed)
                 }
             }
-    
            
             return jstsGeometries2GeoJsonFeatureCollection(cleanedJstsCollection)
             
@@ -76,23 +70,6 @@ export const fixOverlaps = (features, modifiedFeatures=1) => {
     
 }
 
-const coordinatesAreEquivalent = (coordinateArray1, coordinateArray2) => {
-    let i = 0;
-    while (coordinateArray2[i] && JSON.stringify(coordinateArray1[0]) != JSON.stringify(coordinateArray2[i])) {
-      i++;
-    }
-    if(!coordinateArray2[i]){
-      return false
-    }
-    for(let j = 0; j < coordinateArray1.length; j++, i++){
-      if(JSON.stringify(coordinateArray1[j]) != JSON.stringify(coordinateArray2[i % coordinateArray2.length])){
-        return false
-      }
-    }
-    return true
-  }
-
-
 //Takes geojsonFeatures and a featureCollection and returns geojson geometry
 export const handleMerge = (firstInputPolygon, secondInputPolygon, featureCollection) => {
     
@@ -104,9 +81,6 @@ export const handleMerge = (firstInputPolygon, secondInputPolygon, featureCollec
     let status = -1
     
     mergables.forEach(function compare(mergablePolygon){
-        //console.log("SECOND",secondPolygon)
-        //console.log("MERGABLE",mergablePolygon)
-
         if(coordinatesAreEquivalent(getJstsGeometryCoordinates(secondPolygon), getJstsGeometryCoordinates(mergablePolygon))){
             try {
                 status = jstsGeometry2GeoJsonFeature(mergeFeatures(firstPolygon, secondPolygon))

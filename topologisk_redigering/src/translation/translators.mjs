@@ -37,7 +37,6 @@ export const fullGeoJson2GeoJsonFeatureCollection = (fullGeoJson) => {
     return fullGeoJson
 }
 
-
 /* Takes a featureCollection and returns a complete geoJson  */
 export const geoJsonFeatureCollection2FullGeoJSON = (featureCollection) => {
     featureCollection["crs"] = {
@@ -48,7 +47,6 @@ export const geoJsonFeatureCollection2FullGeoJSON = (featureCollection) => {
         }
     return featureCollection
 }
-
 
 /* Takes a GeoJSON FeatureCollection and returns a GeoJSON Feature */
 export const geoJsonFeatureCollection2GeoJsonFeature = (geoJsonFeatureCollection, index) => {
@@ -100,7 +98,7 @@ export const jstsGeometries2GeoJsonFeatureCollection = (jstsGeometries) => {
 
 /* takes a geoJson feature and returns a jsts geometry  */
 export const geoJsonFeature2JstsGeometry = (geoJsonFeature) => {
-    
+
     const reader = new GeoJSONReader()
     let jsts = reader.read(geoJsonFeature)
     jsts.geometry.setSRID(getRandomId())
