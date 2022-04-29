@@ -1,12 +1,7 @@
 import { jstsToGeoJson } from "./GeoJsonFunctions.mjs"
 import getMergeableFeatures, { handleIntersections, mergeFeatures } from "./jsts.mjs"
-import OL3Parser from "jsts/org/locationtech/jts/io/OL3Parser.js"
-import {  Point, LineString, LinearRing, Polygon, MultiLineString, MultiPolygon } from 'ol/geom.js'
-import { Overlay } from "ol"
-import OverlayOp from "jsts/org/locationtech/jts/operation/overlay/OverlayOp.js"
 import { addIntersectionNodes } from "./jsts.mjs"
 import { geoJsonFeatureCollection2JstsGeometries, jstsGeometries2GeoJsonFeatureCollection } from "../translation/translators.mjs"
-//import { slice } from "lodash"
 import { geoJsonFeatureCollection2olFeatures, geoJsonFeature2JstsGeometry} from "../translation/translators.mjs"
 //takes ol list of features as input and trimms last drawn polygon, returns -1 if conflict in fetaures
 export const fixOverlaps = (features, modifiedFeatures=1) => {
@@ -90,9 +85,12 @@ export const handleMerge = (firstInputPolygon, secondInputPolygon, featureCollec
     let secondPolygon = geoJsonFeature2JstsGeometry(secondInputPolygon)
 
     let mergables = getMergeableFeatures(firstPolygon, olFeatures)
+    //console.log(mergables)
 
     let status = -1
+    
     mergables.forEach(function compare(mergablePolygon){
+        console.log((JSON.stringify(secondPolygon) === JSON.stringify(mergablePolygon)))
         if(JSON.stringify(secondPolygon) === JSON.stringify(mergablePolygon)){
             try {
                 status = jstsToGeoJson([mergeFeatures(firstPolygon, secondPolygon)]).features[0]

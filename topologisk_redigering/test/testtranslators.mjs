@@ -251,4 +251,111 @@ test('Convert geoJsonFeature to olFeature', function(t){
     t.end()
 })
 
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+const propertiesFeature = () => {
+    return {
+       "type":"Feature",
+           "geometry": {
+           "type": "Polygon",
+           "coordinates": [
+               [
+                   [0, 0],
+                   [0, 1],
+                   [1, 1],
+                   [1, 0],
+                   [0, 0]
+               ]
+           ]
+           },
+           "properties": {
+               "name": "This is a beautiful name"
+           }
+   
+       }
+   } 
+
+
+const propertiesFeatureCollection = () => {
+    return {
+        "type": "FeatureCollection",
+        "features": [{
+            "type":"Feature",
+            "geometry": {
+            "type": "Polygon",
+            "coordinates": [
+                [
+                    [0, 0],
+                    [0, 1],
+                    [1, 1],
+                    [1, 0],
+                    [0, 0]
+                ]
+            ]
+            },
+            "properties": {
+                "name":"Cinderella"
+            }
+
+            },{
+            "type":"Feature",
+            "geometry": {
+            "type": "Polygon",
+            "coordinates": [
+                [
+                    [1, 0],
+                    [1, 1],
+                    [2, 1],
+                    [2, 0],
+                    [1, 0]
+                ]
+            ]
+            },
+            "properties": {
+                "name":"this is an ok name"
+            }
+            },{
+            "type":"Feature",
+            "geometry": {
+                "type": "Polygon",
+                "coordinates": [
+                [
+                    [0, 1],
+                    [0, 2],
+                    [2, 2],
+                    [2, 1],
+                    [0, 1]
+                ]
+                ]
+            },
+            "properties": {
+                "name": "This is an ugly name"
+            }
+            }]
+    }
+}
+
+test('Check if properties remain the same after jsts <-> geojson conversion', function(t){
+    const propertiesExpected = propertiesFeature().properties
+    const propertiesActual = jstsGeometry2GeoJsonFeature(geoJsonFeature2JstsGeometry(propertiesFeature())).properties
+    console.log("Properties", propertiesActual)
+    t.deepEqual(propertiesActual, propertiesExpected)
+    t.end()
+
+})
+
+test('Check if properties remain the same after jsts <-> geojson collection conversion', function(t){
+    const propertiesExpected1 = propertiesFeatureCollection().features[0].properties
+    const propertiesExpected2 = propertiesFeatureCollection().features[1].properties
+    const propertiesExpected3 = propertiesFeatureCollection().features[2].properties
+    const afterConversion = jstsGeometries2GeoJsonFeatureCollection(geoJsonFeatureCollection2JstsGeometries(propertiesFeatureCollection()))
+    const propertiesActual1 = afterConversion.features[0].properties
+    const propertiesActual2 = afterConversion.features[1].properties
+    const propertiesActual3 = afterConversion.features[2].properties
+
+    t.deepEqual(propertiesActual1, propertiesExpected1)
+    t.deepEqual(propertiesActual2, propertiesExpected2)
+    t.deepEqual(propertiesActual3, propertiesExpected3)
+    t.end()
+
+})
