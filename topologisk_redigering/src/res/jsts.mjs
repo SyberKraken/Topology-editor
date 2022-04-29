@@ -88,14 +88,15 @@ export default function getMergeableFeatures(selectedPolygon, allFeatures) {
       const element = resultCleaned[index];
       jstsFeatureList.push(geoJsonFeature2JstsGeometry(element))
   }
-  
 
   return jstsFeatureList;
 }
+
+
 //takes jsts geometries and return the union in jstsgeometry format
 export function mergeFeatures(firstGeometry, secondGeometry){
 
-  let union = -1;
+    let union = -1;
     try {
         union = OverlayOp.union(firstGeometry, secondGeometry)
     } catch (error) {
@@ -103,51 +104,26 @@ export function mergeFeatures(firstGeometry, secondGeometry){
         console.log(error)
         console.log(firstGeometry)
         console.log(secondGeometry)
-
-
-        
     }
+    
     if (union === -1){
         return -1
     }
-  //let bufferParameters = new BufferParameters();
-  //bufferParameters.setEndCapStyle(BufferParameters.CAP_ROUND);
-  //bufferParameters.setJoinStyle(BufferParameters.JOIN_MITRE);
-
-  //let unionBuffer = BufferOp.bufferOp(union, -0.1, bufferParameters)
-  //debugger
-  let firstPointList = firstGeometry._shell._points._coordinates
-  let secondPointList = secondGeometry._shell._points._coordinates
- // let lineList = LineStringExtracter.getLines(firstGeometry)
-//
- // console.log("before filter things",lineList)
- let factory = new GeometryFactory;
- // //debugger
-  firstPointList.forEach(function isColiding(coord){
-  let point = factory.createPoint(coord)
  
-  secondPointList.forEach(function(coord2){
-      //check if same cacngle 
-      let point2 =  factory.createPoint(coord2)
-      
-      if(firstPointList.includes(point2)){return}
-      else{
-          
-          let x = point._coordinates[0]
-      }
-  })
+    let firstPointList = firstGeometry._shell._points._coordinates
+    let secondPointList = secondGeometry._shell._points._coordinates
 
-
-    //lineList.array.forEach(function coliding2(line){
-    //    let intersection = OverlayOp.intersection(point, line);
-    //    console.log(intersection)
-    //    console.log(line)
-    //   if(intersection){
-    //        
-    //   }
-//
-    //})
-  })
+    let factory = new GeometryFactory;
+    firstPointList.forEach(function isColiding(coord){
+    let point = factory.createPoint(coord)
+    
+    secondPointList.forEach(function(coord2){
+        //check if same cacngle 
+        let point2 =  factory.createPoint(coord2)
+        if(firstPointList.includes(point2)){return}
+        else{let x = point._coordinates[0]}
+        })
+    })
 
   return union
 }
