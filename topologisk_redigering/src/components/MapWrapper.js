@@ -24,12 +24,10 @@ import {defaultStyle, selectedStyle} from '../res/Styles.mjs'
 import { isValid, unkink }  from '../res/unkink.mjs'
 import { geoJsonFeature2olFeature, geoJsonFeatureCollection2olFeatures, olFeature2geoJsonFeature, olFeatures2GeoJsonFeatureCollection } from '../translation/translators.mjs';
 import { saveToDatabase } from '../res/DatabaseFunctions.mjs';
-import { forEach } from 'lodash';
-import {getArea, getLength} from 'ol/sphere';
+//import { forEach } from 'lodash';
+//import {getArea, getLength} from 'ol/sphere';
 import UploadFileIcon from '@mui/icons-material/UploadFile';
 import SaveIcon from '@mui/icons-material/Save';
-import simplepolygon from 'simplepolygon';
-
 import { Button } from '@mui/material';
 
 
@@ -198,7 +196,7 @@ function MapWrapper() {
             // fill new polygons from unkink with red
             if(!isValid(olFeature2geoJsonFeature(features[i])))
             {
-                let geoJsonCollection = simplepolygon( olFeature2geoJsonFeature(features[i]))
+                let geoJsonCollection = unkink(olFeature2geoJsonFeature(features[i]))
                 console.log(geoJsonCollection)
                 source2.removeFeature(features[i])
                 //debugger
@@ -355,12 +353,16 @@ function MapWrapper() {
 
     }
 
+    const saveFeatureCollection = () => {
+        saveToDatabase(olFeatures2GeoJsonFeatureCollection(getFeatureList(map)))
+    }
+
 
     return (
         <>
             <nav>
             <Button value="Import File" color="success" size='large'><UploadFileIcon/></Button>
-            <Button value="Save" color="success" size='large'><SaveIcon/></Button>
+            <Button value="Save" color="success" size='large' onClick={saveFeatureCollection}><SaveIcon/></Button>
             </nav>
             <div style={{ height: '100vh', width: '100%' }} 
             ref={mapElement} 
