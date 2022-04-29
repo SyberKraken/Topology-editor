@@ -1,8 +1,9 @@
 import { jstsToGeoJson } from "./GeoJsonFunctions.mjs"
 import getMergeableFeatures, { handleIntersections, mergeFeatures } from "./jsts.mjs"
 import { addIntersectionNodes } from "./jsts.mjs"
-import { geoJsonFeatureCollection2JstsGeometries, jstsGeometries2GeoJsonFeatureCollection } from "../translation/translators.mjs"
+import { geoJsonFeatureCollection2JstsGeometries, jstsGeometries2GeoJsonFeatureCollection, jstsGeometry2GeoJsonFeature } from "../translation/translators.mjs"
 import { geoJsonFeatureCollection2olFeatures, geoJsonFeature2JstsGeometry} from "../translation/translators.mjs"
+import { getJstsGeometryCoordinates } from "../translation/getter.mjs"
 //takes ol list of features as input and trimms last drawn polygon, returns -1 if conflict in fetaures
 export const fixOverlaps = (features, modifiedFeatures=1) => {
     let areaOverCircLimit = 10
@@ -74,26 +75,40 @@ export const fixOverlaps = (features, modifiedFeatures=1) => {
     
 }
 
+const coordinatesAreEquivalent = (coordinateArray1, coordinateArray2) => {
+    let i = 0;
+    while (coordinateArray2[i] && JSON.stringify(coordinateArray1[0]) != JSON.stringify(coordinateArray2[i])) {
+      i++;
+    }
+    if(!coordinateArray2[i]){
+      return false
+    }
+    for(let j = 0; j < coordinateArray1.length; j++, i++){
+      if(JSON.stringify(coordinateArray1[j]) != JSON.stringify(coordinateArray2[i % coordinateArray2.length])){
+        return false
+      }
+    }
+    return true
+  }
+
+
 //Takes geojsonFeatures and a featureCollection and returns geojson geometry
 export const handleMerge = (firstInputPolygon, secondInputPolygon, featureCollection) => {
-
-    //convert to ol Feature List
-    let olFeatures = geoJsonFeatureCollection2olFeatures(featureCollection)
-
+    
     //convert to jsts geometries
     let firstPolygon = geoJsonFeature2JstsGeometry(firstInputPolygon)
     let secondPolygon = geoJsonFeature2JstsGeometry(secondInputPolygon)
 
-    let mergables = getMergeableFeatures(firstPolygon, olFeatures)
-    //console.log(mergables)
-
+    let mergables = getMergeableFeatures(firstPolygon, featureCollection)
     let status = -1
     
     mergables.forEach(function compare(mergablePolygon){
-        console.log((JSON.stringify(secondPolygon) === JSON.stringify(mergablePolygon)))
-        if(JSON.stringify(secondPolygon) === JSON.stringify(mergablePolygon)){
+        //console.log("SECOND",secondPolygon)
+        //console.log("MERGABLE",mergablePolygon)
+
+        if(coordinatesAreEquivalent(getJstsGeometryCoordinates(secondPolygon), getJstsGeometryCoordinates(mergablePolygon))){
             try {
-                status = jstsToGeoJson([mergeFeatures(firstPolygon, secondPolygon)]).features[0]
+                status = jstsGeometry2GeoJsonFeature(mergeFeatures(firstPolygon, secondPolygon))
             } catch (error) {
                console.log("merge error on typeconversion") 
             }

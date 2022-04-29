@@ -100,6 +100,7 @@ export const jstsGeometries2GeoJsonFeatureCollection = (jstsGeometries) => {
 
 /* takes a geoJson feature and returns a jsts geometry  */
 export const geoJsonFeature2JstsGeometry = (geoJsonFeature) => {
+    
     const reader = new GeoJSONReader()
     let jsts = reader.read(geoJsonFeature)
     jsts.geometry.setSRID(getRandomId())

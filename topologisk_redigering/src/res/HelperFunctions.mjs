@@ -7,6 +7,7 @@ export const deletePolygon = (map, polygon) => {
   }
 
 const isClockwise = (polygon) => {
+  //console.log(polygon)
   const coordinates = polygon.geometry.coordinates[0]
   let sum = 0 
   for (let i = 0; i + 1 < coordinates.length; i++) {
@@ -17,7 +18,7 @@ const isClockwise = (polygon) => {
 }
 
 export const fixCoordinateRotation = (polygon) => {
-  console.log(polygon)
+  //console.log(polygon)
   if (isClockwise(polygon)) {
     let coordinates = polygon.geometry.coordinates[0]
     polygon.geometry.coordinates[0] = coordinates.reverse()

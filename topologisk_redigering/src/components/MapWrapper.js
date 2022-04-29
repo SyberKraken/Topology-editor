@@ -110,17 +110,13 @@ function MapWrapper() {
     
     //fixes overlaps for the latest polygon added to map
     const cleanUserInput = (map, modifiedFeatures=1) => {
-        
-        
-
         if(getFeatureList(map).length > 1)
         {
             let newPolygons = fixOverlaps(olFeatures2GeoJsonFeatureCollection(getFeatureList(map)), modifiedFeatures)
-            let featureList = geoJsonFeatureCollection2olFeatures(newPolygons) //  GeoJSON.readFeatures(geoJsonData)
+            let featureList = geoJsonFeatureCollection2olFeatures(newPolygons) 
             if(featureList.length > 0){
                 getSource(map).clear()
                 getSource(map).addFeatures(featureList) 
-                //saveToDatabase(featureList)
             }else{
                 console.log("cleaned input is empty")
             }
