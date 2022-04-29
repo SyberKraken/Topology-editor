@@ -109,52 +109,33 @@ const overlapPolygons = () => {
   )
 }
 
-const polygon1 = () => {
+
+
+
+const hourglassBefore = () => {
   return (
     {
-      "type":"Feature",
-      "properties": null,
-      "geometry": {
-        "type": "Polygon",
-        "coordinates": [
-          [
-             [0, 0],
-             [1, 1],
-             [0, 1],
-             [0, 0]
+      "type": "FeatureCollection",
+      "features": [{
+        "type": "Feature",
+        "properties": null,
+        "geometry": {
+          "type": "Polygon",
+          "coordinates": [
+            [
+              [0,0],
+              [2,0],
+              [0,2],
+              [2,2],
+              [0,0]
+            ]
           ]
         }
-      }
-    ],
-    "crs": {
-    "type":"name",
-    "properties":{
-        "name":"EPSG:3006"
-        }
-    }   
-  }
-}
-
-
-const hourglassBefore = {
-  "type": "FeatureCollection",
-  "features": [{
-    "type": "Feature",
-    "properties": null,
-    "geometry": {
-      "type": "Polygon",
-      "coordinates": [
-        [
-          [0,0],
-          [2,0],
-          [0,2],
-          [2,2],
-          [0,0]
-        ]
-      ]
+      }]
     }
   )
 }
+
 
 const polygon1Clockwise = () => {
   return (
@@ -174,6 +155,31 @@ const polygon1Clockwise = () => {
       }
     }
   )
+}
+
+const polygon1 = () => {
+  return (
+    {
+      "type":"Feature",
+      "properties": null,
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+             [0, 0],
+             [1, 1],
+             [0, 1],
+             [0, 0]
+          ]
+        ]
+      },
+    "crs": {
+    "type":"name",
+    "properties":{
+        "name":"EPSG:3006"
+        }
+    }   
+  })
 }
 
 
