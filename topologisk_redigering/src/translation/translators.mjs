@@ -3,17 +3,6 @@ import GeoJSONReader from 'jsts/org/locationtech/jts/io/GeoJSONReader.js'
 import GeoJSONWriter from 'jsts/org/locationtech/jts/io/GeoJSONWriter.js'
 import { Feature } from 'ol';
 import { Polygon } from 'ol/geom.js';
-import { getJstsGeometryCoordinates } from './getter.mjs';
-
-let propertiesTable = new Map()
-
-function getRandomId() {
-    let id = Math.floor(Math.random() * 1000)
-    if (propertiesTable.has(id)){
-        getRandomId()
-    }
-    return id 
-  }
 
 /* 
     +--------------------------------------------------------------+
@@ -31,6 +20,15 @@ function getRandomId() {
     +--------------------------------------------------------------+
 */
 
+let propertiesTable = new Map()
+
+function getRandomId() {
+    let id = Math.floor(Math.random() * 1000)
+    if (propertiesTable.has(id)){
+        getRandomId()
+    }
+    return id 
+  }
 /* Takes a full GeoJSON object and returns a GeoJSON FeatureCollection */
 export const fullGeoJson2GeoJsonFeatureCollection = (fullGeoJson) => {
     delete fullGeoJson["crs"]
@@ -99,6 +97,7 @@ export const jstsGeometries2GeoJsonFeatureCollection = (jstsGeometries) => {
 /* takes a geoJson feature and returns a jsts geometry  */
 export const geoJsonFeature2JstsGeometry = (geoJsonFeature) => {
 
+    //console.table(geoJsonFeature)
     const reader = new GeoJSONReader()
     let jsts = reader.read(geoJsonFeature)
     jsts.geometry.setSRID(getRandomId())
@@ -143,6 +142,12 @@ export const geoJsonFeature2olFeature = (geoJsonFeature) => {
 }
 
 export const geoJsonFeatureList2geoJsonFeatureCollection = (geoJsonFeatureList) => {
-   
+    let featureCollection = {
+        "type":"FeatureCollection",
+        "features":[]
+    }
+   featureCollection.features = geoJsonFeatureList
+
+   return featureCollection
 }
 

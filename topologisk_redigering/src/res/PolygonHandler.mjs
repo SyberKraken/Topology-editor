@@ -73,13 +73,23 @@ export const fixOverlaps = (features, modifiedFeatures=1) => {
 //Takes geojsonFeatures and a featureCollection and returns geojson geometry
 export const handleMerge = (firstInputPolygon, secondInputPolygon, featureCollection) => {
     
+    //console.log(firstInputPolygon)
+    //console.log(secondInputPolygon)
+    //console.log(featureCollection)
+
+
     //convert to jsts geometries
     let firstPolygon = geoJsonFeature2JstsGeometry(firstInputPolygon)
     let secondPolygon = geoJsonFeature2JstsGeometry(secondInputPolygon)
 
+    //console.log(firstPolygon)
+    //console.log(secondPolygon)
+
     let mergables = getMergeableFeatures(firstPolygon, featureCollection)
     let status = -1
     
+    //console.log(mergables)
+
     mergables.forEach(function compare(mergablePolygon){
         if(coordinatesAreEquivalent(getJstsGeometryCoordinates(secondPolygon), getJstsGeometryCoordinates(mergablePolygon))){
             try {

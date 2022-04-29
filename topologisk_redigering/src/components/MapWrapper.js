@@ -37,12 +37,14 @@ function MapWrapper() {
     const mapElement = useRef();
     const mapRef = useRef();
     mapRef.current = map;
-
+    let currentClickedPolygon = null
+    let previousClickedPolygon = null
     const projection = getProjection('EPSG:3857');
     const projectionExtent = projection.getExtent();
     const size = getWidth(projectionExtent) / 256;
     const resolutions = new Array(19);
     const matrixIds = new Array(19);
+
     for (let z = 0; z < 19; ++z) {
         //generate resolutions and matrixIds arrays for this WMTS
         resolutions[z] = size / Math.pow(2, z);
@@ -50,9 +52,9 @@ function MapWrapper() {
     }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    const attributions = "Click screen to draw, dubble click polygon to remove and to merge click two adjacent polygons"
+    const attributions = "Click screen to draw, double click polygon to remove and to merge click two adjacent polygons"
 
-    const parser = new OL3Parser();
+ /*    const parser = new OL3Parser();
     parser.inject(
         Point,
         LineString,
@@ -61,13 +63,13 @@ function MapWrapper() {
         MultiPoint,
         MultiLineString,
         MultiPolygon
-    );
+    ); */
     
     const OUTER_SWEDEN_EXTENT = [-1200000, 4700000, 2600000, 8500000];
     const wmts_3006_resolutions = [4096.0, 2048.0, 1024.0, 512.0, 256.0, 128.0, 64.0, 32.0, 16.0, 8.0];
     const wmts_3006_matrixIds = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];   
 
-    const select = new Select({condition: click, style:selectedStyle})
+    
 
     const tilegrid = new WMTSTileGrid({
         tileSize: 256,
@@ -106,6 +108,12 @@ function MapWrapper() {
         style: defaultStyle
     });
 
+    const select = new Select({condition: click, style:selectedStyle})
+
+    const modify = new Modify({
+        source: source, 
+        hitDetection: true
+    })
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     
     //fixes overlaps for the latest polygon added to map
@@ -158,7 +166,7 @@ function MapWrapper() {
                 feature.on('change', cleanself)
             })
         }
-        initialMap.addInteraction(select)
+        //initialMap.addInteraction(select)
         initialMap.on('click', onMapClickGetPixel) // can I get closest pixel from here?
         initialMap.addInteraction(modify)
         modify.on('modifyend', handleModifyend)
@@ -166,108 +174,33 @@ function MapWrapper() {
     }, []);
 
 
-    const handleNewPoly = (evt) => {
-        // when add feature check if valid
-        if (!isValid(olFeature2geoJsonFeature(evt.feature))) {
-            map.getLayers().getArray()[1].getSource().removeFeature(evt.feature)
-        } else {
-            evt.feature.on('change', cleanself)
-        }
-    }
-    
-
-    const handleModifyend = (event) => {
-        console.log("modifyend event.target: ", event.features.getArray())
-        console.log("modifyend event.target.length: ", event.features.getArray().length)
-        let features = event.features.getArray()
-        //remove the latest modified features temporarily from the map source.
-        features.forEach((latestFeature) => {
-            event.target.map_.getLayers().getArray()[1].getSource().removeFeature(latestFeature)
-        })
-        let source2 = getSource(event.target.map_)
-        for(let i=0; i<features.length; i++)
-        {
-            console.log(isValid(olFeature2geoJsonFeature(features[i])));
-            // check if unkink creates the hidden polygon
-            // fill new polygons from unkink with red
-            if(!isValid(olFeature2geoJsonFeature(features[i])))
-            {
-                let geoJsonCollection = unkink(olFeature2geoJsonFeature(features[i]))
-                console.log(geoJsonCollection)
-                source2.removeFeature(features[i])
-                //debugger
-                for (let index = 0; index < geoJsonCollection.features.length; index++) {
-                    const geoJsonfeature = geoJsonCollection.features[index];
-                    source2.addFeature(geoJsonFeature2olFeature(geoJsonfeature))
-                    cleanUserInput(event.target.map_)
-                }
-            }
-        }
-        
-        features.forEach((feature) => {
-            source2.addFeature(feature)
-            cleanUserInput(event.target.map_)
-        })
-        
-        
-        // erros to cry about
-            // unable to assign hole to a shell wut??
-            // side location conflict
-            // found non-noded intersection 
-    }
-
-
-    const modify = new Modify({
-        source: source, 
-        hitDetection: true
-    })
-
-
-
     /* Contextual clickhandler, different actions depending on if you click on a polygon or somewhere on the map */
     const onMapClickGetPixel = (event) => {
-
+        
         /* Check if clicked on an existing polygon */
         if (isPolygon(event.map, event.pixel)){
-
-            const clickedPolygon = getPolygon(event.map, event.pixel)
-            const selectedPolygon = getSelectedPolygon()
-            if(clickedPolygon !== -1){
-                if(selectedPolygon !== -1){
-                    console.log(clickedPolygon.ol_uid)
-                    console.log(selectedPolygon.ol_uid)
-                    if(clickedPolygon.ol_uid !== selectedPolygon.ol_uid){
-                        
-                        let featureList = olFeatures2GeoJsonFeatureCollection(getFeatureList(event.map))
-                        let newPoly = handleMerge(olFeature2geoJsonFeature(clickedPolygon), olFeature2geoJsonFeature(selectedPolygon),featureList)
+            currentClickedPolygon = getPolygon(event.map, event.pixel) 
+            if(previousClickedPolygon != null){
+                if(currentClickedPolygon !== -1){
+                    if(currentClickedPolygon !== previousClickedPolygon){
+                        merge(event.map)
+                    }
                     
-                        if(newPoly !== -1){
-                            let OlPoly = (new GeoJSON()).readFeature(newPoly) //  GeoJSON.readFeatures(geoJsonData)
-                            deletePolygon(event.map, clickedPolygon)
-                            deletePolygon(event.map, selectedPolygon)
-                            getSource(event.map).addFeature(OlPoly)
-                                
-                        }else{
-                            console.log("didnt find the poly in the list")
-                        }
+                    if (currentClickedPolygon === previousClickedPolygon) {
+                        deletePolygon(event.map, currentClickedPolygon)
                     }
                 }
-      
-                /* This done to make sure correct polygon is deleted. Otherwise the previous one is deleted because of delay. */
-                //if clicked only needed if running mergable
-                if (clickedPolygon.ol_uid === selectedPolygon.ol_uid) {
-                    deletePolygon(event.map, select.getFeatures().getArray()[0])
-                }
             }
-            
-        } else {
-            if (clickHandlerState === 'DRAWEND') {
-                console.log("Running checks because polygon is finished drawing")
+            previousClickedPolygon = currentClickedPolygon
+        } 
+        else {
+            if(clickHandlerState === 'DRAWEND') {
+                //console.log("Running checks because polygon is finished drawing")
                 //unkink the drawn polygon HERE
                 cleanUserInput(event.map)
                 clickHandlerState = 'NONE'
             }
-            else if (clickHandlerState === 'NONE'){
+            else if(clickHandlerState === 'NONE'){
                 clickHandlerState = 'DRAW'
                 drawPolygon(event.map).addEventListener('drawend', (evt) => {
         
@@ -278,7 +211,23 @@ function MapWrapper() {
 
                 }) 
             }
-            else {}
+        }
+
+        
+    }
+
+    const merge = (map) => {
+        const featureList = olFeatures2GeoJsonFeatureCollection(getFeatureList(map))
+        let newPoly = handleMerge(olFeature2geoJsonFeature(currentClickedPolygon), olFeature2geoJsonFeature(previousClickedPolygon),featureList)
+    
+        if(newPoly !== -1){
+            let OlPoly = (new GeoJSON()).readFeature(newPoly)
+            deletePolygon(map, currentClickedPolygon)
+            deletePolygon(map, previousClickedPolygon)
+            getSource(map).addFeature(OlPoly)
+                
+        }else{
+            console.log("didnt find the poly in the list")
         }
     }
 
@@ -312,6 +261,53 @@ function MapWrapper() {
         }
     }
 
+    const handleModifyend = (event) => {
+        console.log("modifyend event.target: ", event.features.getArray())
+        console.log("modifyend event.target.length: ", event.features.getArray().length)
+        let features = event.features.getArray()
+        //remove the latest modified features temporarily from the map source.
+        features.forEach((latestFeature) => {
+            event.target.map_.getLayers().getArray()[1].getSource().removeFeature(latestFeature)
+        })
+        let source2 = getSource(event.target.map_)
+        for(let i=0; i<features.length; i++)
+        {
+            // check if unkink creates the hidden polygon
+            // fill new polygons from unkink with red
+            if(!isValid(olFeature2geoJsonFeature(features[i])))
+            {
+                let geoJsonCollection = unkink(olFeature2geoJsonFeature(features[i]))
+                source2.removeFeature(features[i])
+                for (let index = 0; index < geoJsonCollection.features.length; index++) {
+                    const geoJsonfeature = geoJsonCollection.features[index];
+                    source2.addFeature(geoJsonFeature2olFeature(geoJsonfeature))
+                    cleanUserInput(event.target.map_)
+                }
+            }
+        }
+        
+        features.forEach((feature) => {
+            source2.addFeature(feature)
+            cleanUserInput(event.target.map_)
+        })
+        
+        
+        // erros to cry about
+            // unable to assign hole to a shell wut??
+            // side location conflict
+            // found non-noded intersection 
+    }
+
+    const handleNewPoly = (evt) => {
+        // when add feature check if valid
+        if (!isValid(olFeature2geoJsonFeature(evt.feature))) {
+            map.getLayers().getArray()[1].getSource().removeFeature(evt.feature)
+        } else {
+            evt.feature.on('change', cleanself)
+        }
+    }
+    
+
 
     useEffect(() => {
         if (map) {
@@ -322,21 +318,37 @@ function MapWrapper() {
 
     /* check if we are clicking on a polygon*/
     const isPolygon = (map, pixel) => {
-        return map.getFeaturesAtPixel(pixel).length > 0 && map.getFeaturesAtPixel(pixel)[0].getGeometry().getType() === "Polygon"
+        if(map.getFeaturesAtPixel(pixel).length > 0){
+            //console.log(map.getFeaturesAtPixel(pixel)[0].getGeometry().getType() === "Polygon")
+            return map.getFeaturesAtPixel(pixel)[0].getGeometry().getType() === "Polygon"
+        }
+        return false 
     }
    
+   /*  const getFeatureType = (feature) => {
+        return feature.getGeometry().getType()
+    } */
+
     /* get the polygon we are clicking on */
     const getPolygon = (map, pixel) => {
         let list = map.getFeaturesAtPixel(pixel)
+        //console.log(list)
         if (list.length === 0){return -1}
         return list[0]
     }
 
     /* get the polygon marked by select interaction */
-    const getSelectedPolygon = () => {
+/*     const getSelectedPolygon = () => {
         let list = select.getFeatures().getArray()
+        //console.log("SELECTED",list)
         if (list.length === 0){return -1}
         return list[0]
+    } */
+
+    const comparePolygons = () => {
+        if(previousClickedPolygon){
+            return 
+        }
     }
 
     const getSource = (map) => {
