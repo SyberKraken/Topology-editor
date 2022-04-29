@@ -1,6 +1,6 @@
 import { test } from 'tape'
 import simplepolygon from 'simplepolygon'
-import _ from 'lodash'
+//import _, { cloneWith } from 'lodash'
 import {fixOverlaps, handleMerge} from '../src/res/PolygonHandler.mjs'
 import { fixCoordinateRotation } from '../src/res/HelperFunctions.mjs'
 import { assert } from 'chai'
@@ -323,7 +323,108 @@ const topTriangle = {
   }
 }
 
+const topTriangleBig = {
+  "type":"Feature",
+  "properties": null,
+  "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+      [
+        [ 200, 600 ], [ 300, 700 ],
+        [ 400, 600 ], [200, 600]
+      ]
+    ]
+  }
+}
 
+const overlappingCollection = () => {
+  return (
+    {
+      "type": "FeatureCollection",
+      "features": [
+        {
+          "type":"Feature",
+          "properties": null,
+          "geometry": {
+            "type": "Polygon",
+            "coordinates": [
+              [
+                [ 1000, 1000 ], [ 1000, 1001 ],
+                [ 1001, 1001 ], [ 1001, 1000 ],
+                [ 1000, 1000 ]
+              ]
+            ]
+          }
+        },
+        {
+        "type":"Feature",
+        "properties": null,
+        "geometry": {
+          "type": "Polygon",
+          "coordinates": [
+            [
+              [0, 0],
+              [0, 600],
+              [600, 600],
+              [600, 0],
+              [0, 0]
+            ]
+          ]
+        }
+      },  {
+        "type":"Feature",
+        "properties": null,
+        "geometry": {
+          "type": "Polygon",
+          "coordinates": [
+            [
+              [ 200, 600 ], [ 300, 700 ],
+              [ 400, 600 ], [ 500, 500 ],
+              [ 500, 100 ], [ 100, 100 ],
+              [ 100, 500 ], [ 200, 600]
+            ]
+          ]
+        }
+      }]
+    }
+  )
+}
+
+
+const houseBig = {
+  "type":"Feature",
+  "properties": null,
+  "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+      [
+        [ 200, 600 ], [ 300, 700 ],
+        [ 400, 600 ], [ 500, 500 ],
+        [ 500, 100 ], [ 100, 100 ],
+        [ 100, 500 ], [ 200, 600 ]
+      ]
+    ]
+  }
+}
+
+const bigBoxWithExtraNodes = {
+  "type":"Feature",
+  "properties": null,
+  "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+      [
+        [0, 0],
+        [0, 600],
+        [200, 600],
+        [400, 600],
+        [600, 600],
+        [600, 0],
+        [0, 0]
+      ]
+    ]
+  }
+}
 
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -419,6 +520,16 @@ test('addInterSection adds new nodes', function(t){
 test('handleInterSection', function(t){
   const test = testHandleIntersection(addIntersectionInner, handleInterSectionOthers())
   t.assert(coordinatesAreEquivalent(test.geometry.coordinates[0], topTriangle.geometry.coordinates[0]))
-  console.log(test)
+  //console.log(test)
+  t.end()
+})
+
+
+test('fixoverlaps removes overlapping areas AND adds needed nodes on intersection points AND removes features that are too small', function(t){
+  const test = fixOverlaps(overlappingCollection())
+  console.log(test.features[0].geometry.coordinates[0])
+  console.log(bigBoxWithExtraNodes.geometry.coordinates[0])
+  t.assert(coordinatesAreEquivalent(test.features[test.features.length-1].geometry.coordinates[0], topTriangleBig.geometry.coordinates[0]))
+  t.assert(coordinatesAreEquivalent(test.features[0].geometry.coordinates[0], bigBoxWithExtraNodes.geometry.coordinates[0]))
   t.end()
 })

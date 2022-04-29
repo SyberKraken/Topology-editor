@@ -7,67 +7,41 @@ import { getJstsGeometryCoordinates } from "../translation/getter.mjs"
 import { coordinatesAreEquivalent } from "./HelperFunctions.mjs"
 
 
-//takes ol list of features as input and trimms last drawn polygon, returns -1 if conflict in fetaures
+//takes geoJsonFeatureCollection as input and removes areas from the last drawn polygon where it overlaps with other polygons.
 export const fixOverlaps = (features, modifiedFeatures=1) => {
+   
     let areaOverCircLimit = 10
     let jstsCollection = geoJsonFeatureCollection2JstsGeometries(features)
- 
-    let preTrimmed = jstsCollection[jstsCollection.length - 1]
-    let trimmed = -1
-    try {
-        trimmed = handleIntersections(jstsCollection[jstsCollection.length - 1], jstsCollection.slice(0, jstsCollection.length - 1))
-    } catch (error) {
-        console.log(error)
-        return -1
-    }
-    
+    let preTrimmedNewPolygon = jstsCollection[jstsCollection.length - 1]
+    let trimmed = handleIntersections(jstsCollection[jstsCollection.length - 1], jstsCollection.slice(0, jstsCollection.length - 1))
     let cleanedJstsCollection = []
-    //console.log("---1----", jstsCollection.length)
+
     //add intersection nodes to old polygons
     jstsCollection.slice(0, jstsCollection.length - 1).forEach(function f(geom){
-        let diff = -1
-        try {
-            diff = (addIntersectionNodes(geom, [preTrimmed]))
-        
-        } catch (error) {
-            //return original polygon
-            console.log(error)
-            diff = geom
-        }
-        //removes to small polygons
+        let diff = (addIntersectionNodes(geom, [preTrimmedNewPolygon]))
+        //removes too small polygons
         if(diff.getArea()/diff.getLength() > areaOverCircLimit){
             cleanedJstsCollection.push(diff)
         }
-        })
-        //console.log("---2----", jstsCollection.length)
-        
-        try {
-            if (trimmed._geometries) {
-                trimmed._geometries.forEach(function multiPolygonToPolygons(geom){
-                
-                    if(geom.getArea()/geom.getLength() > areaOverCircLimit){
-                        cleanedJstsCollection.push(geom)
-                    }
-                }) 
-            }
-    
-            //if the polygon has an area (meaning its NOT entirely encapsulated by another polygon), add it.
-            else if(trimmed._shell._points._coordinates.length > 0) { 
+    })
 
-                if(trimmed.getArea()/trimmed.getLength() > areaOverCircLimit){
-                    cleanedJstsCollection.push(trimmed)
-                }
+    //If geometries exist then trimmed is a multipolygon and we want to push each polygon individually to cleanedJstsCollection.
+    if (trimmed._geometries) {
+        trimmed._geometries.forEach(function multiPolygonToPolygons(geom){
+            if(geom.getArea()/geom.getLength() > areaOverCircLimit){
+                cleanedJstsCollection.push(geom)
             }
-           
-            return jstsGeometries2GeoJsonFeatureCollection(cleanedJstsCollection)
-            
-        } catch (error) {
-            console.log(error)
-            //TODO error gives reading points on trimmed._geometriesz
+        }) 
+    }
+
+    //if the polygon has an area (meaning its NOT entirely encapsulated by another polygon), add it.
+    else if(trimmed._shell._points._coordinates.length > 0) { 
+        if(trimmed.getArea()/trimmed.getLength() > areaOverCircLimit){
+            cleanedJstsCollection.push(trimmed)
         }
-        return -1
-        
-    
+    }
+   
+    return jstsGeometries2GeoJsonFeatureCollection(cleanedJstsCollection)
 }
 
 //Takes geojsonFeatures and a featureCollection and returns geojson geometry
@@ -89,7 +63,5 @@ export const handleMerge = (firstInputPolygon, secondInputPolygon, featureCollec
             }
         }
     })
-    
     return status
-    
 }
