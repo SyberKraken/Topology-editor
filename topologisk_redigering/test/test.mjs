@@ -5,9 +5,12 @@ import {fixOverlaps, handleMerge} from '../src/res/PolygonHandler.mjs'
 import { fixCoordinateRotation } from '../src/res/HelperFunctions.mjs'
 import { assert } from 'chai'
 import  { unkink } from '../src/res/unkink.mjs'
-import { geoJsonFeature2JstsGeometry } from '../src/translation/translators.mjs'
+import { geoJsonFeature2JstsGeometry, geoJsonFeatureList2geoJsonFeatureCollection, geoJsonFeatureCollection2JstsGeometries } from '../src/translation/translators.mjs'
 import { addIntersectionNodes } from '../src/res/jsts.mjs'
 import { jstsGeometry2GeoJsonFeature } from '../src/translation/translators.mjs'
+import * as translation from '../src/translation/translators.mjs'
+import { handleIntersections } from '../src/res/jsts.mjs'
+
 
 
 
@@ -282,6 +285,44 @@ const addIntersectionInnerWanted = {
   }
 }
 
+const handleInterSectionOthers = () => {
+  return (
+    {
+      "type": "FeatureCollection",
+      "features": [{
+        "type":"Feature",
+        "properties": null,
+        "geometry": {
+          "type": "Polygon",
+          "coordinates": [
+            [
+              [0, 0],
+              [0, 6],
+              [6, 6],
+              [6, 0],
+              [0, 0]
+            ]
+          ]
+        }
+      }]
+    }
+  )
+}
+
+const topTriangle = {
+  "type":"Feature",
+  "properties": null,
+  "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+      [
+        [ 2, 6 ], [ 3, 7 ],
+        [ 4, 6 ], [2, 6]
+      ]
+    ]
+  }
+}
+
 
 
 
@@ -321,16 +362,25 @@ const coordinatesAreEquivalent = (coordinateArray1, coordinateArray2) => {
 }
 
 
-const testAddIntersectionNodes = (jstsInner, jstsOuter) =>{
+const testAddIntersectionNodes = (geoJsonInner, geoJsonOuter) =>{
 
-  const inner = geoJsonFeature2JstsGeometry(jstsInner)
-  const outer= geoJsonFeature2JstsGeometry(jstsOuter)
+  const inner = geoJsonFeature2JstsGeometry(geoJsonInner)
+  const outer= geoJsonFeature2JstsGeometry(geoJsonOuter)
   
   const geoJsonInnerNew = addIntersectionNodes(inner, [outer])
   
   return jstsGeometry2GeoJsonFeature(geoJsonInnerNew)
-  }
-  
+}
+
+const testHandleIntersection = (jstsNew, jstsOther) => {
+  const newGeo = geoJsonFeature2JstsGeometry(jstsNew)
+  const oldList = geoJsonFeatureCollection2JstsGeometries(jstsOther)
+
+  const newGeoResult = handleIntersections(newGeo, oldList)
+
+  return jstsGeometry2GeoJsonFeature(newGeoResult)
+
+}
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /*Tests*/
@@ -362,11 +412,14 @@ test('Merge two polygons', function(t){
 
 test('addInterSection adds new nodes', function(t){
   const test = testAddIntersectionNodes(addIntersectionInner, addIntersectionOuter)
-  console.log(test.geometry.coordinates[0])
-  console.log(addIntersectionInnerWanted.geometry.coordinates[0])
   t.assert(coordinatesAreEquivalent(test.geometry.coordinates[0], addIntersectionInnerWanted.geometry.coordinates[0]))
   //console.log(test)
   t.end()
 })
 
-
+test('handleInterSection', function(t){
+  const test = testHandleIntersection(addIntersectionInner, handleInterSectionOthers())
+  t.assert(coordinatesAreEquivalent(test.geometry.coordinates[0], topTriangle.geometry.coordinates[0]))
+  console.log(test)
+  t.end()
+})

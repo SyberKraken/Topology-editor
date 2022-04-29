@@ -222,8 +222,6 @@ function MapWrapper() {
         hitDetection: true
     })
 
-
-
     /* Contextual clickhandler, different actions depending on if you click on a polygon or somewhere on the map */
     const onMapClickGetPixel = (event) => {
 
@@ -237,9 +235,14 @@ function MapWrapper() {
                     console.log(clickedPolygon.ol_uid)
                     console.log(selectedPolygon.ol_uid)
                     if(clickedPolygon.ol_uid !== selectedPolygon.ol_uid){
-                        
+                        let newPoly = -1
                         let featureList = olFeatures2GeoJsonFeatureCollection(getFeatureList(event.map))
-                        let newPoly = handleMerge(olFeature2geoJsonFeature(clickedPolygon), olFeature2geoJsonFeature(selectedPolygon),featureList)
+                        //try {
+                            newPoly = handleMerge(olFeature2geoJsonFeature(clickedPolygon), olFeature2geoJsonFeature(selectedPolygon),featureList)
+
+                        //} catch (error) {
+                        //    console.log("--------", clickedPolygon, "-------", selectedPolygon, "-----------", featureList)
+                        //}
                     
                         if(newPoly !== -1){
                             let OlPoly = (new GeoJSON()).readFeature(newPoly) //  GeoJSON.readFeatures(geoJsonData)

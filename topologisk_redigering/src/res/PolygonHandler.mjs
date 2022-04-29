@@ -21,9 +21,10 @@ export const fixOverlaps = (features, modifiedFeatures=1) => {
             console.log(error)
             return -1
         }
-       
+
+
         let cleanedJstsCollection = []//jstsCollection.slice(0, jstsCollection.length - 1)
-        console.log("---1----", jstsCollection.length)
+        
         //add intersection nodes to old polygons
         jstsCollection.slice(0, jstsCollection.length - 1).forEach(function f(geom){
             let diff = -1
