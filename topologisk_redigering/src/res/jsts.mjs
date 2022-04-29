@@ -52,9 +52,9 @@ export const addIntersectionNodes = (jstsNewGeometry, jstsOtherGeometries) => {
     return jstsNewGeometry
 }
 
-//takes a JSTSpolygon and a list of Openlayers features and returns a JSTS featurelist
-export default function getMergeableFeatures(selectedPolygon, allFeatures) { //= map.getLayers().getArray()[1].getSource().getFeatures()) => {
-
+//takes a JSTSpolygon and a list of Openlayers features and returns a JSTS geomlist
+export default function getMergeableFeatures(selectedPolygon, allFeatures) { 
+//TODO seperate from ol
   const parser = new OL3Parser();
   parser.inject(
       Point,
@@ -76,10 +76,7 @@ export default function getMergeableFeatures(selectedPolygon, allFeatures) { //=
   const result = otherFeatures.filter(function (poly) {
       
       const curPolygon = parser.read(poly.getGeometry())
-      //debugger
       const intersection = OverlayOp.intersection(curPolygon, selectedPolygon)
-      //console.log("the intersection is: ", intersection)
-      //debugger
       return intersection
       
 /*    const curPolygon = parser.read(poly.getGeometry())

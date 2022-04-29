@@ -6,6 +6,8 @@ import { fixCoordinateRotation } from '../src/res/HelperFunctions.mjs'
 import { assert } from 'chai'
 import { geoJsonFeature2JstsGeometry, jstsGeometry2GeoJsonFeature } from '../src/translation/translators.mjs'
 import { addIntersectionNodes } from '../src/res/jsts.mjs'
+import  { unkink } from '../src/res/unkink.mjs'
+
 
 
 
@@ -15,41 +17,111 @@ import { addIntersectionNodes } from '../src/res/jsts.mjs'
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 const gj = () => {
-  return {
-    "type": "FeatureCollection",
-    "features": [
-      {
-        "type": "Feature",
-        "properties": {name: "testing"},
+  return (
+    {
+      "type": "FeatureCollection",
+      "features": [
+        {
+          "type": "Feature",
+          "properties": {name: "testing"},
+          "geometry": {
+            "type": "Polygon",
+            "coordinates": [
+              [
+                [
+                  15.851554870605469,
+                  61.56980478209987
+                ],
+                [
+                  15.802116394042967,
+                  61.55353706908234
+                ],
+                [
+                  15.873355865478516,
+                  61.54167833832986
+                ],
+                [
+                  15.89567184448242,
+                  61.55615355821311
+                ],
+                [
+                  15.881080627441406,
+                  61.56988650786631
+                ],
+                [
+                  15.851554870605469,
+                  61.56980478209987
+                ]
+              ]
+            ]
+          }
+        }
+      ],
+      "crs": {
+      "type":"name",
+      "properties":{
+          "name":"EPSG:3006"
+          }
+      }   
+    }
+  )
+}
+
+
+
+
+const overlapPolygons = () => {
+  return (
+    {
+      "type": "FeatureCollection",
+      "features": [{
+        "type":"Feature",
+        "properties": null,
         "geometry": {
           "type": "Polygon",
           "coordinates": [
             [
-              [
-                15.851554870605469,
-                61.56980478209987
-              ],
-              [
-                15.802116394042967,
-                61.55353706908234
-              ],
-              [
-                15.873355865478516,
-                61.54167833832986
-              ],
-              [
-                15.89567184448242,
-                61.55615355821311
-              ],
-              [
-                15.881080627441406,
-                61.56988650786631
-              ],
-              [
-                15.851554870605469,
-                61.56980478209987
-              ]
+               [0, 0],
+               [2, 0],
+               [2, 1],
+               [0, 1],
+               [0, 0]
             ]
+          ]
+        }
+      },{
+        "type":"Feature",
+        "properties": null,
+        "geometry": {
+          "type": "Polygon",
+          "coordinates": [
+            [
+               [1, 0],
+               [3, 0],
+               [3, 1],
+               [1, 1],
+               [1, 0]
+            ]
+          ]
+        }
+      }]
+    }
+  )
+}
+
+const polygon1 = () => {
+  return (
+    {
+      "type":"Feature",
+      "properties": null,
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+             [0, 0],
+             [1, 1],
+             [0, 1],
+             [0, 0]
           ]
         }
       }
@@ -81,117 +153,82 @@ const hourglassBefore = {
         ]
       ]
     }
-  }]
+  )
 }
 
-const overlapPolygons = {
-  "type": "FeatureCollection",
-  "features": [{
-    "type":"Feature",
-    "properties": null,
-    "geometry": {
-      "type": "Polygon",
-      "coordinates": [
-        [
-           [0, 0],
-           [2, 0],
-           [2, 1],
-           [0, 1],
-           [0, 0]
+const polygon1Clockwise = () => {
+  return (
+    {
+      "type":"Feature",
+      "properties": null,
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+             [0, 0],
+             [0, 1],
+             [1, 1],
+             [0, 0]
+          ]
         ]
-      ]
+      }
     }
-  },{
-    "type":"Feature",
-    "properties": null,
-    "geometry": {
-      "type": "Polygon",
-      "coordinates": [
-        [
-           [1, 0],
-           [3, 0],
-           [3, 1],
-           [1, 1],
-           [1, 0]
+  )
+}
+
+
+const polygon2 = () => {
+  return (
+    {
+      "type":"Feature",
+      "properties": null,
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+             [0, 0],
+             [1, 0],
+             [1, 1],
+             [0, 0]
+          ]
         ]
-      ]
+      }
     }
-  }]
+  )
 }
 
-const polygon1 = {
-  "type":"Feature",
-  "properties": null,
-  "geometry": {
-    "type": "Polygon",
-    "coordinates": [
-      [
-         [0, 0],
-         [1, 1],
-         [0, 1],
-         [0, 0]
-      ]
-    ]
-  }
+const mergeFeatureCollection = () => {
+  return (
+    {
+      "type": "FeatureCollection",
+      "features": [polygon1(),polygon2()]
+    }
+  )
 }
 
-const polygon1Clockwise = {
-  "type":"Feature",
-  "properties": null,
-  "geometry": {
-    "type": "Polygon",
-    "coordinates": [
-      [
-         [0, 0],
-         [0, 1],
-         [1, 1],
-         [0, 0]
-      ]
-    ]
-  }
-}
-
-
-const polygon2 = {
-  "type":"Feature",
-  "properties": null,
-  "geometry": {
-    "type": "Polygon",
-    "coordinates": [
-      [
-         [0, 0],
-         [1, 0],
-         [1, 1],
-         [0, 0]
-      ]
-    ]
-  }
-}
-
-const mergeFeatureCollection = {
-  "type": "FeatureCollection",
-  "features": [polygon1,polygon2]
-}
-
-const mergedPolygonExpected = {
-  "type":"Feature",
-  "properties": null,
-  "geometry": {
-    "type": "Polygon",
-    "coordinates": [
-      [
-         [0, 0],
-         [1, 0],
-         [1, 1],
-         [0, 1],
-         [0, 0]
-      ]
-    ]
-  }
+const mergedPolygonExpected = () => {
+  return (
+    {
+      "type":"Feature",
+      "properties": null,
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+             [0, 0],
+             [1, 0],
+             [1, 1],
+             [0, 1],
+             [0, 0]
+          ]
+        ]
+      }
+    }
+  )
 }
 
 
-const unkinkedPolygon = simplepolygon(hourglassBefore.features[0])
+const unkinkedPolygon = unkink(hourglassBefore().features[0])
 
 
 //[[[0,0], [1,0], [1,1], [0,1], [0,0]], [[1,0], [2,0], [2,1], [1,1], [1,0]], [[2,0], [3,0], [3,1], [2,1], [2,0]]]
@@ -305,18 +342,15 @@ const testAddIntersectionNodes = (jstsInner, JstsOuterList) =>{
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /*Testing coordinates after unkinked */
 test('Should rotate coordinates correctly', function(t) {
-  const actualCoordinates = testGetGeoJsonSingleFeatureCoordinate(fixCoordinateRotation(polygon1Clockwise))
-  const expectedCoordinates = testGetGeoJsonSingleFeatureCoordinate(polygon1)
+  const actualCoordinates = testGetGeoJsonSingleFeatureCoordinate(fixCoordinateRotation(polygon1Clockwise()))
+  const expectedCoordinates = testGetGeoJsonSingleFeatureCoordinate(polygon1())
   t.assert(coordinatesAreEquivalent(actualCoordinates, expectedCoordinates))
   t.end()
 })
 
 test('Should return matching coordinates',function(t) {
-  //unkinked1 = unkinkedpolygon[0], unkinked2 = unk[1]
   let unkinked1 = unkinkedPolygon.features[0]
   let unkinked2 = unkinkedPolygon.features[1]
-  unkinked1 = fixCoordinateRotation(unkinked1)
-  unkinked2 = fixCoordinateRotation(unkinked2)
 
   t.assert(coordinatesAreEquivalent(testGetGeoJsonSingleFeatureCoordinate(unkinked1), [[0,0],[2,0],[1,1],[0,0]]))
   t.assert(coordinatesAreEquivalent(testGetGeoJsonSingleFeatureCoordinate(unkinked2), [[1,1],[2,2],[0,2],[1,1]]))
@@ -324,8 +358,8 @@ test('Should return matching coordinates',function(t) {
 })
 
 test('Merge two polygons', function(t){
-  const mergedPolygonActual = fixCoordinateRotation(handleMerge(polygon1,polygon2, mergeFeatureCollection))
-  t.assert(coordinatesAreEquivalent(testGetGeoJsonSingleFeatureCoordinate(mergedPolygonActual), testGetGeoJsonSingleFeatureCoordinate(mergedPolygonExpected)))
+  const mergedPolygonActual = fixCoordinateRotation(handleMerge(polygon1(),polygon2(), mergeFeatureCollection()))
+  t.assert(coordinatesAreEquivalent(testGetGeoJsonSingleFeatureCoordinate(mergedPolygonActual), testGetGeoJsonSingleFeatureCoordinate(mergedPolygonExpected())))
   t.end()
 })
  

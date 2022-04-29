@@ -17,6 +17,7 @@ const isClockwise = (polygon) => {
 }
 
 export const fixCoordinateRotation = (polygon) => {
+  console.log(polygon)
   if (isClockwise(polygon)) {
     let coordinates = polygon.geometry.coordinates[0]
     polygon.geometry.coordinates[0] = coordinates.reverse()

@@ -5,6 +5,15 @@ import { Feature } from 'ol';
 import { Polygon } from 'ol/geom.js';
 import { getJstsGeometryCoordinates } from './getter.mjs';
 
+let propertiesTable = new Map()
+
+function getRandomId() {
+    let id = Math.floor(Math.random() * 1000)
+    if (propertiesTable.has(id)){
+        getRandomId()
+    }
+    return id 
+  }
 
 /* 
     +--------------------------------------------------------------+
@@ -26,7 +35,6 @@ import { getJstsGeometryCoordinates } from './getter.mjs';
 export const fullGeoJson2GeoJsonFeatureCollection = (fullGeoJson) => {
     delete fullGeoJson["crs"]
     return fullGeoJson
-    //return featureCollection
 }
 
 
@@ -73,18 +81,19 @@ export const geoJsonFeatureCollection2JstsGeometries = (geoJsonFeatureCollection
 /* takes an array of geometries and returns a FeatureCollection */
 export const jstsGeometries2GeoJsonFeatureCollection = (jstsGeometries) => {
 
-    let writer = new GeoJSONWriter()
     let featureList = []
+    let featureCollection = {
+        "type":"FeatureCollection",
+        "features":[]
+    }
 
     jstsGeometries.forEach(geom => {
-        let writtenGeometry = writer.write(geom)
-        let polygon = new Polygon(writtenGeometry.coordinates)
-        let featureWrapping = new Feature(polygon)
-        featureList.push(featureWrapping)
+        let newFeature = jstsGeometry2GeoJsonFeature(geom)
+        featureList.push(newFeature)
     });
     
-    const jsonObj = new GeoJSON({ projection: "EPSG:3006" }).writeFeaturesObject(featureList)
-    return jsonObj
+    featureCollection.features = featureList
+    return featureCollection
 }
 
 // ........ The functions above this line are where  want them to be
@@ -93,17 +102,22 @@ export const jstsGeometries2GeoJsonFeatureCollection = (jstsGeometries) => {
 export const geoJsonFeature2JstsGeometry = (geoJsonFeature) => {
     const reader = new GeoJSONReader()
     let jsts = reader.read(geoJsonFeature)
+    jsts.geometry.setSRID(getRandomId())
+    propertiesTable.set(jsts.geometry._SRID, geoJsonFeature.properties)
     return jsts.geometry
 }
 
 /* Takes a jsts geometry and returns a geoJson feature */
 export const jstsGeometry2GeoJsonFeature = (jstsGeometry) => {
     let writer = new GeoJSONWriter()
-    let newFeature
+    let getProperties = propertiesTable.get(jstsGeometry._SRID)
+    propertiesTable.delete(jstsGeometry._SRID)
 
     let writtenGeometry = writer.write(jstsGeometry)
     let polygon = new Polygon(writtenGeometry.coordinates)
-    newFeature = new Feature(polygon)
+    let newFeature = new Feature(polygon)
+    newFeature.setProperties(getProperties)
+    newFeature = new GeoJSON().writeFeatureObject(newFeature)
 
     return newFeature
 }
