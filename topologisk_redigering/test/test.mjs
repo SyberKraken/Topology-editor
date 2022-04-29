@@ -4,10 +4,10 @@ import _ from 'lodash'
 import {fixOverlaps, handleMerge} from '../src/res/PolygonHandler.mjs'
 import { fixCoordinateRotation } from '../src/res/HelperFunctions.mjs'
 import { assert } from 'chai'
-import { geoJsonFeature2JstsGeometry, jstsGeometry2GeoJsonFeature } from '../src/translation/translators.mjs'
-import { addIntersectionNodes } from '../src/res/jsts.mjs'
 import  { unkink } from '../src/res/unkink.mjs'
-
+import { geoJsonFeature2JstsGeometry } from '../src/translation/translators.mjs'
+import { addIntersectionNodes } from '../src/res/jsts.mjs'
+import { jstsGeometry2GeoJsonFeature } from '../src/translation/translators.mjs'
 
 
 
@@ -68,7 +68,29 @@ const gj = () => {
 }
 
 
-
+const hourglassBefore = () => {
+  return (
+    {
+      "type": "FeatureCollection",
+      "features": [{
+        "type": "Feature",
+        "properties": null,
+        "geometry": {
+          "type": "Polygon",
+          "coordinates": [
+            [
+              [0,0],
+              [2,0],
+              [0,2],
+              [2,2],
+              [0,0]
+            ]
+          ]
+        }
+      }]
+    }
+  )
+}
 
 const overlapPolygons = () => {
   return (
@@ -109,33 +131,25 @@ const overlapPolygons = () => {
   )
 }
 
-
-
-
-const hourglassBefore = () => {
+const polygon1 = () => {
   return (
     {
-      "type": "FeatureCollection",
-      "features": [{
-        "type": "Feature",
-        "properties": null,
-        "geometry": {
-          "type": "Polygon",
-          "coordinates": [
-            [
-              [0,0],
-              [2,0],
-              [0,2],
-              [2,2],
-              [0,0]
-            ]
+      "type":"Feature",
+      "properties": null,
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+             [0, 0],
+             [1, 1],
+             [0, 1],
+             [0, 0]
           ]
-        }
-      }]
+        ]
+      }
     }
   )
 }
-
 
 const polygon1Clockwise = () => {
   return (
@@ -155,31 +169,6 @@ const polygon1Clockwise = () => {
       }
     }
   )
-}
-
-const polygon1 = () => {
-  return (
-    {
-      "type":"Feature",
-      "properties": null,
-      "geometry": {
-        "type": "Polygon",
-        "coordinates": [
-          [
-             [0, 0],
-             [1, 1],
-             [0, 1],
-             [0, 0]
-          ]
-        ]
-      },
-    "crs": {
-    "type":"name",
-    "properties":{
-        "name":"EPSG:3006"
-        }
-    }   
-  })
 }
 
 
@@ -240,6 +229,62 @@ const unkinkedPolygon = unkink(hourglassBefore().features[0])
 //[[[0,0], [1,0], [1,1], [0,1], [0,0]], [[1,0], [2,0], [2,1], [1,1], [1,0]], [[2,0], [3,0], [3,1], [2,1], [2,0]]]
 
 
+const addIntersectionInner = {
+  "type":"Feature",
+  "properties": null,
+  "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+      [
+        [1, 1],
+        [1, 5],
+        [3, 7],
+        [5, 5],
+        [5, 1],
+        [1, 1]
+      ]
+    ]
+  }
+}
+
+const addIntersectionOuter = {
+
+  "type":"Feature",
+  "properties": null,
+  "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+      [
+        [0, 0],
+        [0, 6],
+        [6, 6],
+        [6, 0],
+        [0, 0]
+      ]
+    ]
+  }
+}
+
+
+const addIntersectionInnerWanted = {
+  "type":"Feature",
+  "properties": null,
+  "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+      [
+        [ 2, 6 ], [ 3, 7 ],
+        [ 4, 6 ], [ 5, 5 ],
+        [ 5, 1 ], [ 1, 1 ],
+        [ 1, 5 ], [ 2, 6 ]
+      ]
+    ]
+  }
+}
+
+
+
+
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /*Functions*/
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -275,77 +320,22 @@ const coordinatesAreEquivalent = (coordinateArray1, coordinateArray2) => {
   return true
 }
 
-const addIntersectionInner = {
-    "type":"Feature",
-    "properties": null,
-    "geometry": {
-      "type": "Polygon",
-      "coordinates": [
-        [
-          [1, 1],
-          [1, 5],
-          [3, 7],
-          [5, 5],
-          [5, 1],
-          [1, 1]
-        ]
-      ]
-    }
-}
 
-const addIntersectionOuter = {
+const testAddIntersectionNodes = (jstsInner, jstsOuter) =>{
 
-    "type":"Feature",
-    "properties": null,
-    "geometry": {
-      "type": "Polygon",
-      "coordinates": [
-        [
-          [0, 0],
-          [0, 6],
-          [6, 6],
-          [6, 0],
-          [0, 0]
-        ]
-      ]
-    }
-}
-
-
-const addIntersectionInnerWanted = {
-    "type":"Feature",
-    "properties": null,
-    "geometry": {
-      "type": "Polygon",
-      "coordinates": [
-        [
-          [1, 1],
-          [1, 5],
-          [2, 6],
-          [3, 7],
-          [4, 6],
-          [5, 5],
-          [5, 1],
-          [1, 1]
-        ]
-      ]
-    }
-}
-
-
-
-const testAddIntersectionNodes = (jstsInner, JstsOuterList) =>{
-  
-  const inner = geoJsonFeature2JstsGeometry(addIntersectionInner)
-  const outer= geoJsonFeature2JstsGeometry(addIntersectionOuter)
+  const inner = geoJsonFeature2JstsGeometry(jstsInner)
+  const outer= geoJsonFeature2JstsGeometry(jstsOuter)
   
   const geoJsonInnerNew = addIntersectionNodes(inner, [outer])
-
+  
   return jstsGeometry2GeoJsonFeature(geoJsonInnerNew)
-}
+  }
+  
+
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /*Tests*/
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 /*Testing coordinates after unkinked */
 test('Should rotate coordinates correctly', function(t) {
   const actualCoordinates = testGetGeoJsonSingleFeatureCoordinate(fixCoordinateRotation(polygon1Clockwise()))
@@ -369,10 +359,14 @@ test('Merge two polygons', function(t){
   t.end()
 })
  
+
 test('addInterSection adds new nodes', function(t){
   const test = testAddIntersectionNodes(addIntersectionInner, addIntersectionOuter)
-  t.assert(coordinatesAreEquivalent(test, addIntersectionInnerWanted))
-  console.log(test)
+  console.log(test.geometry.coordinates[0])
+  console.log(addIntersectionInnerWanted.geometry.coordinates[0])
+  t.assert(coordinatesAreEquivalent(test.geometry.coordinates[0], addIntersectionInnerWanted.geometry.coordinates[0]))
+  //console.log(test)
   t.end()
 })
+
 
