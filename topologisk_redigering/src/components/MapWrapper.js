@@ -9,26 +9,21 @@ import WMTS from 'ol/source/WMTS';
 import { get as getProjection } from 'ol/proj';
 import { getWidth } from 'ol/extent';
 import GeoJSON from 'ol/format/GeoJSON';
-import MultiPoint from 'ol/geom/MultiPoint';
-import OL3Parser from "jsts/org/locationtech/jts/io/OL3Parser";
-import { Point, LineString, LinearRing, Polygon, MultiLineString, MultiPolygon } from 'ol/geom'
 import { drawPolygon } from '../res/UIFunctions.mjs';
 import { createStringXY } from 'ol/coordinate';
 import MousePosition from 'ol/control/MousePosition'
 import { defaults as defaultControls } from 'ol/control'
 import { fixOverlaps, handleMerge } from '../res/PolygonHandler.mjs';
-import { Select, Modify } from 'ol/interaction';
-import {click} from "ol/events/condition"
+import { Modify } from 'ol/interaction';
 import {deletePolygon} from '../res/HelperFunctions.mjs'
 import {defaultStyle, selectedStyle} from '../res/Styles.mjs'
 import { isValid, unkink }  from '../res/unkink.mjs'
 import { geoJsonFeature2olFeature, geoJsonFeatureCollection2olFeatures, olFeature2geoJsonFeature, olFeatures2GeoJsonFeatureCollection } from '../translation/translators.mjs';
 import { saveToDatabase } from '../res/DatabaseFunctions.mjs';
-//import { forEach } from 'lodash';
-//import {getArea, getLength} from 'ol/sphere';
 import UploadFileIcon from '@mui/icons-material/UploadFile';
 import SaveIcon from '@mui/icons-material/Save';
 import { Button } from '@mui/material';
+import QuestionMarkIcon from '@mui/icons-material/QuestionMark';
 
 
 function MapWrapper() {
@@ -53,23 +48,10 @@ function MapWrapper() {
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     const attributions = "Click screen to draw, double click polygon to remove and to merge click two adjacent polygons"
-
- /*    const parser = new OL3Parser();
-    parser.inject(
-        Point,
-        LineString,
-        LinearRing,
-        Polygon,
-        MultiPoint,
-        MultiLineString,
-        MultiPolygon
-    ); */
     
     const OUTER_SWEDEN_EXTENT = [-1200000, 4700000, 2600000, 8500000];
     const wmts_3006_resolutions = [4096.0, 2048.0, 1024.0, 512.0, 256.0, 128.0, 64.0, 32.0, 16.0, 8.0];
     const wmts_3006_matrixIds = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];   
-
-    
 
     const tilegrid = new WMTSTileGrid({
         tileSize: 256,
@@ -107,8 +89,6 @@ function MapWrapper() {
         source: source,
         style: defaultStyle
     });
-
-    const select = new Select({condition: click, style:selectedStyle})
 
     const modify = new Modify({
         source: source, 
@@ -166,7 +146,6 @@ function MapWrapper() {
                 feature.on('change', cleanself)
             })
         }
-        //initialMap.addInteraction(select)
         initialMap.on('click', onMapClickGetPixel) // can I get closest pixel from here?
         initialMap.addInteraction(modify)
         modify.on('modifyend', handleModifyend)
@@ -212,8 +191,6 @@ function MapWrapper() {
                 }) 
             }
         }
-
-        
     }
 
     const merge = (map) => {
@@ -312,6 +289,7 @@ function MapWrapper() {
     useEffect(() => {
         if (map) {
             map.getLayers().getArray()[1].getSource().addEventListener('addfeature', handleNewPoly)
+            //cleanUserInput(map)
         }
     }, [map])
     
@@ -337,14 +315,6 @@ function MapWrapper() {
         return list[0]
     }
 
-    /* get the polygon marked by select interaction */
-/*     const getSelectedPolygon = () => {
-        let list = select.getFeatures().getArray()
-        //console.log("SELECTED",list)
-        if (list.length === 0){return -1}
-        return list[0]
-    } */
-
     const comparePolygons = () => {
         if(previousClickedPolygon){
             return 
@@ -358,7 +328,6 @@ function MapWrapper() {
     /* get the array of features on map */
     const getFeatureList = (map) => {
         return map.getLayers().getArray()[1].getSource().getFeatures()
-
     }
 
     const saveFeatureCollection = () => {
@@ -368,15 +337,15 @@ function MapWrapper() {
 
     return (
         <>
-            <nav>
-            <Button value="Import File" color="success" size='large'><UploadFileIcon/></Button>
-            <Button value="Save" color="success" size='large' onClick={saveFeatureCollection}><SaveIcon/></Button>
-            </nav>
-            <div style={{ height: '100vh', width: '100%' }} 
+            <div style={{ height: '100vh', width: '100%' }}
             ref={mapElement} 
             className="map-container">    
+                <nav> 
+                    <Button value="Import File" color="success" size='large'><UploadFileIcon/></Button>
+                    <Button value="Save" color="success" size='large' onClick={saveFeatureCollection}><SaveIcon/></Button>
+                    <Button ><QuestionMarkIcon></QuestionMarkIcon></Button>
+                </nav>
             </div>
-            
         </>
     );
 }

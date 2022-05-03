@@ -1,15 +1,7 @@
 import OverlayOp from "jsts/org/locationtech/jts/operation/overlay/OverlayOp.js"
-import OL3Parser from "jsts/org/locationtech/jts/io/OL3Parser.js";
-import { Point, LineString, LinearRing, Polygon, MultiLineString, MultiPolygon } from 'ol/geom.js'
 import polygonsAreConnected from "./TopologyValidation.mjs"
-import { geoJsonToJsts, jstsToGeoJson } from './GeoJsonFunctions.mjs';
-import {default as jstsPoint} from "jsts/org/locationtech/jts/geom/Point.js";
-import { CoordinateXY } from "jsts/org/locationtech/jts/geom.js";
 import { GeometryFactory } from "jsts/org/locationtech/jts/geom.js";
-import { LineStringExtracter } from "jsts/org/locationtech/jts/geom/util.js";
-import GeoJSON from 'ol/format/GeoJSON.js';
-import { olToJsts } from "./unkink.mjs";
-import { geoJsonFeature2JstsGeometry, geoJsonFeatureCollection2JstsGeometries, geoJsonFeatureList2geoJsonFeatureCollection, jstsGeometry2GeoJsonFeature } from "../translation/translators.mjs";
+import { geoJsonFeature2JstsGeometry, jstsGeometry2GeoJsonFeature } from "../translation/translators.mjs";
 
 
 export const checkIntersection = (jstsGeometryA, jstsGeometryB) => {
@@ -110,7 +102,7 @@ export function mergeFeatures(firstGeometry, secondGeometry){
     let firstPointList = firstGeometry._shell._points._coordinates
     let secondPointList = secondGeometry._shell._points._coordinates
 
-    let factory = new GeometryFactory;
+    let factory = new GeometryFactory();
     firstPointList.forEach(function isColiding(coord){
     let point = factory.createPoint(coord)
     
