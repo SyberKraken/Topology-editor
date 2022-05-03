@@ -34,10 +34,26 @@ export const addIntersectionNodes = (jstsNewGeometry, jstsOtherGeometries) => {
         jstsOtherGeometries.forEach(jstsGeometry => {   
             let jstsNewGeometryTemp = OverlayOp.difference(jstsNewGeometry, jstsGeometry) 
             let intersection = OverlayOp.intersection(jstsNewGeometry_original, jstsGeometry);
+            //console.log("INTERSECTION: ", intersection)
+            //console.log("JSTSNEWGEOMETRYTEMP", jstsNewGeometryTemp)
+            
+            //handle both if intersection is geometrycollection and just a geometry
+            try {
+                jstsNewGeometry = OverlayOp.union(jstsNewGeometryTemp, intersection)
+          
+            } catch (error) {
+                console.log("detta error är 'under kontroll:'")
+                console.log(error)
+                intersection._geometries.forEach(intersectionGeom => {
+                    jstsNewGeometryTemp = OverlayOp.union(jstsNewGeometryTemp, intersectionGeom)
+                });
+            }
+
+
            // console.log("-----------jstsNewGeometryTemp",jstsNewGeometryTemp)
             //console.log("-----------intersection",intersection)
                 //NOTE mbe check both multi
-            jstsNewGeometry = OverlayOp.union(jstsNewGeometryTemp, intersection)
+            //jstsNewGeometry = OverlayOp.union(jstsNewGeometryTemp, intersection)
 
         })
         

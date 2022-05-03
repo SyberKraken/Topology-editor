@@ -300,6 +300,8 @@ function MapWrapper() {
 
     const handleNewPoly = (evt) => {
         // when add feature check if valid
+        console.log("EVENT FEATURE converted:")
+        console.log(olFeature2geoJsonFeature(evt.feature))
         if (!isValid(olFeature2geoJsonFeature(evt.feature))) {
             map.getLayers().getArray()[1].getSource().removeFeature(evt.feature)
         } else {
