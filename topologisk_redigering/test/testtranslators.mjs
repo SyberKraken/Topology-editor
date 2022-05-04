@@ -27,7 +27,9 @@ const featureCollection = () => {
                 ]
             ]
             },
-            "properties": null
+            "properties": {
+                "name":"A"
+            }
 
             },{
             "type":"Feature",
@@ -43,7 +45,9 @@ const featureCollection = () => {
                 ]
             ]
             },
-            "properties": null
+            "properties": {
+                "name":"B"
+            }
             },{
             "type":"Feature",
             "geometry": {
@@ -58,7 +62,9 @@ const featureCollection = () => {
                 ]
                 ]
             },
-            "properties": null
+            "properties": {
+                "name":"C"
+            }
             }]
     }
 }
@@ -80,7 +86,9 @@ const featureCollectionSingleFeature = () => {
                 ]
             ]
             },
-            "properties": null
+            "properties": {
+                "name":"A"
+            }
             }]
         }
 }
@@ -102,8 +110,9 @@ const fullGeoJson = () => {
         ]
     ]
     },
-    "properties": null
-    
+    "properties": {
+        "name":"A"
+    }
     },{
     "type":"Feature",
     "geometry": {
@@ -118,7 +127,9 @@ const fullGeoJson = () => {
         ]
     ]
     },
-    "properties": null
+    "properties": {
+        "name":"B"
+    }
     },{
     "type":"Feature",
     "geometry": {
@@ -133,7 +144,9 @@ const fullGeoJson = () => {
         ]
         ]
     },
-    "properties": null
+    "properties": {
+        "name":"C"
+    }    
     }],
     "crs": {
         "type": "name",
@@ -158,7 +171,9 @@ const feature = () => {
             ]
         ]
         },
-        "properties": null
+        "properties": {
+            "name":"A"
+        }
 
     }
 } 
@@ -216,7 +231,6 @@ test('Convert jsts geometry to a geoJson feature', function(t){
     t.end()
 })
 
-
 test('Convert a list of OL features to a FeatureCollection', function(t) {
     let actual = olFeatures2GeoJsonFeatureCollection(olFeatureList)
     let expected = featureCollection()
@@ -225,20 +239,25 @@ test('Convert a list of OL features to a FeatureCollection', function(t) {
 })
 
 test('Convert a FeatureCollection to a list of OL features', function(t){
+    //console.log(geoJsonFeatureCollection2olFeatures(featureCollection()))
     let actual = [] 
     geoJsonFeatureCollection2olFeatures(featureCollection()).forEach(feature => {
         actual.push(getOlFeatureCoordinates(feature))
     })
     let expected = []
-    olFeatureList.forEach(feature => {
-        expected.push(getOlFeatureCoordinates(feature))
+    featureCollection().features.forEach(feature => {
+        expected.push(feature.geometry.coordinates)
     })
+   /*  olFeatureList.forEach(feature => {
+        expected.push(getOlFeatureCoordinates(feature))
+    }) */
     t.deepEqual(actual, expected)
     t.end()
 }) 
 
 test('Convert olFeature to geoJson feature', function(t){
     let actual = olFeature2geoJsonFeature(olFeatureList[0])
+    //console.log(actual)
     let expected = feature()
     t.deepEqual(actual, expected)
     t.end()
@@ -246,7 +265,8 @@ test('Convert olFeature to geoJson feature', function(t){
 
 test('Convert geoJsonFeature to olFeature', function(t){
     let actual = getOlFeatureCoordinates(geoJsonFeature2olFeature(feature()))
-    let expected = getOlFeatureCoordinates(olFeatureList[0])
+    let expected = feature().geometry.coordinates
+    //let expected = getOlFeatureCoordinates(olFeatureList[0])
     t.deepEqual(actual, expected)
     t.end()
 })
@@ -338,7 +358,6 @@ const propertiesFeatureCollection = () => {
 test('Check if properties remain the same after jsts <-> geojson conversion', function(t){
     const propertiesExpected = propertiesFeature().properties
     const propertiesActual = jstsGeometry2GeoJsonFeature(geoJsonFeature2JstsGeometry(propertiesFeature())).properties
-    console.log("Properties", propertiesActual)
     t.deepEqual(propertiesActual, propertiesExpected)
     t.end()
 

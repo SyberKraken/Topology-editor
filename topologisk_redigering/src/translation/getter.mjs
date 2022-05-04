@@ -13,8 +13,13 @@ export const getListOfOlFeaturesFromMap = (map) => {
     return map.getLayers().getArray()[1].getSource().getFeatures()
 }
 
-
 export const getJstsGeometryCoordinates = (geom) => {
     return geom._shell._points._coordinates
 }
 //Getters for geoJSON "FeatureCollections"
+
+
+export const getGeoJsonProperties = (geosjonFeature) => {
+    return geosjonFeature.properties
+}
+

@@ -20,15 +20,18 @@ import { Polygon } from 'ol/geom.js';
     +--------------------------------------------------------------+
 */
 
-let propertiesTable = new Map()
+let propertiesTableJSTS = new Map()
+let propertiesTableOL = new Map()
 
 function getRandomId() {
     let id = Math.floor(Math.random() * 1000)
-    if (propertiesTable.has(id)){
+    if (propertiesTableJSTS.has(id)){
         getRandomId()
     }
     return id 
-  }
+}
+
+
 /* Takes a full GeoJSON object and returns a GeoJSON FeatureCollection */
 export const fullGeoJson2GeoJsonFeatureCollection = (fullGeoJson) => {
     delete fullGeoJson["crs"]
@@ -62,6 +65,32 @@ export const geoJsonFeature2geoJsonFeatureCollection = (geoJsonFeature) => {
     return geoJsonFeatureCollection
 }
 
+/* takes a geoJson feature and returns a jsts geometry  */
+export const geoJsonFeature2JstsGeometry = (geoJsonFeature) => {
+
+    //console.table(geoJsonFeature)
+    const reader = new GeoJSONReader()
+    let jsts = reader.read(geoJsonFeature)
+    jsts.geometry.setSRID(getRandomId())
+    propertiesTableJSTS.set(jsts.geometry._SRID, geoJsonFeature.properties)
+    return jsts.geometry
+}
+
+/* Takes a jsts geometry and returns a geoJson feature */
+export const jstsGeometry2GeoJsonFeature = (jstsGeometry) => {
+    let writer = new GeoJSONWriter()
+    let getProperties = propertiesTableJSTS.get(jstsGeometry._SRID)
+    propertiesTableJSTS.delete(jstsGeometry._SRID)
+
+    let writtenGeometry = writer.write(jstsGeometry)
+    let polygon = new Polygon(writtenGeometry.coordinates)
+    let newFeature = new Feature(polygon)
+    newFeature.setProperties(getProperties)
+    newFeature = new GeoJSON().writeFeatureObject(newFeature)
+
+    return newFeature
+}
+
 /* Takes a featureCollection and returns an array of jsts geometries */
 export const geoJsonFeatureCollection2JstsGeometries = (geoJsonFeatureCollection) => {
     
@@ -72,7 +101,6 @@ export const geoJsonFeatureCollection2JstsGeometries = (geoJsonFeatureCollection
     })
     return geometries
 }
-
 
 /* takes an array of geometries and returns a FeatureCollection */
 export const jstsGeometries2GeoJsonFeatureCollection = (jstsGeometries) => {
@@ -91,34 +119,9 @@ export const jstsGeometries2GeoJsonFeatureCollection = (jstsGeometries) => {
     featureCollection.features = featureList
     return featureCollection
 }
-
-// ........ The functions above this line are where  want them to be
-
-/* takes a geoJson feature and returns a jsts geometry  */
-export const geoJsonFeature2JstsGeometry = (geoJsonFeature) => {
-
-    //console.table(geoJsonFeature)
-    const reader = new GeoJSONReader()
-    let jsts = reader.read(geoJsonFeature)
-    jsts.geometry.setSRID(getRandomId())
-    propertiesTable.set(jsts.geometry._SRID, geoJsonFeature.properties)
-    return jsts.geometry
-}
-
-/* Takes a jsts geometry and returns a geoJson feature */
-export const jstsGeometry2GeoJsonFeature = (jstsGeometry) => {
-    let writer = new GeoJSONWriter()
-    let getProperties = propertiesTable.get(jstsGeometry._SRID)
-    propertiesTable.delete(jstsGeometry._SRID)
-
-    let writtenGeometry = writer.write(jstsGeometry)
-    let polygon = new Polygon(writtenGeometry.coordinates)
-    let newFeature = new Feature(polygon)
-    newFeature.setProperties(getProperties)
-    newFeature = new GeoJSON().writeFeatureObject(newFeature)
-
-    return newFeature
-}
+//////////////////////////////////////////////////////////////////////////
+//      The functions above this line are where  want them to be        //
+//////////////////////////////////////////////////////////////////////////
 
 /* Takes an array of ol features and returns a feature collection */        
 export const olFeatures2GeoJsonFeatureCollection = (olFeatures) => {

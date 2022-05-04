@@ -16,7 +16,7 @@ import { defaults as defaultControls } from 'ol/control'
 import { fixOverlaps, handleMerge } from '../res/PolygonHandler.mjs';
 import { Modify } from 'ol/interaction';
 import {deletePolygon} from '../res/HelperFunctions.mjs'
-import {defaultStyle, selectedStyle} from '../res/Styles.mjs'
+import {defaultStyle } from '../res/Styles.mjs'
 import { isValid, unkink }  from '../res/unkink.mjs'
 import { geoJsonFeature2olFeature, geoJsonFeatureCollection2olFeatures, olFeature2geoJsonFeature, olFeatures2GeoJsonFeatureCollection } from '../translation/translators.mjs';
 import { saveToDatabase } from '../res/DatabaseFunctions.mjs';
