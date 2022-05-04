@@ -16,7 +16,7 @@ import { defaults as defaultControls } from 'ol/control'
 import { fixOverlaps, handleMerge } from '../res/PolygonHandler.mjs';
 import { Modify } from 'ol/interaction';
 import {deletePolygon} from '../res/HelperFunctions.mjs'
-import {defaultStyle } from '../res/Styles.mjs'
+import {defaultStyle, selectedStyle } from '../res/Styles.mjs'
 import { isValid, unkink }  from '../res/unkink.mjs'
 import { geoJsonFeature2olFeature, geoJsonFeatureCollection2olFeatures, olFeature2geoJsonFeature, olFeatures2GeoJsonFeatureCollection } from '../translation/translators.mjs';
 import { saveToDatabase } from '../res/DatabaseFunctions.mjs';
@@ -159,7 +159,9 @@ function MapWrapper() {
         /* Check if clicked on an existing polygon */
         if (isPolygon(event.map, event.pixel)){
             currentClickedPolygon = getPolygon(event.map, event.pixel) 
+            currentClickedPolygon.setStyle(selectedStyle)
             if(previousClickedPolygon != null){
+                previousClickedPolygon.setStyle(defaultStyle)
                 if(currentClickedPolygon !== -1){
                     if(currentClickedPolygon !== previousClickedPolygon){
                         merge(event.map)
@@ -182,7 +184,6 @@ function MapWrapper() {
             else if(clickHandlerState === 'NONE'){
                 clickHandlerState = 'DRAW'
                 drawPolygon(event.map).addEventListener('drawend', (evt) => {
-        
                     handleDrawend(evt, event.map)
                     clickHandlerState = 'DRAWEND'
                     event.map.getInteractions().getArray().pop()
