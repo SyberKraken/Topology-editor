@@ -98,6 +98,9 @@ function MapWrapper() {
     
     //fixes overlaps for the latest polygon added to map
     const cleanUserInput = (map, modifiedFeatures=1) => {
+        console.log("cleanuserinput, map has this many features:")
+        
+        console.log(getFeatureList(map).length)
         if(getFeatureList(map).length > 1)
         {
             let newPolygons = fixOverlaps(olFeatures2GeoJsonFeatureCollection(getFeatureList(map)), modifiedFeatures)
@@ -278,8 +281,7 @@ function MapWrapper() {
 
     const handleNewPoly = (evt) => {
         // when add feature check if valid
-        console.log("EVENT FEATURE converted:")
-        console.log(olFeature2geoJsonFeature(evt.feature))
+        console.log( )
         if (!isValid(olFeature2geoJsonFeature(evt.feature))) {
             map.getLayers().getArray()[1].getSource().removeFeature(evt.feature)
         } else {

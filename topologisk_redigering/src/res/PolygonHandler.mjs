@@ -5,7 +5,7 @@ import { geoJsonFeatureCollection2JstsGeometries, jstsGeometries2GeoJsonFeatureC
 import { geoJsonFeatureCollection2olFeatures, geoJsonFeature2JstsGeometry} from "../translation/translators.mjs"
 import { getJstsGeometryCoordinates } from "../translation/getter.mjs"
 import { coordinatesAreEquivalent } from "./HelperFunctions.mjs"
-
+import Area from "jsts/org/locationtech/jts/algorithm/Area.js"
 
 //takes geoJsonFeatureCollection as input and removes areas from the last drawn polygon where it overlaps with other polygons.
 export const fixOverlaps = (features, modifiedFeatures=1) => {
@@ -24,6 +24,21 @@ export const fixOverlaps = (features, modifiedFeatures=1) => {
             cleanedJstsCollection.push(diff)
         }
     })
+
+    //if the polygon has holes, remove holes that are too small
+    if (trimmed._holes) {
+        if (trimmed._holes.length > 0) {
+            
+            for (let i = 0; i < trimmed._holes.length; i++) {
+                let hole = trimmed._holes[i]
+                console.log("HOLE HERE, size is: ", Area.ofRing(hole._points._coordinates))
+                if(Area.ofRing(hole._points._coordinates)/hole.getLength() < areaOverCircLimit) {
+                    console.log("HOLE REMOVED")
+                    trimmed.holes.splice(i, 1)
+                }
+            }
+        }
+    }
 
     //If geometries exist then trimmed is a multipolygon and we want to push each polygon individually to cleanedJstsCollection.
     if (trimmed._geometries) {
