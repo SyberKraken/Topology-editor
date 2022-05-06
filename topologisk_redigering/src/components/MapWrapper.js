@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Map, View } from 'ol';
+import { Feature, Map, View } from 'ol';
 import TileLayer from 'ol/layer/Tile';
 import 'ol/ol.css';
 import VectorLayer from 'ol/layer/Vector';
@@ -24,6 +24,7 @@ import UploadFileIcon from '@mui/icons-material/UploadFile';
 import SaveIcon from '@mui/icons-material/Save';
 import { Button } from '@mui/material';
 import QuestionMarkIcon from '@mui/icons-material/QuestionMark';
+import { Polygon } from 'ol/geom';
 
 
 function MapWrapper() {
@@ -80,10 +81,28 @@ function MapWrapper() {
 
     const source = new VectorSource({
         wrapX: false,
-        url: "http://localhost:4000/file1",
-        format: new GeoJSON({ projection: "EPSG:3006" }),
+        /* url: "http://localhost:4000/file1",   */
+        /* format: new GeoJSON({ projection: "EPSG:3006" }), */
+        loader: function(){
+            let url = "http://localhost:4000/file1"
+            fetch(url).then(res => res.json()).then(result => {
+            result.features.forEach(feature => {
+                if (feature.geometry.coordinates.length > 1){
+                    let splitMulti = []
+                    feature.geometry.coordinates.forEach(coordinateArr => {
+                        splitMulti.push(new Feature(new Polygon(coordinateArr)))
+                    })
+                    source.addFeatures(splitMulti)
+                }
+                else{
+                    source.addFeature(new Feature(new Polygon(feature.geometry.coordinates[0])))
+                }
+            })
+    
+        })
+    }
 
-    });
+});
 
     const polygonLayer = new VectorLayer({
         source: source,
@@ -281,7 +300,12 @@ function MapWrapper() {
 
     const handleNewPoly = (evt) => {
         // when add feature check if valid
+<<<<<<< HEAD
         console.log( )
+=======
+        //console.log("EVENT FEATURE converted:")
+        //console.log(olFeature2geoJsonFeature(evt.feature))
+>>>>>>> refs/remotes/origin/main
         if (!isValid(olFeature2geoJsonFeature(evt.feature))) {
             map.getLayers().getArray()[1].getSource().removeFeature(evt.feature)
         } else {
@@ -302,30 +326,19 @@ function MapWrapper() {
     /* check if we are clicking on a polygon*/
     const isPolygon = (map, pixel) => {
         if(map.getFeaturesAtPixel(pixel).length > 0){
-            //console.log(map.getFeaturesAtPixel(pixel)[0].getGeometry().getType() === "Polygon")
             return map.getFeaturesAtPixel(pixel)[0].getGeometry().getType() === "Polygon"
         }
         return false 
     }
-   
-   /*  const getFeatureType = (feature) => {
-        return feature.getGeometry().getType()
-    } */
 
     /* get the polygon we are clicking on */
     const getPolygon = (map, pixel) => {
         let list = map.getFeaturesAtPixel(pixel)
-        //console.log(list)
         if (list.length === 0){return -1}
         return list[0]
     }
 
-    const comparePolygons = () => {
-        if(previousClickedPolygon){
-            return 
-        }
-    }
-
+    /* get mapsource */
     const getSource = (map) => {
         return map.getLayers().getArray()[1].getSource()
     }
@@ -342,13 +355,12 @@ function MapWrapper() {
 
     return (
         <>
-            <div style={{ height: '100vh', width: '100%' }}
-            ref={mapElement} 
+            <div style={{ height: '95vh', width: '100%' }}
+            ref={mapElement}
             className="map-container">    
                 <nav> 
                     <Button value="Import File" color="success" size='large'><UploadFileIcon/></Button>
                     <Button value="Save" color="success" size='large' onClick={saveFeatureCollection}><SaveIcon/></Button>
-                    <Button ><QuestionMarkIcon></QuestionMarkIcon></Button>
                 </nav>
             </div>
         </>
