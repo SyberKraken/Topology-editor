@@ -44,7 +44,6 @@ export const isValid = (geoJsonFeature) => {
  
 }
 
-
 /*
  * return true if @lastDrawnPoly intersects any of the polys in @allPolys
  * @lastDrawnPoly = openlayers feature

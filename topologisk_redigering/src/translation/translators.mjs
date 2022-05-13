@@ -73,7 +73,10 @@ export const geoJsonFeature2JstsGeometry = (geoJsonFeature) => {
     let jsts = reader.read(geoJsonFeature)
     jsts.geometry.setSRID(getRandomId())
     propertiesTableJSTS.set(jsts.geometry._SRID, geoJsonFeature.properties)
+    console.log(jsts)
+
     return jsts.geometry
+
 }
 
 /* Takes a jsts geometry and returns a geoJson feature */
@@ -117,6 +120,7 @@ export const jstsGeometries2GeoJsonFeatureCollection = (jstsGeometries) => {
     });
     
     featureCollection.features = featureList
+    console.log(featureCollection)
     return featureCollection
 }
 //////////////////////////////////////////////////////////////////////////
@@ -131,6 +135,9 @@ export const olFeatures2GeoJsonFeatureCollection = (olFeatures) => {
 
 /* Takes a geoJson featureCollection and returns an Array of features */
 export const geoJsonFeatureCollection2olFeatures = (featureCollection) => {
+    console.log(featureCollection)
+    let result = new GeoJSON().readFeatures(featureCollection)
+    console.log(result)
     return new GeoJSON().readFeatures(featureCollection)
 }
 

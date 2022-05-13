@@ -101,7 +101,10 @@ function MapWrapper() {
             let url = "http://localhost:4000/file1"
             fetch(url).then(res => res.json()).then(result => {
             result.features.forEach(feature => {
-                if (feature.geometry.coordinates.length > 1){
+                
+                source.addFeature(geoJsonFeature2olFeature(feature))
+                
+                /* if (feature.geometry.coordinates.length > 1){
                     let splitMulti = []
                     feature.geometry.coordinates.forEach(coordinateArr => {
                         splitMulti.push(new Feature(new Polygon(coordinateArr)))
@@ -110,7 +113,7 @@ function MapWrapper() {
                 }
                 else{
                     source.addFeature(new Feature(new Polygon(feature.geometry.coordinates[0])))
-                }
+                } */
             })
     
         })
@@ -141,7 +144,10 @@ function MapWrapper() {
         if(getFeatureList(map).length > 1)
         {
             let newPolygons = fixOverlaps(olFeatures2GeoJsonFeatureCollection(getFeatureList(map)), modifiedFeatures)
+            //TODO: mcProblem happens here, we think. V V V
             let featureList = geoJsonFeatureCollection2olFeatures(newPolygons) 
+            //TODO: check flatcoordinates for the multipolygon in the console log below.
+            console.log(featureList)
             if(featureList.length > 0){
                 getSource(map).clear()
                 getSource(map).addFeatures(featureList) 

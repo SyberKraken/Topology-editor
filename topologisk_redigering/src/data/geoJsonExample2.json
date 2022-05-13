@@ -1,9 +1,70 @@
 {
-  "file1": {
-    "type": "FeatureCollection",
-    "name": "compartments",
-    "crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:EPSG::3006" } },
-    "features": [
-    ]
-    }    
+  "file1":    
+  {
+  "type": "FeatureCollection",
+  "crs": {
+    "type": "name",
+    "properties": {
+      "name": "EPSG:3006"
+    }
+  },
+  "features": [{
+    "type": "Feature",
+    "geometry": {
+      "type": "MultiPolygon",
+      "coordinates": [
+        [
+          [
+            [
+              500000,
+              7000000
+            ],
+            [
+              510000,
+              7000000
+            ],
+            [
+              510000,
+              7100000
+            ],
+            [
+              500000,
+              7100000
+            ],
+            [
+              500000,
+              7000000
+            ]
+          ]
+        ],
+        [
+          [
+            [
+              400000,
+              7000000
+            ],
+            [
+              410000,
+              7000000
+            ],
+            [
+              410000,
+              7100000
+            ],
+            [
+              400000,
+              7100000
+            ],
+            [
+              400000,
+              7000000
+            ]
+          ]
+        ]
+      ]
+    },
+    "properties": null
+  }]
+
+  }
 }

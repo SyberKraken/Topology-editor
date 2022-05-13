@@ -14,7 +14,8 @@ export const handleIntersections = (jstsNewGeometry, jstsOtherGeometries) => {
     
     jstsOtherGeometries.forEach(jstsGeometry => {
             jstsNewGeometry = OverlayOp.difference(jstsNewGeometry, jstsGeometry) 
-       
+            console.log(jstsGeometry)
+            console.log("Difference: ", jstsNewGeometry)
     });
     //console.log("JSTSNEWGEOM: ", jstsNewGeometry)
     return jstsNewGeometry
