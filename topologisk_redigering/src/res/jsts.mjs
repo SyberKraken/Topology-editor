@@ -2,6 +2,9 @@ import OverlayOp from "jsts/org/locationtech/jts/operation/overlay/OverlayOp.js"
 import polygonsAreConnected from "./TopologyValidation.mjs"
 import { GeometryFactory } from "jsts/org/locationtech/jts/geom.js";
 import { geoJsonFeature2JstsGeometry, jstsGeometry2GeoJsonFeature } from "../translation/translators.mjs";
+import { coordinatesAreEquivalent } from "./HelperFunctions.mjs";
+import { getJstsGeometryCoordinates } from "../translation/getter.mjs";
+import IsValidOp from "jsts/org/locationtech/jts/operation/valid/IsValidOp.js";
 
 
 export const checkIntersection = (jstsGeometryA, jstsGeometryB) => {
@@ -11,11 +14,23 @@ export const checkIntersection = (jstsGeometryA, jstsGeometryB) => {
 //removes overlapped areas from new geometry
 //takes a jsts geometry and a list of all other jsts geometries.
 export const handleIntersections = (jstsNewGeometry, jstsOtherGeometries) => {
-    
-    jstsOtherGeometries.forEach(jstsGeometry => {
-            jstsNewGeometry = OverlayOp.difference(jstsNewGeometry, jstsGeometry) 
-       
+    if (IsValidOp.isValid(jstsNewGeometry)) {
+
+        jstsOtherGeometries.forEach(jstsGeometry => {
+            if (IsValidOp.isValid(jstsGeometry)) {
+                jstsNewGeometry = OverlayOp.difference(jstsNewGeometry, jstsGeometry)
+            } else {
+                console.log("That was not a valid JSTS Geometry! \n", jstsGeometry)
+            }   
     });
+
+    } else {
+        console.log("That was not a valid JSTS Geometry! \n", jstsNewGeometry)
+    }
+    
+    if (!IsValidOp.isValid(jstsNewGeometry)) {
+        console.log("Returning invalid JSTS geometry...")
+    }
     //console.log("JSTSNEWGEOM: ", jstsNewGeometry)
     return jstsNewGeometry
 }

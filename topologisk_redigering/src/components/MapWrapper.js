@@ -26,6 +26,7 @@ import { Button } from '@mui/material';
 import QuestionMarkIcon from '@mui/icons-material/QuestionMark';
 import { Polygon } from 'ol/geom';
 import { DoubleClickZoom } from 'ol/interaction';
+import { get } from 'lodash';
 
 /*
 MapWrapper contains the on screen map and runs functionality according to user interaction.
@@ -92,6 +93,38 @@ function MapWrapper() {
         wrapX: true,
     })
 
+    const splittingMultipolygons = (Data) => {
+        let splitMulti = []
+
+        Data.features.forEach(feature => {
+            if (feature.geometry.coordinates.length > 1){
+                feature.geometry.coordinates.forEach(coordinateArr => {
+                    splitMulti.push(new Feature(new Polygon(coordinateArr)))
+                })
+            }
+            else{
+                splitMulti.push(new Feature(new Polygon(feature.geometry.coordinates[0])))
+            }
+        })
+
+        return splitMulti
+    }
+
+    const cleanInputData = (inputData) => {
+
+        const polygons = splittingMultipolygons(inputData)
+
+        // Add each polygon one by one using handleDrawEnd.
+        polygons.forEach( polygon => {
+            source.addFeature( polygon )
+
+        })
+
+
+        //source.addFeatures(polygons) // Add polygons to map
+
+    }
+
     //Loads geoJson data from server via url
     const source = new VectorSource({
         wrapX: false,
@@ -100,19 +133,7 @@ function MapWrapper() {
         loader: function(){
             let url = "http://localhost:4000/file1"
             fetch(url).then(res => res.json()).then(result => {
-            result.features.forEach(feature => {
-                if (feature.geometry.coordinates.length > 1){
-                    let splitMulti = []
-                    feature.geometry.coordinates.forEach(coordinateArr => {
-                        splitMulti.push(new Feature(new Polygon(coordinateArr)))
-                    })
-                    source.addFeatures(splitMulti)
-                }
-                else{
-                    source.addFeature(new Feature(new Polygon(feature.geometry.coordinates[0])))
-                }
-            })
-    
+                cleanInputData(result)   
         })
     }
 
@@ -134,13 +155,11 @@ function MapWrapper() {
     Removes parts of the most recently added polygon on the map that overlap with 
         existing polygons. on the intersection points, the new polygon has nodes added.
     */
-    const cleanUserInput = (map, modifiedFeatures=1) => {
-        console.log("cleanuserinput, map has this many features:")
-        
-        console.log(getFeatureList(map).length)
-        if(getFeatureList(map).length > 1)
+    const cleanUserInput = (map, oldFeatureList, modifiedFeatures=1) => {
+
+        if(oldFeatureList.length > 1)
         {
-            let newPolygons = fixOverlaps(olFeatures2GeoJsonFeatureCollection(getFeatureList(map)), modifiedFeatures)
+            let newPolygons = fixOverlaps(olFeatures2GeoJsonFeatureCollection(oldFeatureList), modifiedFeatures)
             let featureList = geoJsonFeatureCollection2olFeatures(newPolygons) 
             if(featureList.length > 0){
                 getSource(map).clear()
@@ -233,13 +252,13 @@ function MapWrapper() {
         else {
             if(clickHandlerState === 'DRAWEND') {
                 //TODO: MAYBE unkink the drawn polygon HERE
-                cleanUserInput(event.map)
+                cleanUserInput(event.map, getFeatureList(event.map))
                 clickHandlerState = 'NONE'
             }
             else if(clickHandlerState === 'NONE'){
                 clickHandlerState = 'DRAW'
                 drawPolygon(event.map).addEventListener('drawend', (evt) => {
-                    handleDrawend(evt, event.map)
+                    handleDrawend(evt.feature, event.map)
                     clickHandlerState = 'DRAWEND'
                     event.map.getInteractions().getArray().pop()
                     event.map.getInteractions().getArray().pop()
@@ -263,13 +282,13 @@ function MapWrapper() {
     }
 
     //interprets newly drawn polygon and modifies it to not break topology rules.
-    const handleDrawend = (evt, map) => {
+    const handleDrawend = (newFeature, map) => {
         const mapSource = map.getLayers().getArray()[1].getSource()
 
         // check if valid
         let valid = false
         try {
-            valid = isValid(olFeature2geoJsonFeature(evt.feature))
+            valid = isValid(olFeature2geoJsonFeature(newFeature))
         } catch (error) {
             console.log("isvalid error from drawendevent") 
         }
@@ -277,17 +296,17 @@ function MapWrapper() {
         if (!valid)
         {
             //if not valid unkink: return geoJsonFeatureCollection
-            const unkinkedCollection = unkink(olFeature2geoJsonFeature(evt.feature))
+            const unkinkedCollection = unkink(olFeature2geoJsonFeature(newFeature))
             
             //check intersection and add unkinked polys to the source
             const olFeatures = geoJsonFeatureCollection2olFeatures(unkinkedCollection)
             mapSource.addFeatures(olFeatures)
-            cleanUserInput(map)
+            cleanUserInput(map, getFeatureList(map))
             return unkinkedCollection.features.length
         }
         else 
         {
-            cleanUserInput(map)
+            cleanUserInput(map, getFeatureList(map))
             return 1
         }
     }
@@ -313,14 +332,14 @@ function MapWrapper() {
                 for (let index = 0; index < geoJsonCollection.features.length; index++) {
                     const geoJsonfeature = geoJsonCollection.features[index];
                     source2.addFeature(geoJsonFeature2olFeature(geoJsonfeature))
-                    cleanUserInput(event.target.map_)
+                    cleanUserInput(event.target.map_, getFeatureList(event.target.map_))
                 }
             }
         }
         
         features.forEach((feature) => {
             source2.addFeature(feature)
-            cleanUserInput(event.target.map_)
+            cleanUserInput(event.target.map_, getFeatureList(event.target.map_))
         })
     }
 
