@@ -23,8 +23,7 @@ import { saveToDatabase } from '../res/DatabaseFunctions.mjs';
 import UploadFileIcon from '@mui/icons-material/UploadFile';
 import SaveIcon from '@mui/icons-material/Save';
 import { Button } from '@mui/material';
-import QuestionMarkIcon from '@mui/icons-material/QuestionMark';
-import { Polygon } from 'ol/geom';
+import { Polygon, MultiPolygon } from 'ol/geom';
 import { DoubleClickZoom } from 'ol/interaction';
 
 /*
@@ -95,13 +94,16 @@ function MapWrapper() {
     //Loads geoJson data from server via url
     const source = new VectorSource({
         wrapX: false,
-        /* url: "http://localhost:4000/file1",   */
-        /* format: new GeoJSON({ projection: "EPSG:3006" }), */
         loader: function(){
             let url = "http://localhost:4000/file1"
             fetch(url).then(res => res.json()).then(result => {
             result.features.forEach(feature => {
-                if (feature.geometry.coordinates.length > 1){
+                if (feature.geometry.type === "MultiPolygon"){
+                    source.addFeature(new Feature(new MultiPolygon(feature.geometry.coordinates)))
+                } else if(feature.geometry.type === "Polygon"){
+                    source.addFeature(new Feature(new Polygon(feature.geometry.coordinates)))
+                }
+                /* if (feature.geometry.coordinates.length > 1){
                     let splitMulti = []
                     feature.geometry.coordinates.forEach(coordinateArr => {
                         splitMulti.push(new Feature(new Polygon(coordinateArr)))
@@ -110,7 +112,7 @@ function MapWrapper() {
                 }
                 else{
                     source.addFeature(new Feature(new Polygon(feature.geometry.coordinates[0])))
-                }
+                } */
             })
     
         })
@@ -161,13 +163,9 @@ function MapWrapper() {
     const cleanself = (evt) => {
         //alt 1: run this on all polygons who change. Stop propagation to hinder repeated firing.
         //alt 2: getPointClosestToPixel, get all features who share pixel, run cleanuserinput/handleintersections on all of them.
-        
-        //console.log("Feature change event provides:", evt.target)
     }
 
-    /*
-        sets initial values and interactions for the Openlayers Map. 
-    */
+    /* sets initial values and interactions for the Openlayers Map.*/
     useEffect(() => {
         const initialMap = new Map({
             controls: defaultControls().extend([mousePositionControl]),

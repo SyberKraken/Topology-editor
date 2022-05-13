@@ -18,7 +18,6 @@ class Line {
   }
   
     // verify that two polygons in a "FeatureCollection" (i.e. Topology) are connected
-  
     // To do this you want to find a line that is common to both polygons.
   
     //https://codeforces.com/blog/entry/48868

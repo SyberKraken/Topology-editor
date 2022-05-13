@@ -355,6 +355,41 @@ const propertiesFeatureCollection = () => {
     }
 }
 
+const multiPolygon = () => {
+    return {
+            "type":"Feature",
+            "geometry": {
+            "type": "MultiPolygon",
+            "coordinates": [
+                [
+                    [0, 0],
+                    [0, 1],
+                    [1, 1],
+                    [1, 0],
+                    [0, 0]
+                ],
+                [
+                    [1, 0],
+                    [1, 1],
+                    [2, 1],
+                    [2, 0],
+                    [1, 0]
+                ],
+                [
+                    [0, 1],
+                    [0, 2],
+                    [2, 2],
+                    [2, 1],
+                    [0, 1]
+                ]
+            ]
+            },
+            "properties": {
+                "name":"This is a MultiPolygon"
+            }
+        }
+    }
+
 test('Check if properties remain the same after jsts <-> geojson conversion', function(t){
     const propertiesExpected = propertiesFeature().properties
     const propertiesActual = jstsGeometry2GeoJsonFeature(geoJsonFeature2JstsGeometry(propertiesFeature())).properties
@@ -378,3 +413,22 @@ test('Check if properties remain the same after jsts <-> geojson collection conv
     t.end()
 
 })
+
+
+test('Check if geojson --> jsts conversion with multipolygons work', function(t){
+    const propertiesExpected = multiPolygon().properties
+    const coordinatesExpected = multiPolygon().geometry.coordinates
+    const jsts = geoJsonFeature2JstsGeometry(multiPolygon())
+    const geoAfterConversion = jstsGeometry2GeoJsonFeature(jsts)
+    const jstsCoordinates = jsts._geometries.coordinates
+    const geoAfterCoordinates = geoAfterConversion.geometry.coordinates[0]
+    const geoAfterProperties = geoAfterConversion.properties
+
+    t.deepEqual(jstsCoordinates, coordinatesExpected)
+    t.deepEqual(geoAfterCoordinates, coordinatesExpected)
+    console.log("------------------------------------------")
+    t.deepEqual(geoAfterProperties,propertiesExpected)
+    t.end()
+})
+
+

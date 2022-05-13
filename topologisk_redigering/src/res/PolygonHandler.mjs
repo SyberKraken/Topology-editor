@@ -1,8 +1,7 @@
-import { jstsToGeoJson } from "./GeoJsonFunctions.mjs"
 import getMergeableFeatures, { handleIntersections, mergeFeatures } from "./jsts.mjs"
 import { addIntersectionNodes } from "./jsts.mjs"
 import { geoJsonFeatureCollection2JstsGeometries, jstsGeometries2GeoJsonFeatureCollection, jstsGeometry2GeoJsonFeature } from "../translation/translators.mjs"
-import { geoJsonFeatureCollection2olFeatures, geoJsonFeature2JstsGeometry} from "../translation/translators.mjs"
+import { geoJsonFeature2JstsGeometry} from "../translation/translators.mjs"
 import { getJstsGeometryCoordinates } from "../translation/getter.mjs"
 import { coordinatesAreEquivalent } from "./HelperFunctions.mjs"
 import Area from "jsts/org/locationtech/jts/algorithm/Area.js"
@@ -28,7 +27,6 @@ export const fixOverlaps = (features, modifiedFeatures=1) => {
     //if the polygon has holes, remove holes that are too small
     if (trimmed._holes) {
         if (trimmed._holes.length > 0) {
-            
             for (let i = 0; i < trimmed._holes.length; i++) {
                 let hole = trimmed._holes[i]
                 console.log("HOLE HERE, size is: ", Area.ofRing(hole._points._coordinates))
@@ -69,14 +67,13 @@ export const handleMerge = (firstInputPolygon, secondInputPolygon, featureCollec
     let mergables = getMergeableFeatures(firstPolygon, featureCollection)
     let status = -1
     
-    //console.log(mergables)
-
     mergables.forEach(function compare(mergablePolygon){
         if(coordinatesAreEquivalent(getJstsGeometryCoordinates(secondPolygon), getJstsGeometryCoordinates(mergablePolygon))){
             try {
                 status = jstsGeometry2GeoJsonFeature(mergeFeatures(firstPolygon, secondPolygon))
             } catch (error) {
                console.log("merge error on typeconversion") 
+               console.log(error)
             }
         }
     })

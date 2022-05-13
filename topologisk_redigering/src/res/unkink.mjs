@@ -6,7 +6,7 @@ import MultiPoint from 'ol/geom/MultiPoint.js';
 import BufferParameters from 'jsts/org/locationtech/jts/operation/buffer/BufferParameters.js'
 import BufferOp from 'jsts/org/locationtech/jts/operation/buffer/BufferOp.js'
 import OverlayOp from "jsts/org/locationtech/jts/operation/overlay/OverlayOp.js"
-import { geoJsonFeature2JstsGeometry, geoJsonFeature2olFeature } from '../translation/translators.mjs';
+import { geoJsonFeature2JstsGeometry } from '../translation/translators.mjs';
 import { fixCoordinateRotation } from './HelperFunctions.mjs';
 
 

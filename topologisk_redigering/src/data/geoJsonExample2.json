@@ -1,9 +1,12 @@
 {
   "file1": {
     "type": "FeatureCollection",
-    "name": "compartments",
-    "crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:EPSG::3006" } },
-    "features": [
-    ]
-    }    
+    "features": [],
+    "crs": {
+      "type": "name",
+      "properties": {
+        "name": "EPSG:3006"
+      }
+    }
+  }
 }

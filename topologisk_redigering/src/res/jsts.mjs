@@ -3,11 +3,6 @@ import polygonsAreConnected from "./TopologyValidation.mjs"
 import { GeometryFactory } from "jsts/org/locationtech/jts/geom.js";
 import { geoJsonFeature2JstsGeometry, jstsGeometry2GeoJsonFeature } from "../translation/translators.mjs";
 
-
-export const checkIntersection = (jstsGeometryA, jstsGeometryB) => {
-    let jstsGeometryIntersection = jstsGeometryA.intersection(jstsGeometryB)
-}
-
 //removes overlapped areas from new geometry
 //takes a jsts geometry and a list of all other jsts geometries.
 export const handleIntersections = (jstsNewGeometry, jstsOtherGeometries) => {
@@ -16,7 +11,6 @@ export const handleIntersections = (jstsNewGeometry, jstsOtherGeometries) => {
             jstsNewGeometry = OverlayOp.difference(jstsNewGeometry, jstsGeometry) 
        
     });
-    //console.log("JSTSNEWGEOM: ", jstsNewGeometry)
     return jstsNewGeometry
 }
 
@@ -26,8 +20,6 @@ export const addIntersectionNodes = (jstsNewGeometry, jstsOtherGeometries) => {
         jstsOtherGeometries.forEach(jstsGeometry => {   
             let jstsNewGeometryTemp = OverlayOp.difference(jstsNewGeometry, jstsGeometry) 
             let intersection = OverlayOp.intersection(jstsNewGeometry_original, jstsGeometry);
-            //console.log("INTERSECTION: ", intersection)
-            //console.log("JSTSNEWGEOMETRYTEMP", jstsNewGeometryTemp)
             
             //handle both if intersection is geometrycollection and just a geometry
             try {
@@ -40,34 +32,21 @@ export const addIntersectionNodes = (jstsNewGeometry, jstsOtherGeometries) => {
                     jstsNewGeometryTemp = OverlayOp.union(jstsNewGeometryTemp, intersectionGeom)
                 });
             }
-
-
-           // console.log("-----------jstsNewGeometryTemp",jstsNewGeometryTemp)
-            //console.log("-----------intersection",intersection)
-                //NOTE mbe check both multi
-            //jstsNewGeometry = OverlayOp.union(jstsNewGeometryTemp, intersection)
-
         })
         
     } catch (error) {
         console.log(error)
         return jstsNewGeometry_original
     }
-   
-
-   
-    //console.log("JSTSNEWGEOM: ", jstsNewGeometry)
     return jstsNewGeometry
 }
 
 //takes a JSTSpolygon and a geoJsonFeatureCollection and returns a JSTS geomlist
 export default function getMergeableFeatures(selectedPolygon, allFeatures) { 
 
-  //console.log(allFeatures)
   //removes selected polygon from polygons it will be checked against
   let otherFeatures = allFeatures.features.filter(function(feature) {
     const curPolygon = geoJsonFeature2JstsGeometry(feature)
-    //console.log(curPolygon)
     return JSON.stringify(curPolygon) !== JSON.stringify(selectedPolygon)
   })
 
@@ -76,18 +55,14 @@ export default function getMergeableFeatures(selectedPolygon, allFeatures) {
     const curPolygon = geoJsonFeature2JstsGeometry(feature)
     const intersection = OverlayOp.intersection(curPolygon, selectedPolygon)
     return intersection
-
   })
 
-  //console.log(result)
   const resultCleaned = result.filter(function(poly) {
       const curPolygon = geoJsonFeature2JstsGeometry(poly)
       return polygonsAreConnected(jstsGeometry2GeoJsonFeature(curPolygon), jstsGeometry2GeoJsonFeature(selectedPolygon))
   })
 
-  //console.log(result)
   //converting to jsts geometries 
-  
   const jstsFeatureList = []
   for (let index = 0; index < resultCleaned.length; index++) {
       const element = resultCleaned[index];
