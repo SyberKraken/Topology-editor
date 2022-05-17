@@ -131,7 +131,6 @@ function MapWrapper() {
             source.addFeature(polygon) //handleDrawEnd assumes the new polygon already exists in the source.
             handleDrawend( polygon, source )
         })
-        
 
     }
 
