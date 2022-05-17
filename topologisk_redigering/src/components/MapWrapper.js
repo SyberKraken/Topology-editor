@@ -143,9 +143,15 @@ function MapWrapper() {
         console.log(getFeatureList(map).length)
         if(getFeatureList(map).length > 1)
         {
+            console.log("features before fixoverlaps:")
+            console.log(getFeatureList(map))
+            console.log(olFeatures2GeoJsonFeatureCollection(getFeatureList(map)))
             let newPolygons = fixOverlaps(olFeatures2GeoJsonFeatureCollection(getFeatureList(map)), modifiedFeatures)
             //TODO: mcProblem happens here, we think. V V V
+            console.log("features after fixoverlaps")
+            console.log(newPolygons)
             let featureList = geoJsonFeatureCollection2olFeatures(newPolygons) 
+                
             //TODO: check flatcoordinates for the multipolygon in the console log below.
             console.log(featureList)
             if(featureList.length > 0){

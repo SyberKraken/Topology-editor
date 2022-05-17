@@ -8,11 +8,11 @@ import { coordinatesAreEquivalent } from "./HelperFunctions.mjs"
 import Area from "jsts/org/locationtech/jts/algorithm/Area.js"
 
 //takes geoJsonFeatureCollection as input and removes areas from the last drawn polygon where it overlaps with other polygons.
-//this function probably works with multipolygons 
 export const fixOverlaps = (features, modifiedFeatures=1) => {
-   console.log(features)
+    console.log(features)
     let areaOverCircLimit = 10
     let jstsCollection = geoJsonFeatureCollection2JstsGeometries(features)
+    console.log("se till att jsts konvertering behåller multipolygon")
     console.log(jstsCollection)
     let preTrimmedNewPolygon = jstsCollection[jstsCollection.length - 1]
     let trimmed = handleIntersections(jstsCollection[jstsCollection.length - 1], jstsCollection.slice(0, jstsCollection.length - 1))
@@ -27,15 +27,18 @@ export const fixOverlaps = (features, modifiedFeatures=1) => {
         }
     })
 
+    console.log("se till att cleanedjstscollection nedan har multipolygoner:")
+    console.log(cleanedJstsCollection)
+
     //if the polygon has holes, remove holes that are too small
     if (trimmed._holes) {
         if (trimmed._holes.length > 0) {  
             for (let i = 0; i < trimmed._holes.length; i++) {
                 let hole = trimmed._holes[i]
 
-                console.log("HOLE HERE, size is: ", Area.ofRing(hole._points._coordinates))
+                //console.log("HOLE HERE, size is: ", Area.ofRing(hole._points._coordinates))
                 if(Area.ofRing(hole._points._coordinates)/hole.getLength() < areaOverCircLimit) {
-                    console.log("HOLE REMOVED")
+                    //console.log("HOLE REMOVED")
                     trimmed.holes.splice(i, 1)
                 }
             }
@@ -44,12 +47,16 @@ export const fixOverlaps = (features, modifiedFeatures=1) => {
 
     //If geometries exist then trimmed is a multipolygon and we want to push each polygon individually to cleanedJstsCollection.
     //TODO: do we want to change this behaviour to create a multipolygon instead of splitting into different polygons
+    //TODO: change comments here if this behaviour has been changed.
+    
     if (trimmed._geometries) {
-        trimmed._geometries.forEach(function multiPolygonToPolygons(geom){
+        console.log("this is a multipolygon! we love multipolygons, so we add it.")
+        cleanedJstsCollection.push(trimmed)
+       /*  trimmed._geometries.forEach(function multiPolygonToPolygons(geom){
             if(geom.getArea()/geom.getLength() > areaOverCircLimit){
                 cleanedJstsCollection.push(geom)
             }
-        }) 
+        })  */
     }
 
     //if the polygon has an area (meaning its NOT entirely encapsulated by another polygon), add it.
@@ -59,6 +66,10 @@ export const fixOverlaps = (features, modifiedFeatures=1) => {
         }
     }
    
+    console.log("se till att cleanedjstscollection nedan har multipolygoner:")
+    console.log(cleanedJstsCollection)  
+    console.log(jstsGeometries2GeoJsonFeatureCollection(cleanedJstsCollection))
+
     return jstsGeometries2GeoJsonFeatureCollection(cleanedJstsCollection)
 }
 

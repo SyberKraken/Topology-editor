@@ -2,7 +2,8 @@ import GeoJSON from 'ol/format/GeoJSON.js';
 import GeoJSONReader from 'jsts/org/locationtech/jts/io/GeoJSONReader.js'
 import GeoJSONWriter from 'jsts/org/locationtech/jts/io/GeoJSONWriter.js'
 import { Feature } from 'ol';
-import { Polygon } from 'ol/geom.js';
+import { Polygon, MultiPolygon } from 'ol/geom.js';
+//import { MultiPolygon } from 'jsts/org/locationtech/jts/geom';
 
 /* 
     +--------------------------------------------------------------+
@@ -86,7 +87,16 @@ export const jstsGeometry2GeoJsonFeature = (jstsGeometry) => {
     propertiesTableJSTS.delete(jstsGeometry._SRID)
 
     let writtenGeometry = writer.write(jstsGeometry)
-    let polygon = new Polygon(writtenGeometry.coordinates)
+    //if multipolygon, new multipolygon. else new polygon 
+    console.log("KOLLA HÄÄÄÄÄÄÄÄÄÄÄR MULTIPOLYGON ELLER SINGLE???")
+    console.log(writtenGeometry)
+    let polygon;
+    if(writtenGeometry.type == "MultiPolygon") {
+        polygon = new MultiPolygon(writtenGeometry.coordinates)
+    }
+    else {
+        polygon = new Polygon(writtenGeometry.coordinates)
+    }
     let newFeature = new Feature(polygon)
     newFeature.setProperties(getProperties)
     newFeature = new GeoJSON().writeFeatureObject(newFeature)
@@ -135,7 +145,7 @@ export const olFeatures2GeoJsonFeatureCollection = (olFeatures) => {
 
 /* Takes a geoJson featureCollection and returns an Array of features */
 export const geoJsonFeatureCollection2olFeatures = (featureCollection) => {
-    console.log(featureCollection)
+
     let result = new GeoJSON().readFeatures(featureCollection)
     console.log(result)
     return new GeoJSON().readFeatures(featureCollection)
