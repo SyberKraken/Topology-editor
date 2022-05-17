@@ -76,6 +76,9 @@ export const fixOverlaps = (features, modifiedFeatures=1) => {
 
 //Takes geojsonFeatures and a featureCollection and returns geojson geometry
 export const handleMerge = (firstInputPolygon, secondInputPolygon, featureCollection) => {
+    
+    console.log("HANDLEMERGE CALLED")
+
     //convert to jsts geometries
    
     let firstPolygon = geoJsonFeature2JstsGeometry(firstInputPolygon)
@@ -86,9 +89,12 @@ export const handleMerge = (firstInputPolygon, secondInputPolygon, featureCollec
     
     //console.log(mergables)
 
+//TODO: if sats för multipolygoner eller något
+
     mergables.forEach(function compare(mergablePolygon){
         if(coordinatesAreEquivalent(getJstsGeometryCoordinates(secondPolygon), getJstsGeometryCoordinates(mergablePolygon))){
             try {
+                console.log("THESE ARE MERGEABLE")
                 status = jstsGeometry2GeoJsonFeature(mergeFeatures(firstPolygon, secondPolygon))
             } catch (error) {
                console.log("merge error on typeconversion") 

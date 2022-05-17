@@ -88,8 +88,6 @@ export const jstsGeometry2GeoJsonFeature = (jstsGeometry) => {
 
     let writtenGeometry = writer.write(jstsGeometry)
     //if multipolygon, new multipolygon. else new polygon 
-    console.log("KOLLA HÄÄÄÄÄÄÄÄÄÄÄR MULTIPOLYGON ELLER SINGLE???")
-    console.log(writtenGeometry)
     let polygon;
     if(writtenGeometry.type == "MultiPolygon") {
         polygon = new MultiPolygon(writtenGeometry.coordinates)

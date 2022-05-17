@@ -360,7 +360,7 @@ function MapWrapper() {
     /* check if we are clicking on a polygon*/
     const isPolygon = (map, pixel) => {
         if(map.getFeaturesAtPixel(pixel).length > 0){
-            return map.getFeaturesAtPixel(pixel)[0].getGeometry().getType() === "Polygon"
+            return (map.getFeaturesAtPixel(pixel)[0].getGeometry().getType() === "Polygon" || map.getFeaturesAtPixel(pixel)[0].getGeometry().getType() === "MultiPolygon")
         }
         return false 
     }
