@@ -8,15 +8,18 @@ import Area from "jsts/org/locationtech/jts/algorithm/Area.js"
 
 //takes geoJsonFeatureCollection as input and removes areas from the last drawn polygon where it overlaps with other polygons.
 export const fixOverlaps = (features, modifiedFeatures=1) => {
+
+    console.log("fixOverlaps")
    
     let areaOverCircLimit = 10
     let jstsCollection = geoJsonFeatureCollection2JstsGeometries(features)
     let preTrimmedNewPolygon = jstsCollection[jstsCollection.length - 1]
-    let trimmed = handleIntersections(jstsCollection[jstsCollection.length - 1], jstsCollection.slice(0, jstsCollection.length - 1))
+    let originalPolygons = jstsCollection.slice(0, jstsCollection.length - 1)
+    let trimmed = handleIntersections(preTrimmedNewPolygon, originalPolygons)
     let cleanedJstsCollection = []
 
     //add intersection nodes to old polygons
-    jstsCollection.slice(0, jstsCollection.length - 1).forEach(function f(geom){
+    originalPolygons.forEach(function f(geom){
         let diff = (addIntersectionNodes(geom, [preTrimmedNewPolygon]))
         //removes too small polygons
         if(diff.getArea()/diff.getLength() > areaOverCircLimit){

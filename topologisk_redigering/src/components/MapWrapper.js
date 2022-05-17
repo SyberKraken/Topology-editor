@@ -25,6 +25,7 @@ import SaveIcon from '@mui/icons-material/Save';
 import { Button } from '@mui/material';
 import { Polygon, MultiPolygon } from 'ol/geom';
 import { DoubleClickZoom } from 'ol/interaction';
+import { get } from 'lodash';
 
 /*
 MapWrapper contains the on screen map and runs functionality according to user interaction.
@@ -91,30 +92,52 @@ function MapWrapper() {
         wrapX: true,
     })
 
+    const splittingMultipolygons = (Data) => {
+        let splitMulti = []
+
+        Data.features.forEach(feature => {
+            if (feature.geometry.coordinates.length > 1){
+                feature.geometry.coordinates.forEach(coordinateArr => {
+                    splitMulti.push(new Feature(new Polygon(coordinateArr)))
+                })
+            }
+            else{
+                splitMulti.push(new Feature(new Polygon(feature.geometry.coordinates[0])))
+            }
+        })
+
+        return splitMulti
+    }
+
+    const updateSource = (source, features) => {
+        console.log(features)
+        if(features.length > 0){
+            source.clear()
+            source.addFeatures(features) 
+        }else{
+            console.log("You are trying to update the map with an empty list of features!")
+        }
+
+    }
+
+
+    const cleanInputData = (inputData, source) => {
+
+        const polygons = splittingMultipolygons(inputData)
+        polygons.forEach( polygon => {
+            source.addFeature(polygon) //handleDrawEnd assumes the new polygon already exists in the source.
+            handleDrawend( polygon, source )
+        })
+
+    }
+
     //Loads geoJson data from server via url
     const source = new VectorSource({
         wrapX: false,
         loader: function(){
             let url = "http://localhost:4000/file1"
             fetch(url).then(res => res.json()).then(result => {
-            result.features.forEach(feature => {
-                if (feature.geometry.type === "MultiPolygon"){
-                    source.addFeature(new Feature(new MultiPolygon(feature.geometry.coordinates)))
-                } else if(feature.geometry.type === "Polygon"){
-                    source.addFeature(new Feature(new Polygon(feature.geometry.coordinates)))
-                }
-                /* if (feature.geometry.coordinates.length > 1){
-                    let splitMulti = []
-                    feature.geometry.coordinates.forEach(coordinateArr => {
-                        splitMulti.push(new Feature(new Polygon(coordinateArr)))
-                    })
-                    source.addFeatures(splitMulti)
-                }
-                else{
-                    source.addFeature(new Feature(new Polygon(feature.geometry.coordinates[0])))
-                } */
-            })
-    
+                cleanInputData(result, source)   
         })
     }
 
@@ -136,21 +159,15 @@ function MapWrapper() {
     Removes parts of the most recently added polygon on the map that overlap with 
         existing polygons. on the intersection points, the new polygon has nodes added.
     */
-    const cleanUserInput = (map, modifiedFeatures=1) => {
-        console.log("cleanuserinput, map has this many features:")
-        
-        console.log(getFeatureList(map).length)
-        if(getFeatureList(map).length > 1)
+    const cleanUserInput = (oldFeatureList, modifiedFeatures=1) => {
+        let featureList = []
+        if(oldFeatureList.length > 1)
         {
-            let newPolygons = fixOverlaps(olFeatures2GeoJsonFeatureCollection(getFeatureList(map)), modifiedFeatures)
-            let featureList = geoJsonFeatureCollection2olFeatures(newPolygons) 
-            if(featureList.length > 0){
-                getSource(map).clear()
-                getSource(map).addFeatures(featureList) 
-            }else{
-                console.log("cleaned input is empty")
-            }
+            let newPolygons = fixOverlaps(olFeatures2GeoJsonFeatureCollection(oldFeatureList), modifiedFeatures)
+            featureList = geoJsonFeatureCollection2olFeatures(newPolygons) 
+
         }
+        return featureList
     }
 
     const mousePositionControl = new MousePosition({
@@ -231,18 +248,21 @@ function MapWrapper() {
         else {
             if(clickHandlerState === 'DRAWEND') {
                 //TODO: MAYBE unkink the drawn polygon HERE
-                cleanUserInput(event.map)
+                //let cleaned = cleanUserInput(getFeatureList(event.map))
+                //updateSource(getSource(event.map), cleaned)
                 clickHandlerState = 'NONE'
             }
             else if(clickHandlerState === 'NONE'){
                 clickHandlerState = 'DRAW'
                 drawPolygon(event.map).addEventListener('drawend', (evt) => {
-                    handleDrawend(evt, event.map)
+                    handleDrawend(evt.feature, getSource(event.map))
                     clickHandlerState = 'DRAWEND'
                     event.map.getInteractions().getArray().pop()
                     event.map.getInteractions().getArray().pop()
                 }) 
+                
             }
+            updateSource(getSource(event.map), cleanUserInput(getFeatureList(event.map)))
         }
     }
     //merges the two most recently clicked polygons when called
@@ -261,33 +281,40 @@ function MapWrapper() {
     }
 
     //interprets newly drawn polygon and modifies it to not break topology rules.
-    const handleDrawend = (evt, map) => {
-        const mapSource = map.getLayers().getArray()[1].getSource()
-
+    const handleDrawend = (newFeature, source) => {
+        
         // check if valid
         let valid = false
         try {
-            valid = isValid(olFeature2geoJsonFeature(evt.feature))
+            valid = isValid(olFeature2geoJsonFeature(newFeature))
         } catch (error) {
             console.log("isvalid error from drawendevent") 
         }
+
+        let cleanedFeatures
         
         if (!valid)
         {
             //if not valid unkink: return geoJsonFeatureCollection
-            const unkinkedCollection = unkink(olFeature2geoJsonFeature(evt.feature))
+            const unkinkedCollection = unkink(olFeature2geoJsonFeature(newFeature))
             
             //check intersection and add unkinked polys to the source
             const olFeatures = geoJsonFeatureCollection2olFeatures(unkinkedCollection)
-            mapSource.addFeatures(olFeatures)
-            cleanUserInput(map)
+            source.addFeatures(olFeatures)
+            cleanedFeatures = cleanUserInput(source.getFeatures())
+            updateSource(source, cleanedFeatures)
+
             return unkinkedCollection.features.length
         }
         else 
         {
-            cleanUserInput(map)
+            //cleanedFeatures = cleanUserInput(source.getFeatures())
+            //updateSource(source, cleanedFeatures)
+
             return 1
         }
+
+
     }
 
     //interprets newly modified polygon and modifies it to not break topology rules.
@@ -311,14 +338,14 @@ function MapWrapper() {
                 for (let index = 0; index < geoJsonCollection.features.length; index++) {
                     const geoJsonfeature = geoJsonCollection.features[index];
                     source2.addFeature(geoJsonFeature2olFeature(geoJsonfeature))
-                    cleanUserInput(event.target.map_)
+                    cleanUserInput(event.target.map_, getFeatureList(event.target.map_))
                 }
             }
         }
         
         features.forEach((feature) => {
             source2.addFeature(feature)
-            cleanUserInput(event.target.map_)
+            cleanUserInput(event.target.map_, getFeatureList(event.target.map_))
         })
     }
 
