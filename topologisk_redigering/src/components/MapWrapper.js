@@ -110,18 +110,29 @@ function MapWrapper() {
         return splitMulti
     }
 
-    const cleanInputData = (inputData) => {
+    const updateSource = (source, features) => {
+
+        if(features.length > 0){
+            source.clear()
+            source.addFeatures(features) 
+        }else{
+            console.log("You are trying to update the map with an empty list of features!")
+        }
+
+    }
+
+
+    const cleanInputData = (inputData, source) => {
 
         const polygons = splittingMultipolygons(inputData)
 
-        // Add each polygon one by one using handleDrawEnd.
+        /*
         polygons.forEach( polygon => {
-            source.addFeature( polygon )
-
+            handleDrawend( polygon )
         })
+        */
 
-
-        //source.addFeatures(polygons) // Add polygons to map
+        updateSource(source, polygons)
 
     }
 
@@ -133,7 +144,7 @@ function MapWrapper() {
         loader: function(){
             let url = "http://localhost:4000/file1"
             fetch(url).then(res => res.json()).then(result => {
-                cleanInputData(result)   
+                cleanInputData(result, source)   
         })
     }
 
@@ -157,17 +168,17 @@ function MapWrapper() {
     */
     const cleanUserInput = (map, oldFeatureList, modifiedFeatures=1) => {
 
+        let featureList = []
+
         if(oldFeatureList.length > 1)
         {
             let newPolygons = fixOverlaps(olFeatures2GeoJsonFeatureCollection(oldFeatureList), modifiedFeatures)
-            let featureList = geoJsonFeatureCollection2olFeatures(newPolygons) 
-            if(featureList.length > 0){
-                getSource(map).clear()
-                getSource(map).addFeatures(featureList) 
-            }else{
-                console.log("cleaned input is empty")
-            }
+            featureList = geoJsonFeatureCollection2olFeatures(newPolygons) 
+
         }
+
+        return featureList
+
     }
 
     const mousePositionControl = new MousePosition({
