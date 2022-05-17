@@ -126,13 +126,12 @@ function MapWrapper() {
 
         const polygons = splittingMultipolygons(inputData)
 
-        /*
+        
         polygons.forEach( polygon => {
-            handleDrawend( polygon )
+            source.addFeature(polygon) //handleDrawEnd assumes the new polygon already exists in the source.
+            handleDrawend( polygon, source )
         })
-        */
-
-        updateSource(source, polygons)
+        
 
     }
 
@@ -166,7 +165,7 @@ function MapWrapper() {
     Removes parts of the most recently added polygon on the map that overlap with 
         existing polygons. on the intersection points, the new polygon has nodes added.
     */
-    const cleanUserInput = (map, oldFeatureList, modifiedFeatures=1) => {
+    const cleanUserInput = (oldFeatureList, modifiedFeatures=1) => {
 
         let featureList = []
 
@@ -269,7 +268,7 @@ function MapWrapper() {
             else if(clickHandlerState === 'NONE'){
                 clickHandlerState = 'DRAW'
                 drawPolygon(event.map).addEventListener('drawend', (evt) => {
-                    handleDrawend(evt.feature, event.map)
+                    handleDrawend(evt.feature, getSource(event.map))
                     clickHandlerState = 'DRAWEND'
                     event.map.getInteractions().getArray().pop()
                     event.map.getInteractions().getArray().pop()
@@ -293,9 +292,8 @@ function MapWrapper() {
     }
 
     //interprets newly drawn polygon and modifies it to not break topology rules.
-    const handleDrawend = (newFeature, map) => {
-        const mapSource = map.getLayers().getArray()[1].getSource()
-
+    const handleDrawend = (newFeature, source) => {
+        
         // check if valid
         let valid = false
         try {
@@ -303,6 +301,8 @@ function MapWrapper() {
         } catch (error) {
             console.log("isvalid error from drawendevent") 
         }
+
+        let cleanedFeatures
         
         if (!valid)
         {
@@ -311,15 +311,21 @@ function MapWrapper() {
             
             //check intersection and add unkinked polys to the source
             const olFeatures = geoJsonFeatureCollection2olFeatures(unkinkedCollection)
-            mapSource.addFeatures(olFeatures)
-            cleanUserInput(map, getFeatureList(map))
+            source.addFeatures(olFeatures)
+            cleanedFeatures = cleanUserInput(source.getFeatures())
+            updateSource(source, cleanedFeatures)
+
             return unkinkedCollection.features.length
         }
         else 
         {
-            cleanUserInput(map, getFeatureList(map))
+            cleanedFeatures = cleanUserInput(source.getFeatures())
+            updateSource(source, cleanedFeatures)
+
             return 1
         }
+
+
     }
 
     //interprets newly modified polygon and modifies it to not break topology rules.
