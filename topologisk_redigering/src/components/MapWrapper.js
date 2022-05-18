@@ -127,6 +127,7 @@ function MapWrapper() {
         polygons.forEach( polygon => {
             source.addFeature(polygon) //handleDrawEnd assumes the new polygon already exists in the source.
             handleDrawend( polygon, source )
+            //handleModifyend() ? 
         })
 
     }
@@ -175,13 +176,6 @@ function MapWrapper() {
         projection: "EPSG:3006",
     })
 
-
-    // To be implemented... 
-    const cleanself = (evt) => {
-        //alt 1: run this on all polygons who change. Stop propagation to hinder repeated firing.
-        //alt 2: getPointClosestToPixel, get all features who share pixel, run cleanuserinput/handleintersections on all of them.
-    }
-
     /* sets initial values and interactions for the Openlayers Map.*/
     useEffect(() => {
         const initialMap = new Map({
@@ -199,13 +193,6 @@ function MapWrapper() {
 
             }),
         });
-        const featurelist = getFeatureList(initialMap)
-        if(featurelist.length > 0)
-        {
-            featurelist.forEach((feature) => {
-                feature.on('change', cleanself)
-            })
-        }
         initialMap.on('click', onMapClickGetPixel) // can I get closest pixel from here?
         initialMap.addInteraction(modify)
         modify.on('modifyend', handleModifyend)
@@ -227,8 +214,8 @@ function MapWrapper() {
     //Contextual clickhandler, different actions depending on if you click on a polygon or somewhere on the map 
     const onMapClickGetPixel = (event) => {
         //Check if clicked on an existing polygon 
-        if (isPolygon(event.map, event.pixel)){
-            currentClickedPolygon = getPolygon(event.map, event.pixel) 
+        if (isFeatureAtPixelAPolygon(event.map, event.pixel)){
+            currentClickedPolygon = getMapFeatureAtPixel(event.map, event.pixel) 
             currentClickedPolygon.setStyle(selectedStyle)
             if(previousClickedPolygon != null){
                 previousClickedPolygon.setStyle(defaultStyle)
@@ -255,26 +242,26 @@ function MapWrapper() {
             else if(clickHandlerState === 'NONE'){
                 clickHandlerState = 'DRAW'
                 drawPolygon(event.map).addEventListener('drawend', (evt) => {
-                    handleDrawend(evt.feature, getSource(event.map))
+                    handleDrawend(evt.feature, getMapSource(event.map))
                     clickHandlerState = 'DRAWEND'
                     event.map.getInteractions().getArray().pop()
                     event.map.getInteractions().getArray().pop()
                 }) 
                 
             }
-            updateSource(getSource(event.map), cleanUserInput(getFeatureList(event.map)))
+            updateSource(getMapSource(event.map), cleanUserInput(getMapFeatures(event.map)))
         }
     }
     //merges the two most recently clicked polygons when called
     const merge = (map) => {
-        const featureList = olFeatures2GeoJsonFeatureCollection(getFeatureList(map))
+        const featureList = olFeatures2GeoJsonFeatureCollection(getMapFeatures(map))
         let newPoly = handleMerge(olFeature2geoJsonFeature(currentClickedPolygon), olFeature2geoJsonFeature(previousClickedPolygon),featureList)
     
         if(newPoly !== -1){
             let OlPoly = (new GeoJSON()).readFeature(newPoly)
             deletePolygon(map, currentClickedPolygon)
             deletePolygon(map, previousClickedPolygon)
-            getSource(map).addFeature(OlPoly)   
+            getMapSource(map).addFeature(OlPoly)   
         }else{
             console.log("didnt find the poly in the list")
         }
@@ -319,59 +306,56 @@ function MapWrapper() {
 
     //interprets newly modified polygon and modifies it to not break topology rules.
     const handleModifyend = (event) => {
-        console.log("modifyend event.target: ", event.features.getArray())
-        console.log("modifyend event.target.length: ", event.features.getArray().length)
-        let features = event.features.getArray()
+
+        let modifiedFeatures = event.features.getArray()
         //remove the latest modified features temporarily from the map source.
-        features.forEach((latestFeature) => {
-            event.target.map_.getLayers().getArray()[1].getSource().removeFeature(latestFeature)
+        modifiedFeatures.forEach((feature) => {
+            event.target.map_.getLayers().getArray()[1].getSource().removeFeature(feature)
         })
-        let source2 = getSource(event.target.map_)
-        for(let i=0; i<features.length; i++)
+        let source2 = getMapSource(event.target.map_)
+        for(let i=0; i<modifiedFeatures.length; i++)
         {
             // check if unkink creates the hidden polygon
             // fill new polygons from unkink with red
-            if(!isValid(olFeature2geoJsonFeature(features[i])))
+            if(!isValid(olFeature2geoJsonFeature(modifiedFeatures[i])))
             {
-                let geoJsonCollection = unkink(olFeature2geoJsonFeature(features[i]))
-                source2.removeFeature(features[i])
+                let geoJsonCollection = unkink(olFeature2geoJsonFeature(modifiedFeatures[i]))
+                source2.removeFeature(modifiedFeatures[i])
                 for (let index = 0; index < geoJsonCollection.features.length; index++) {
                     const geoJsonfeature = geoJsonCollection.features[index];
                     source2.addFeature(geoJsonFeature2olFeature(geoJsonfeature))
-                    cleanUserInput(event.target.map_, getFeatureList(event.target.map_))
+                    cleanUserInput(event.target.map_, getMapFeatures(event.target.map_))
                 }
             }
         }
         
-        features.forEach((feature) => {
+        modifiedFeatures.forEach((feature) => {
             source2.addFeature(feature)
-            cleanUserInput(event.target.map_, getFeatureList(event.target.map_))
+            cleanUserInput(event.target.map_, getMapFeatures(event.target.map_))
         })
     }
 
-    const handleNewPoly = (evt) => {
-        // when add feature check if valid
-        //console.log("EVENT FEATURE converted:")
-        //console.log(olFeature2geoJsonFeature(evt.feature))
-        if (!isValid(olFeature2geoJsonFeature(evt.feature))) {
-            map.getLayers().getArray()[1].getSource().removeFeature(evt.feature)
-        } else {
-            evt.feature.on('change', cleanself)
+    const removeFromMapIfInvalid = (event) => {
+        if (!isValid(olFeature2geoJsonFeature(event.feature))) {
+            removeFeatureFromMap(event.feature)
         }
     }
     
 
-
+    /* This will run each time the map changes in some way.
+       Used to make sure no invalid polygons are added to the map. */
     useEffect(() => {
         if (map) {
-            map.getLayers().getArray()[1].getSource().addEventListener('addfeature', handleNewPoly)
-            //cleanUserInput(map)
+            getMapSource(map).addEventListener('addfeature', removeFromMapIfInvalid)
         }
     }, [map])
     
+    const removeFeatureFromMap = (feature) => {
+        getMapSource(map).removeFeature(feature)
+    }
 
     /* check if we are clicking on a polygon*/
-    const isPolygon = (map, pixel) => {
+    const isFeatureAtPixelAPolygon = (map, pixel) => {
         if(map.getFeaturesAtPixel(pixel).length > 0){
             return map.getFeaturesAtPixel(pixel)[0].getGeometry().getType() === "Polygon"
         }
@@ -379,24 +363,24 @@ function MapWrapper() {
     }
 
     /* get the polygon we are clicking on */
-    const getPolygon = (map, pixel) => {
+    const getMapFeatureAtPixel = (map, pixel) => {
         let list = map.getFeaturesAtPixel(pixel)
         if (list.length === 0){return -1}
         return list[0]
     }
 
     /* get mapsource */
-    const getSource = (map) => {
+    const getMapSource = (map) => {
         return map.getLayers().getArray()[1].getSource()
     }
 
     /* get the array of features on map */
-    const getFeatureList = (map) => {
+    const getMapFeatures = (map) => {
         return map.getLayers().getArray()[1].getSource().getFeatures()
     }
 
     const saveFeatureCollection = () => {
-        saveToDatabase(olFeatures2GeoJsonFeatureCollection(getFeatureList(map)))
+        saveToDatabase(olFeatures2GeoJsonFeatureCollection(getMapFeatures(map)))
     }
 
 
