@@ -1,5 +1,5 @@
-import getMergeableFeatures, { handleIntersections, mergeFeatures } from "./jsts.mjs"
-import { addIntersectionNodes } from "./jsts.mjs"
+import getMergeableFeatures, { handleIntersections, mergeFeatures } from "./JSTSFunctions.mjs"
+import { addIntersectionNodes } from "./JSTSFunctions.mjs"
 import { geoJsonFeatureCollection2JstsGeometries, jstsGeometries2GeoJsonFeatureCollection, jstsGeometry2GeoJsonFeature } from "../translation/translators.mjs"
 import { geoJsonFeature2JstsGeometry} from "../translation/translators.mjs"
 import { getJstsGeometryCoordinates } from "../translation/getter.mjs"
