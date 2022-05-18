@@ -28,15 +28,15 @@ export const addIntersectionNodes = (newJstsGeometry, originalJstsGeometries) =>
     try {
         //iterate the original geometries and get the difference between them and the new geometry as well as where they intersect
         originalJstsGeometries.forEach(jstsGeometry => {   
-            let difference = OverlayOp.difference(newJstsGeometry, jstsGeometry) 
-            let intersection = OverlayOp.intersection(newJstsGeometry_original, jstsGeometry);
+            let difference = OverlayOp.difference(newJstsGeometry, jstsGeometry) //difference returns closure of 
+            let intersection = OverlayOp.intersection(newJstsGeometry_original, jstsGeometry); //OverlayOp.intersection may return either a geometryCollection or a single geometry
             
             //handle both if intersection is geometrycollection and just a geometry
             try {
-                //if intersection is a single geometry, do union on intersection and difference
+                //if intersection is a single geometry, do union on intersection and difference (creating nodes at intersection)
                 newJstsGeometry = OverlayOp.union(difference, intersection)
-                //TODO not sure what's happening here...
             } catch (error) {
+                //TODO not sure what's happening here...
                 console.log("detta error är 'under kontroll:'")
                 console.log(error)
                 intersection._geometries.forEach(intersectionGeom => {
