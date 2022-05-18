@@ -22,8 +22,6 @@ class Line {
   
     //https://codeforces.com/blog/entry/48868
   
-  
-  
     // Polygon is a plane figure that is bounded by a finite chain of straight line segments closing in a 
     // loop to form a closed chain or circuit. These segments are called its edges or sides, and the points 
     // where two edges meet are the polygon's vertices or corners (wiki).

@@ -28,12 +28,10 @@ export const olToJsts = (poly) => {
 
 
 export const isValid = (geoJsonFeature) => {
-    //let olPoly = geoJsonFeature2olFeature(geoJsonFeature)
     let jstsLastDrawnPoly
     try {
         jstsLastDrawnPoly = geoJsonFeature2JstsGeometry(geoJsonFeature)
         return IsValidOp.isValid(jstsLastDrawnPoly);
-        
     } catch (error) {
         console.log("isvalid error")
         console.log(jstsLastDrawnPoly)
@@ -41,16 +39,14 @@ export const isValid = (geoJsonFeature) => {
         //console.log(error)
     }
     return false
- 
 }
-
 
 /*
  * return true if @lastDrawnPoly intersects any of the polys in @allPolys
  * @lastDrawnPoly = openlayers feature
  * @allPolys = openlayer features
  */
-export function calcIntersection(lastDrawnPoly, allPolys) {
+function calculateIntersection(lastDrawnPoly, allPolys) {
     let jstsLastDrawnPoly = olToJsts(lastDrawnPoly)
     // shrink polygon by tiny amount otherwise it will count as intersect
     // if two polygons share a point on a border
@@ -76,5 +72,3 @@ export const unkink = (polygon) => {
 
     return unkinkedPolygons
 }
-
-export default { isValid,  calcIntersection } ;
