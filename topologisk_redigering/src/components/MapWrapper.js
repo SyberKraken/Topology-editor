@@ -338,14 +338,14 @@ function MapWrapper() {
                 for (let index = 0; index < geoJsonCollection.features.length; index++) {
                     const geoJsonfeature = geoJsonCollection.features[index];
                     source2.addFeature(geoJsonFeature2olFeature(geoJsonfeature))
-                    cleanUserInput(event.target.map_, getFeatureList(event.target.map_))
+                    cleanUserInput(getFeatureList(event.target.map_))
                 }
             }
         }
         
         features.forEach((feature) => {
             source2.addFeature(feature)
-            cleanUserInput(event.target.map_, getFeatureList(event.target.map_))
+            cleanUserInput(getFeatureList(event.target.map_))
         })
     }
 
