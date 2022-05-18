@@ -9,23 +9,22 @@ import WMTS from 'ol/source/WMTS';
 import { get as getProjection } from 'ol/proj';
 import { getWidth } from 'ol/extent';
 import GeoJSON from 'ol/format/GeoJSON';
-import { drawPolygon } from '../res/UIFunctions.mjs';
+import { saveToDatabase } from '../resources/DatabaseFunctions.mjs';
+import { drawPolygon } from '../resources/UIFunctions.mjs';
 import { createStringXY } from 'ol/coordinate';
 import MousePosition from 'ol/control/MousePosition'
 import { defaults as defaultControls } from 'ol/control'
-import { fixOverlaps, handleMerge } from '../res/PolygonHandler.mjs';
+import { fixOverlaps, handleMerge } from '../resources/PolygonHandler.mjs';
 import { Modify } from 'ol/interaction';
-import {deletePolygon} from '../res/HelperFunctions.mjs'
-import {defaultStyle, selectedStyle } from '../res/Styles.mjs'
-import { isValid, unkink }  from '../res/unkink.mjs'
+import {deletePolygon} from '../resources/HelperFunctions.mjs'
+import {defaultStyle, selectedStyle } from '../resources/Styles.mjs'
+import { isValid, unkink }  from '../resources/unkink.mjs'
 import { geoJsonFeature2olFeature, geoJsonFeatureCollection2olFeatures, olFeature2geoJsonFeature, olFeatures2GeoJsonFeatureCollection } from '../translation/translators.mjs';
-import { saveToDatabase } from '../res/DatabaseFunctions.mjs';
 import UploadFileIcon from '@mui/icons-material/UploadFile';
 import SaveIcon from '@mui/icons-material/Save';
 import { Button } from '@mui/material';
 import { Polygon, MultiPolygon } from 'ol/geom';
 import { DoubleClickZoom } from 'ol/interaction';
-import { get } from 'lodash';
 
 /*
 MapWrapper contains the on screen map and runs functionality according to user interaction.
@@ -324,14 +323,14 @@ function MapWrapper() {
                 for (let index = 0; index < geoJsonCollection.features.length; index++) {
                     const geoJsonfeature = geoJsonCollection.features[index];
                     source2.addFeature(geoJsonFeature2olFeature(geoJsonfeature))
-                    cleanUserInput(event.target.map_, getMapFeatures(event.target.map_))
+                    cleanUserInput(getMapFeatures(event.target.map_))
                 }
             }
         }
         
         modifiedFeatures.forEach((feature) => {
             source2.addFeature(feature)
-            cleanUserInput(event.target.map_, getMapFeatures(event.target.map_))
+            cleanUserInput(getMapFeatures(event.target.map_))
         })
     }
 

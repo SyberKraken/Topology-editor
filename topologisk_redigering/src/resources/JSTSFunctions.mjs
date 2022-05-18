@@ -1,18 +1,18 @@
 import OverlayOp from "jsts/org/locationtech/jts/operation/overlay/OverlayOp.js"
-import polygonsAreConnected from "./TopologyValidation.mjs"
-import { GeometryFactory } from "jsts/org/locationtech/jts/geom.js";
-import { geoJsonFeature2JstsGeometry, jstsGeometry2GeoJsonFeature } from "../translation/translators.mjs";
-import { coordinatesAreEquivalent } from "./HelperFunctions.mjs";
-import { getJstsGeometryCoordinates } from "../translation/getter.mjs";
 import IsValidOp from "jsts/org/locationtech/jts/operation/valid/IsValidOp.js";
+import { GeometryFactory } from "jsts/org/locationtech/jts/geom.js";
+import polygonsAreConnected from "./TopologyValidation.mjs"
+import { geoJsonFeature2JstsGeometry, jstsGeometry2GeoJsonFeature } from "../translation/translators.mjs";
 
 //removes overlapped areas from new geometry
 //takes a jsts geometry and a list of all other jsts geometries.
-export const handleIntersections = (jstsNewGeometry, jstsOtherGeometries) => {
+export const handleIntersections = (jstsNewGeometry, jstsOriginalGeometries) => {
+    //Checks if the received geometry is valid
     if (IsValidOp.isValid(jstsNewGeometry)) {
-
-        jstsOtherGeometries.forEach(jstsGeometry => {
+        jstsOriginalGeometries.forEach(jstsGeometry => {
+            //iterate original geometries and if they are valid compare with the newly added one
             if (IsValidOp.isValid(jstsGeometry)) {
+                //The overlapping areas of the newly added geometry and the original one is removed and the new geometry consist of the difference
                 jstsNewGeometry = OverlayOp.difference(jstsNewGeometry, jstsGeometry)
             } else {
                 console.log("That was not a valid JSTS Geometry! \n", jstsGeometry)
@@ -21,31 +21,35 @@ export const handleIntersections = (jstsNewGeometry, jstsOtherGeometries) => {
     return jstsNewGeometry
 }}
 
-export const addIntersectionNodes = (jstsNewGeometry, jstsOtherGeometries) => {
-    let jstsNewGeometry_original = jstsNewGeometry
+
+//Takes a jstsGeometry and adds nodes to where it overlaps other already existing geometries
+export const addIntersectionNodes = (newJstsGeometry, originalJstsGeometries) => {
+    let newJstsGeometry_original = newJstsGeometry
     try {
-        jstsOtherGeometries.forEach(jstsGeometry => {   
-            let jstsNewGeometryTemp = OverlayOp.difference(jstsNewGeometry, jstsGeometry) 
-            let intersection = OverlayOp.intersection(jstsNewGeometry_original, jstsGeometry);
+        //iterate the original geometries and get the difference between them and the new geometry as well as where they intersect
+        originalJstsGeometries.forEach(jstsGeometry => {   
+            let difference = OverlayOp.difference(newJstsGeometry, jstsGeometry) //difference returns closure of 
+            let intersection = OverlayOp.intersection(newJstsGeometry_original, jstsGeometry); //OverlayOp.intersection may return either a geometryCollection or a single geometry
             
             //handle both if intersection is geometrycollection and just a geometry
             try {
-                jstsNewGeometry = OverlayOp.union(jstsNewGeometryTemp, intersection)
-          
+                //if intersection is a single geometry, do union on intersection and difference (creating nodes at intersection)
+                newJstsGeometry = OverlayOp.union(difference, intersection)
             } catch (error) {
+                //TODO not sure what's happening here...
                 console.log("detta error är 'under kontroll:'")
                 console.log(error)
                 intersection._geometries.forEach(intersectionGeom => {
-                    jstsNewGeometryTemp = OverlayOp.union(jstsNewGeometryTemp, intersectionGeom)
+                    difference = OverlayOp.union(difference, intersectionGeom)
                 });
             }
         })
         
     } catch (error) {
         console.log(error)
-        return jstsNewGeometry_original
+        return newJstsGeometry_original
     }
-    return jstsNewGeometry
+    return newJstsGeometry
 }
 
 //takes a JSTSpolygon and a geoJsonFeatureCollection and returns a JSTS geomlist
