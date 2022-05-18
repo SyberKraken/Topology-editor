@@ -1,8 +1,8 @@
 import OverlayOp from "jsts/org/locationtech/jts/operation/overlay/OverlayOp.js"
-import polygonsAreConnected from "./TopologyValidation.mjs"
-import { GeometryFactory } from "jsts/org/locationtech/jts/geom.js";
-import { geoJsonFeature2JstsGeometry, jstsGeometry2GeoJsonFeature } from "../translation/translators.mjs";
 import IsValidOp from "jsts/org/locationtech/jts/operation/valid/IsValidOp.js";
+import { GeometryFactory } from "jsts/org/locationtech/jts/geom.js";
+import polygonsAreConnected from "./TopologyValidation.mjs"
+import { geoJsonFeature2JstsGeometry, jstsGeometry2GeoJsonFeature } from "../translation/translators.mjs";
 
 //removes overlapped areas from new geometry
 //takes a jsts geometry and a list of all other jsts geometries.
