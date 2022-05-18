@@ -91,15 +91,27 @@ export const handleMerge = (firstInputPolygon, secondInputPolygon, featureCollec
 
 //TODO: if sats för multipolygoner eller något
 
-    mergables.forEach(function compare(mergablePolygon){
-        if(coordinatesAreEquivalent(getJstsGeometryCoordinates(secondPolygon), getJstsGeometryCoordinates(mergablePolygon))){
-            try {
-                console.log("THESE ARE MERGEABLE")
-                status = jstsGeometry2GeoJsonFeature(mergeFeatures(firstPolygon, secondPolygon))
-            } catch (error) {
-               console.log("merge error on typeconversion") 
+ 
+
+    console.log(firstPolygon)
+    console.log(secondPolygon)
+    //if secondPolygon is a multipolygon
+/*     if (secondPolygon._geometries || firstPolygon._geometries) {
+        status = jstsGeometry2GeoJsonFeature(mergeFeatures(firstPolygon, secondPolygon))
+    }
+
+    else {
+        mergables.forEach(function compare(mergablePolygon){
+            if(coordinatesAreEquivalent(getJstsGeometryCoordinates(secondPolygon), getJstsGeometryCoordinates(mergablePolygon))){
+                try {
+                    console.log("THESE ARE MERGEABLE")
+                    status = jstsGeometry2GeoJsonFeature(mergeFeatures(firstPolygon, secondPolygon))
+                } catch (error) {
+                    console.log("merge error on typeconversion") 
+                }
             }
-        }
-    })
+        })
+    } */
+    status = jstsGeometry2GeoJsonFeature(mergeFeatures(firstPolygon, secondPolygon))
     return status
 }

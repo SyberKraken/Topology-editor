@@ -38,6 +38,7 @@ Polygons can be merged by clicking on two polygons in succession, if they are ad
 function MapWrapper() {
     //Common data used for most operations
     const [map, setMap] = useState();
+    let mergeState = 0
     let clickHandlerState = 'NONE';
     const mapElement = useRef();
     const mapRef = useRef();
@@ -226,23 +227,32 @@ function MapWrapper() {
         //Check if clicked on an existing polygon 
         if (isPolygon(event.map, event.pixel)){
             currentClickedPolygon = getPolygon(event.map, event.pixel) 
+            mergeState += 1
             currentClickedPolygon.setStyle(selectedStyle)
             if(previousClickedPolygon != null){
                 previousClickedPolygon.setStyle(defaultStyle)
                 if(currentClickedPolygon !== -1){
                     //merge if this click occurs directly after a click on another polygon
                     if(currentClickedPolygon !== previousClickedPolygon){
-                        merge(event.map)
+                        if (mergeState >= 2) {
+                            merge(event.map)
+                            currentClickedPolygon = null
+                            previousClickedPolygon = null
+                            mergeState = 0
+                        }
                     }
                     //delete if this click is on the same polygon as the last click.
                     if (currentClickedPolygon === previousClickedPolygon) {
                         deletePolygon(event.map, currentClickedPolygon)
+                        currentClickedPolygon = null
+                        previousClickedPolygon = null
                     }
                 }
             }
             previousClickedPolygon = currentClickedPolygon
         } 
         else {
+            mergeState = 0
             if(clickHandlerState === 'DRAWEND') {
                 //TODO: MAYBE unkink the drawn polygon HERE
                 cleanUserInput(event.map)
