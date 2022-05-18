@@ -143,9 +143,6 @@ export const olFeatures2GeoJsonFeatureCollection = (olFeatures) => {
 
 /* Takes a geoJson featureCollection and returns an Array of features */
 export const geoJsonFeatureCollection2olFeatures = (featureCollection) => {
-
-    let result = new GeoJSON().readFeatures(featureCollection)
-    console.log(result)
     return new GeoJSON().readFeatures(featureCollection)
 }
 
@@ -155,9 +152,13 @@ export const olFeature2geoJsonFeature = (olFeature) => {
 }
 
 export const geoJsonFeature2olFeature = (geoJsonFeature) => {
+    console.log(geoJsonFeature)
     let olFeature = new GeoJSON().readFeature(geoJsonFeature)
+    console.log(olFeature)
     return olFeature
 }
+
+
 
 export const geoJsonFeatureList2geoJsonFeatureCollection = (geoJsonFeatureList) => {
     let featureCollection = {

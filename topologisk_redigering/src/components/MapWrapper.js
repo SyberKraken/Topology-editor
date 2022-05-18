@@ -331,9 +331,11 @@ function MapWrapper() {
             if(!isValid(olFeature2geoJsonFeature(features[i])))
             {
                 let geoJsonCollection = unkink(olFeature2geoJsonFeature(features[i]))
+                console.log(geoJsonCollection)
                 source2.removeFeature(features[i])
                 for (let index = 0; index < geoJsonCollection.features.length; index++) {
                     const geoJsonfeature = geoJsonCollection.features[index];
+                    console.log(geoJsonfeature)
                     source2.addFeature(geoJsonFeature2olFeature(geoJsonfeature))
                     cleanUserInput(event.target.map_)
                 }

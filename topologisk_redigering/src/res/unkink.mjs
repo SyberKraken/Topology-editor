@@ -6,9 +6,8 @@ import MultiPoint from 'ol/geom/MultiPoint.js';
 import BufferParameters from 'jsts/org/locationtech/jts/operation/buffer/BufferParameters.js'
 import BufferOp from 'jsts/org/locationtech/jts/operation/buffer/BufferOp.js'
 import OverlayOp from "jsts/org/locationtech/jts/operation/overlay/OverlayOp.js"
-import { geoJsonFeature2JstsGeometry, geoJsonFeature2olFeature } from '../translation/translators.mjs';
+import { geoJsonFeature2JstsGeometry, geoJsonFeature2olFeature, geoJsonFeature2geoJsonFeatureCollection } from '../translation/translators.mjs';
 import { fixCoordinateRotation } from './HelperFunctions.mjs';
-
 
 const parser = new OL3Parser();
 parser.inject(
@@ -66,14 +65,20 @@ export function calcIntersection(lastDrawnPoly, allPolys) {
     return result.length > 0
 }
 
-
 export const unkink = (polygon) => {
-    let unkinkedPolygons = simplepolygon(polygon)
-    unkinkedPolygons.features.forEach(polygon => {
-        polygon = fixCoordinateRotation(polygon)
-    })
-
-    return unkinkedPolygons
+    //dont unkink multipoly?
+    if (polygon.geometry.type !== "MultiPolygon")
+    {        
+        let unkinkedPolygons = simplepolygon(polygon)
+        unkinkedPolygons.features.forEach(polygon => {
+            polygon = fixCoordinateRotation(polygon)
+        })
+        return unkinkedPolygons
+    }
+    else {
+        //TODO: support for unkink on multipolygons would perhaps start here...
+        return geoJsonFeature2geoJsonFeatureCollection(polygon)
+    }
 }
 
 export default { isValid,  calcIntersection } ;
