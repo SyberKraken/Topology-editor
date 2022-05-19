@@ -111,7 +111,7 @@ function MapWrapper() {
     }
 
     const updateSource = (source, features) => {
-        console.log(features)
+        //console.log(features)
         if(features.length > 0){
             source.clear()
             source.addFeatures(features) 
@@ -181,13 +181,7 @@ function MapWrapper() {
         let featureList = []
         if(oldFeatureList.length > 1)
         {
-            //console.log("features before fixoverlaps:")
-            //console.log(getMapFeatures(map))
-            //console.log(olFeatures2GeoJsonFeatureCollection(getMapFeatures(map)))
             let newPolygons = fixOverlaps(olFeatures2GeoJsonFeatureCollection(oldFeatureList), modifiedFeatures)
-            //TODO: mcProblem happens here, we think. V V V
-            console.log("features after fixoverlaps")
-            console.log(newPolygons)
             featureList = geoJsonFeatureCollection2olFeatures(newPolygons) 
                 
             //TODO: check flatcoordinates for the multipolygon in the console log below.
@@ -226,7 +220,7 @@ function MapWrapper() {
         initialMap.getInteractions().getArray().forEach(function(interaction) {
             if (interaction instanceof DoubleClickZoom) {
                 initialMap.removeInteraction(interaction);
-                console.log(DoubleClickZoom.name)
+                //console.log(DoubleClickZoom.name)
             }
         }
         )
@@ -373,14 +367,12 @@ function MapWrapper() {
         }) */
     }
  
-
     const removeFromMapIfInvalid = (event) => {
         if (!isValid(olFeature2geoJsonFeature(event.feature))) {
             removeFeatureFromMap(event.feature)
         }
     }
     
-
     /* This will run each time the map changes in some way.
        Used to make sure no invalid polygons are added to the map. */
     useEffect(() => {
@@ -413,8 +405,6 @@ function MapWrapper() {
         if (list.length === 0){return -1}
         return list[0]
     }
-
- 
 
     /* get mapsource */
     const getMapSource = (map) => {

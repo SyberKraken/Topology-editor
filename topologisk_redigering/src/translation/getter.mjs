@@ -14,7 +14,7 @@ export const getListOfOlFeaturesFromMap = (map) => {
 }
 
 export const getJstsGeometryCoordinates = (geom) => {
-    console.log(geom)
+    //console.log(geom)
     let coords = []
     //if multipolygon, return coords in an array
     if (geom._geometries) {   

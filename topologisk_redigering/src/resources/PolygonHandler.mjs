@@ -9,11 +9,11 @@ import Area from "jsts/org/locationtech/jts/algorithm/Area.js"
 
 //takes geoJsonFeatureCollection as input and removes areas from the last drawn polygon where it overlaps with other polygons.
 export const fixOverlaps = (features, modifiedFeatures=1) => {
-    console.log(features)
+    //console.log(features)
     let areaOverCircLimit = 10
     let jstsCollection = geoJsonFeatureCollection2JstsGeometries(features)
-    console.log("se till att jsts konvertering behåller multipolygon")
-    console.log(jstsCollection)
+    //console.log("se till att jsts konvertering behåller multipolygon")
+    //console.log(jstsCollection)
     let preTrimmedNewPolygon = jstsCollection[jstsCollection.length - 1]
     let trimmed = handleIntersections(jstsCollection[jstsCollection.length - 1], jstsCollection.slice(0, jstsCollection.length - 1))
     let cleanedJstsCollection = []
@@ -27,8 +27,8 @@ export const fixOverlaps = (features, modifiedFeatures=1) => {
         }
     })
 
-    console.log("se till att cleanedjstscollection nedan har multipolygoner:")
-    console.log(cleanedJstsCollection)
+    //console.log("se till att cleanedjstscollection nedan har multipolygoner:")
+    //console.log(cleanedJstsCollection)
 
     //if the polygon has holes, remove holes that are too small
     if (trimmed._holes) {
@@ -50,7 +50,7 @@ export const fixOverlaps = (features, modifiedFeatures=1) => {
     //TODO: change comments here if this behaviour has been changed.
     
     if (trimmed._geometries) {
-        console.log("this is a multipolygon! we love multipolygons, so we add it.")
+        //console.log("this is a multipolygon! we love multipolygons, so we add it.")
         cleanedJstsCollection.push(trimmed)
        /*  trimmed._geometries.forEach(function multiPolygonToPolygons(geom){
             if(geom.getArea()/geom.getLength() > areaOverCircLimit){
@@ -66,9 +66,9 @@ export const fixOverlaps = (features, modifiedFeatures=1) => {
         }
     }
    
-    console.log("se till att cleanedjstscollection nedan har multipolygoner:")
-    console.log(cleanedJstsCollection)  
-    console.log(jstsGeometries2GeoJsonFeatureCollection(cleanedJstsCollection))
+    //console.log("se till att cleanedjstscollection nedan har multipolygoner:")
+    //console.log(cleanedJstsCollection)  
+    //console.log(jstsGeometries2GeoJsonFeatureCollection(cleanedJstsCollection))
 
     return jstsGeometries2GeoJsonFeatureCollection(cleanedJstsCollection)
 }
@@ -77,7 +77,7 @@ export const fixOverlaps = (features, modifiedFeatures=1) => {
 //Takes geojsonFeatures and a featureCollection and returns geojson geometry
 export const handleMerge = (firstInputPolygon, secondInputPolygon, featureCollection) => {
     
-    console.log("HANDLEMERGE CALLED")
+    //console.log("HANDLEMERGE CALLED")
 
     //convert to jsts geometries
    
@@ -93,8 +93,8 @@ export const handleMerge = (firstInputPolygon, secondInputPolygon, featureCollec
 
  
 
-    console.log(firstPolygon)
-    console.log(secondPolygon)
+    //console.log(firstPolygon)
+    //console.log(secondPolygon)
     //if secondPolygon is a multipolygon
 /*     if (secondPolygon._geometries || firstPolygon._geometries) {
         status = jstsGeometry2GeoJsonFeature(mergeFeatures(firstPolygon, secondPolygon))

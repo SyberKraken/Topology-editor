@@ -40,9 +40,9 @@ export const addIntersectionNodes = (newJstsGeometry, originalJstsGeometries) =>
                 //TODO not sure what's happening here...
                 console.log("detta error är 'under kontroll:'")
                 console.log(error)
-                intersection._geometries.forEach(intersectionGeom => {
+                /*intersection._geometries.forEach(intersectionGeom => {
                     difference = OverlayOp.union(difference, intersectionGeom)
-                });
+                });*/
             }
         })
         
@@ -105,7 +105,7 @@ export function mergeFeatures(firstGeometry, secondGeometry){
         console.log("--------error in union--------")
         console.log(error)
         console.log(firstGeometry)
-        console.log(secondGeometry)
+        console.log(secondGeometry) 
     }
     
     if (union === -1){
