@@ -25,6 +25,7 @@ import SaveIcon from '@mui/icons-material/Save';
 import { Button } from '@mui/material';
 import { Polygon, MultiPolygon } from 'ol/geom';
 import { DoubleClickZoom } from 'ol/interaction';
+import * as turf from "@turf/turf"
 
 
 /*
@@ -39,6 +40,7 @@ function MapWrapper() {
     //Common data used for most operations
     const [map, setMap] = useState();
     let mergeState = 0
+    let originalPoly = ""
     let clickHandlerState = 'NONE';
     const mapElement = useRef();
     const mapRef = useRef();
@@ -111,7 +113,7 @@ function MapWrapper() {
     }
 
     const updateSource = (source, features) => {
-        //console.log(features)
+        console.log(features)
         if(features.length > 0){
             source.clear()
             source.addFeatures(features) 
@@ -181,7 +183,13 @@ function MapWrapper() {
         let featureList = []
         if(oldFeatureList.length > 1)
         {
+            //console.log("features before fixoverlaps:")
+            //console.log(getMapFeatures(map))
+            //console.log(olFeatures2GeoJsonFeatureCollection(getMapFeatures(map)))
             let newPolygons = fixOverlaps(olFeatures2GeoJsonFeatureCollection(oldFeatureList), modifiedFeatures)
+            //TODO: mcProblem happens here, we think. V V V
+            console.log("features after fixoverlaps")
+            console.log(newPolygons)
             featureList = geoJsonFeatureCollection2olFeatures(newPolygons) 
                 
             //TODO: check flatcoordinates for the multipolygon in the console log below.
@@ -215,12 +223,13 @@ function MapWrapper() {
         initialMap.on('click', onMapClickGetPixel) // can I get closest pixel from here?
         initialMap.addInteraction(modify)
         modify.on('modifyend', handleModifyend)
+        modify.on('modifystart', handleModifyStart)
 
         // remove DoubleClickZoom interaction from the map
         initialMap.getInteractions().getArray().forEach(function(interaction) {
             if (interaction instanceof DoubleClickZoom) {
                 initialMap.removeInteraction(interaction);
-                //console.log(DoubleClickZoom.name)
+                console.log(DoubleClickZoom.name)
             }
         }
         )
@@ -332,47 +341,60 @@ function MapWrapper() {
 
     }
 
-    //interprets newly modified polygon and modifies it to not break topology rules.
-     const handleModifyend = (event) => {
-/*
-        console.log("HANDLEMODIFYEND",event.features.getArray())
 
-        let modifiedFeatures = event.features
-        let eventSource = getMapSource(event.target.map_)
-
-        //remove the latest modified features temporarily from the map source.
-        modifiedFeatures.forEach((feature) => {
-            removeFeatureFromEventMap(event.target.map_, feature)
-        })
-        
-        for(let i=0; i<modifiedFeatures.length; i++)
+    const handleModifyStart = (event) => {
+        let features = event.features.getArray()
+        if(features.length  > 1)
         {
-            //check if modified feature is valid
-            if(!isValid(olFeature2geoJsonFeature(modifiedFeatures[i])))
-            {
-                let unkinkedCollection = unkink(olFeature2geoJsonFeature(modifiedFeatures[i]))
-                eventSource.removeFeature(modifiedFeatures[i])
+            let beforeMod1 = olFeature2geoJsonFeature(features[features.length - 1])
+            let beforeMod2 = olFeature2geoJsonFeature(features[features.length  - 2])
 
-                for (let index = 0; index < unkinkedCollection.features.length; index++) {
-                    const geoJsonfeature = unkinkedCollection.features[index];
-                    eventSource.addFeature(geoJsonFeature2olFeature(geoJsonfeature))
-                    cleanUserInput(getMapFeatures(event.target.map_))
-                }
+            originalPoly = turf.union(beforeMod1, beforeMod2)
+        }
+    }
+
+    const handleModifyend = (event) => {
+        let features = event.features.getArray()
+        let source2 = getMapSource(event.target.map_)
+
+        features.forEach((latestFeature) => {
+            source2.removeFeature(latestFeature)
+        })
+
+        for (let i = 0; i<features.length; i++) {
+            if(!isValid(olFeature2geoJsonFeature(features[i])))
+            {
+                features[i] = originalPoly
+                let newPoly = features[i - 1]
+                features.splice(i-1)
+                features.splice(i)
+
+                let intersection = turf.intersect(olFeature2geoJsonFeature(newPoly), originalPoly);
+
+                let difference = turf.difference(originalPoly, intersection);
+                
+                source2.addFeature(geoJsonFeature2olFeature(difference))
+                source2.addFeature(geoJsonFeature2olFeature(intersection))
             }
         }
-        
-        modifiedFeatures.forEach((feature) => {
-            eventSource.addFeature(feature)
-            cleanUserInput(getMapFeatures(event.target.map_))
-        }) */
+
+        for (let i = 0; i<features.length; i++) {
+            console.log(features[i])
+            source2.addFeature(features[i])
+            cleanUserInput(event.target.map_)
+        }
+        updateSource(getMapSource(event.target.map_), cleanUserInput(getMapFeatures(event.target.map_)))
+
     }
- 
+
+
     const removeFromMapIfInvalid = (event) => {
         if (!isValid(olFeature2geoJsonFeature(event.feature))) {
             removeFeatureFromMap(event.feature)
         }
     }
     
+
     /* This will run each time the map changes in some way.
        Used to make sure no invalid polygons are added to the map. */
     useEffect(() => {
@@ -381,14 +403,8 @@ function MapWrapper() {
         }
     }, [map])
     
-    /* Remove a feaure from map */
     const removeFeatureFromMap = (feature) => {
         getMapSource(map).removeFeature(feature)
-    }
-
-    /* remove a feature from map inside an event */
-    const removeFeatureFromEventMap = (map, feature) => {
-    map.getLayers().getArray()[1].getSource().removeFeature(feature)
     }
 
     /* check if we are clicking on a polygon*/
