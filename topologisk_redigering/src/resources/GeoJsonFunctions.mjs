@@ -10,7 +10,8 @@ OpenLayers and JSTS data structures.
 -----------------------------------------------------------------------------/*/
 /*
     * returns features from first source in OL map object
-    * @map = OL map object
+    * @param    {Map} map: OL map object
+    * @return   {Array[Feature]} : array of OL Feature objects extracted from map
     */
 export const getFeatureList = (map) => {
     return map.getLayers().getArray()[1].getSource().getFeatures()
@@ -18,7 +19,8 @@ export const getFeatureList = (map) => {
 
 /*
     * returns OL features from a GeoJson object
-    * @geoJsonData = geojson object
+    * @param    {GeoJson} : geoJsonData  to be converted
+    * @return   {Array[Feature]} : array of OL Feature from geojsondata
     */
 export const GeoJsonObjToFeatureList = (geoJsonData) => {
     return (new GeoJSON()).readFeatures(geoJsonData)
@@ -26,13 +28,15 @@ export const GeoJsonObjToFeatureList = (geoJsonData) => {
 
 /*
     * returns a GeoJson object from the first source of an OL map
-    * @map = OL map object
+    * @param    {Map} map : OL map object
+    * @return   {GeoJson} jsonObj : GeoJson object with features form given map
     */
 export const featuresToGeoJson = (map) => {
     let features = [];
     if (map) {features = getFeatureList(map) }
     else {features = []}
-    const jsonObj = new GeoJSON({ projection: "EPSG:3006" }).writeFeaturesObject(features)
+    const jsonObj = new GeoJSON({ projection: "EPSG:3006" })
+        .writeFeaturesObject(features)
     jsonObj["crs"] = {
         "type": "name",
         "properties": {
@@ -44,23 +48,22 @@ export const featuresToGeoJson = (map) => {
 
 /*
     * returns a JSTS object from geojsondata
-    * @geoJsonData = geojson object
+    * @param  {GeoJson} : geoJsonData : geojson object
+    * @return {Geometry/GeometryCollection} jsts : converted shapes
     */
 export const geoJsonToJsts = (geoJson) => {
     let jsts = new GeoJSONReader().read(geoJson)
     return jsts
 }
 
-
-
 /*
-    * returns a Geojson object from a JSTS featurecollection or an array of JSTS objects
+    * returns a Geojson object from a JSTS featurecollection or 
+    * an array of JSTS objects
     * !OBS REQUIRES USE OF .features can not use normal indexing
-    * @jstsObject = JSTS featurecollection or array
+    * @param {Array[Geometry]/GeometryCollection} jstsObject : shapes to convert
+    * @return {GeoJson} jsonObj : GeoJson with converted shapes
     */
 export const jstsToGeoJson = (jstsObject) => {
-
-    //debugger
 
     let writer = new GeoJSONWriter()
     let featureList = []
