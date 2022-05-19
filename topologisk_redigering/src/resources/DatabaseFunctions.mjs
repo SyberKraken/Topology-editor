@@ -1,4 +1,3 @@
-import GeoJSON from "ol/format/GeoJSON.js"
 import { geoJsonFeatureCollection2FullGeoJSON } from "../translation/translators.mjs"
 
 // new terminal run command :  npm run http (for windows)
@@ -8,11 +7,9 @@ import { geoJsonFeatureCollection2FullGeoJSON } from "../translation/translators
     // YOU NEED TO INSTALL json-server GLOBALLY FOR THE FOLLOWING FUNCTION TO WORK! (23/2)
     // npm install -g json-server
 
-export const saveToDatabase = (featureCollection) => {
-        //const jsonObj = new GeoJSON({ projection: "EPSG:3006" }).writeFeaturesObject(features)
+/* Saves a GeoJson featureCollection to the file that was used as input data. */
+export const saveToFile = (featureCollection) => {
         const geojson = geoJsonFeatureCollection2FullGeoJSON(featureCollection)
-
-        //console.log(JSON.stringify(geojson))
 
         fetch("http://localhost:4000/file1",
             {
@@ -25,11 +22,4 @@ export const saveToDatabase = (featureCollection) => {
             })
             .then(function (res) { console.log(res) })
             .catch(function (res) { console.log(res) })
-}
-
-
-
-export const loadPolyFromDB = ([]) => {      
-    //Cant load in layer while runnign at the moment.     
-    //realoadMap(vectorLayerFromUrl("geoJsonExample2.geojson"))
 }
