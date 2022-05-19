@@ -72,7 +72,6 @@ const gj = () => {
   )
 }
 
-
 const hourglassBefore = () => {
   return (
     {
@@ -96,6 +95,7 @@ const hourglassBefore = () => {
     }
   )
 }
+
 
 const overlapPolygons = () => {
   return (
@@ -464,7 +464,8 @@ const coordinatesAreEquivalent = (coordinateArray1, coordinateArray2) => {
   return true
 }
 
-
+//Checks that new nodes are added in correct places whenever we fix overlaps
+// of 2 polygons
 const testAddIntersectionNodes = (geoJsonInner, geoJsonOuter) =>{
 
   const inner = geoJsonFeature2JstsGeometry(geoJsonInner)
@@ -475,6 +476,8 @@ const testAddIntersectionNodes = (geoJsonInner, geoJsonOuter) =>{
   return jstsGeometry2GeoJsonFeature(geoJsonInnerNew)
 }
 
+//Checks that polygons are cut and reshaped with the old ones having priority
+// whenever we fix overlaps of 2 polygons
 const testHandleIntersection = (jstsNew, jstsOther) => {
   const newGeo = geoJsonFeature2JstsGeometry(jstsNew)
   const oldList = geoJsonFeatureCollection2JstsGeometries(jstsOther)
