@@ -532,8 +532,8 @@ test('handleInterSection', function(t){
 
 test('fixoverlaps removes overlapping areas AND adds needed nodes on intersection points AND removes features that are too small', function(t){
   const test = fixOverlaps(overlappingCollection())
-  console.log(test.features[0].geometry.coordinates[0])
-  console.log(bigBoxWithExtraNodes.geometry.coordinates[0])
+  //console.log(test.features[0].geometry.coordinates[0])
+  //console.log(bigBoxWithExtraNodes.geometry.coordinates[0])
   t.assert(coordinatesAreEquivalent(test.features[test.features.length-1].geometry.coordinates[0], topTriangleBig.geometry.coordinates[0]))
   t.assert(coordinatesAreEquivalent(test.features[0].geometry.coordinates[0], bigBoxWithExtraNodes.geometry.coordinates[0]))
   t.end()

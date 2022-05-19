@@ -1,14 +1,14 @@
 import simplepolygon from 'simplepolygon';
 import IsValidOp from "jsts/org/locationtech/jts/operation/valid/IsValidOp.js";
-import OL3Parser from "jsts/org/locationtech/jts/io/OL3Parser.js";
-import BufferParameters from 'jsts/org/locationtech/jts/operation/buffer/BufferParameters.js'
-import BufferOp from 'jsts/org/locationtech/jts/operation/buffer/BufferOp.js'
-import OverlayOp from "jsts/org/locationtech/jts/operation/overlay/OverlayOp.js"
+//import OL3Parser from "jsts/org/locationtech/jts/io/OL3Parser.js";
+//import BufferParameters from 'jsts/org/locationtech/jts/operation/buffer/BufferParameters.js'
+//import BufferOp from 'jsts/org/locationtech/jts/operation/buffer/BufferOp.js'
+//import OverlayOp from "jsts/org/locationtech/jts/operation/overlay/OverlayOp.js"
 import { Point, LineString, LinearRing, Polygon, MultiLineString, MultiPolygon } from 'ol/geom.js'
 import MultiPoint from 'ol/geom/MultiPoint.js';
 import { geoJsonFeature2JstsGeometry, geoJsonFeature2geoJsonFeatureCollection } from '../translation/translators.mjs';
 import { fixCoordinateRotation } from './HelperFunctions.mjs';
-
+/*
 const parser = new OL3Parser();
 parser.inject(
     Point,
@@ -23,9 +23,9 @@ parser.inject(
 
 export const olToJsts = (poly) => {
     return parser.read(poly.getGeometry())
-}
+} */
 
-
+//Check if a feature is valid or not
 export const isValid = (geoJsonFeature) => {
     let jstsLastDrawnPoly
     try {
@@ -44,7 +44,7 @@ export const isValid = (geoJsonFeature) => {
  * @lastDrawnPoly = openlayers feature
  * @allPolys = openlayer features
  */
-function calculateIntersection(lastDrawnPoly, allPolys) {
+/* function calculateIntersection(lastDrawnPoly, allPolys) {
     let jstsLastDrawnPoly = olToJsts(lastDrawnPoly)
     // shrink polygon by tiny amount otherwise it will count as intersect
     // if two polygons share a point on a border
@@ -59,7 +59,7 @@ function calculateIntersection(lastDrawnPoly, allPolys) {
     });
 
     return result.length > 0
-}
+} */
 
 export const unkink = (polygon) => {
     //dont unkink multipoly?
