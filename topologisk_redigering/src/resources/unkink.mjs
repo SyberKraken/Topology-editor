@@ -9,7 +9,6 @@ import MultiPoint from 'ol/geom/MultiPoint.js';
 import { geoJsonFeature2JstsGeometry } from '../translation/translators.mjs';
 import { fixCoordinateRotation } from './HelperFunctions.mjs';
 
-
 const parser = new OL3Parser();
 parser.inject(
     Point,
@@ -62,12 +61,18 @@ function calculateIntersection(lastDrawnPoly, allPolys) {
     return result.length > 0
 }
 
-
-//unkink a polygon and fix its coordinates so that the are clockwise
 export const unkink = (polygon) => {
-    let unkinkedPolygons = simplepolygon(polygon)
-    unkinkedPolygons.features.forEach(polygon => {
-        polygon = fixCoordinateRotation(polygon)
-    })
-    return unkinkedPolygons
+    //dont unkink multipoly?
+    if (polygon.geometry.type !== "MultiPolygon")
+    {        
+        let unkinkedPolygons = simplepolygon(polygon)
+        unkinkedPolygons.features.forEach(polygon => {
+            polygon = fixCoordinateRotation(polygon)
+        })
+        return unkinkedPolygons
+    }
+    else {
+        //TODO: support for unkink on multipolygons would perhaps start here...
+        return geoJsonFeature2geoJsonFeatureCollection(polygon)
+    }
 }
