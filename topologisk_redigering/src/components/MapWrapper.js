@@ -121,7 +121,6 @@ function MapWrapper() {
 
 
     const cleanInputData = (inputData, source) => {
-
         const polygons = splittingMultipolygons(inputData)
         polygons.forEach( polygon => {
             source.addFeature(polygon) //handleDrawEnd assumes the new polygon already exists in the source.
@@ -304,35 +303,40 @@ function MapWrapper() {
     }
 
     //interprets newly modified polygon and modifies it to not break topology rules.
-    const handleModifyend = (event) => {
+   /*  const handleModifyend = (event) => {
 
-        let modifiedFeatures = event.features.getArray()
+        console.log("HANDLEMODIFYEND",event.features.getArray())
+
+        let modifiedFeatures = event.features
+        let eventSource = getMapSource(event.target.map_)
+
         //remove the latest modified features temporarily from the map source.
         modifiedFeatures.forEach((feature) => {
-            event.target.map_.getLayers().getArray()[1].getSource().removeFeature(feature)
+            removeFeatureFromEventMap(event.target.map_, feature)
         })
-        let source2 = getMapSource(event.target.map_)
+        
         for(let i=0; i<modifiedFeatures.length; i++)
         {
-            // check if unkink creates the hidden polygon
-            // fill new polygons from unkink with red
+            //check if modified feature is valid
             if(!isValid(olFeature2geoJsonFeature(modifiedFeatures[i])))
             {
-                let geoJsonCollection = unkink(olFeature2geoJsonFeature(modifiedFeatures[i]))
-                source2.removeFeature(modifiedFeatures[i])
-                for (let index = 0; index < geoJsonCollection.features.length; index++) {
-                    const geoJsonfeature = geoJsonCollection.features[index];
-                    source2.addFeature(geoJsonFeature2olFeature(geoJsonfeature))
+                let unkinkedCollection = unkink(olFeature2geoJsonFeature(modifiedFeatures[i]))
+                eventSource.removeFeature(modifiedFeatures[i])
+
+                for (let index = 0; index < unkinkedCollection.features.length; index++) {
+                    const geoJsonfeature = unkinkedCollection.features[index];
+                    eventSource.addFeature(geoJsonFeature2olFeature(geoJsonfeature))
                     cleanUserInput(getMapFeatures(event.target.map_))
                 }
             }
         }
         
         modifiedFeatures.forEach((feature) => {
-            source2.addFeature(feature)
+            eventSource.addFeature(feature)
             cleanUserInput(getMapFeatures(event.target.map_))
         })
     }
+ */
 
     const removeFromMapIfInvalid = (event) => {
         if (!isValid(olFeature2geoJsonFeature(event.feature))) {
@@ -349,8 +353,14 @@ function MapWrapper() {
         }
     }, [map])
     
+    /* Remove a feaure from map */
     const removeFeatureFromMap = (feature) => {
         getMapSource(map).removeFeature(feature)
+    }
+
+    /* remove a feature from map inside an event */
+    const removeFeatureFromEventMap = (map, feature) => {
+    map.getLayers().getArray()[1].getSource().removeFeature(feature)
     }
 
     /* check if we are clicking on a polygon*/
@@ -367,6 +377,8 @@ function MapWrapper() {
         if (list.length === 0){return -1}
         return list[0]
     }
+
+ 
 
     /* get mapsource */
     const getMapSource = (map) => {
