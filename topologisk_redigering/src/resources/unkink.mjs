@@ -6,7 +6,7 @@ import BufferOp from 'jsts/org/locationtech/jts/operation/buffer/BufferOp.js'
 import OverlayOp from "jsts/org/locationtech/jts/operation/overlay/OverlayOp.js"
 import { Point, LineString, LinearRing, Polygon, MultiLineString, MultiPolygon } from 'ol/geom.js'
 import MultiPoint from 'ol/geom/MultiPoint.js';
-import { geoJsonFeature2JstsGeometry } from '../translation/translators.mjs';
+import { geoJsonFeature2JstsGeometry, geoJsonFeature2geoJsonFeatureCollection } from '../translation/translators.mjs';
 import { fixCoordinateRotation } from './HelperFunctions.mjs';
 
 const parser = new OL3Parser();

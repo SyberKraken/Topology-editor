@@ -26,6 +26,7 @@ import { Button } from '@mui/material';
 import { Polygon, MultiPolygon } from 'ol/geom';
 import { DoubleClickZoom } from 'ol/interaction';
 
+
 /*
 MapWrapper contains the on screen map and runs functionality according to user interaction.
 The user draws polygons by placing their nodes on the map with left click. 
@@ -180,23 +181,17 @@ function MapWrapper() {
         let featureList = []
         if(oldFeatureList.length > 1)
         {
-            console.log("features before fixoverlaps:")
-            console.log(getFeatureList(map))
-            console.log(olFeatures2GeoJsonFeatureCollection(getFeatureList(map)))
-            let newPolygons = fixOverlaps(olFeatures2GeoJsonFeatureCollection(getFeatureList(map)), modifiedFeatures)
+            //console.log("features before fixoverlaps:")
+            //console.log(getMapFeatures(map))
+            //console.log(olFeatures2GeoJsonFeatureCollection(getMapFeatures(map)))
+            let newPolygons = fixOverlaps(olFeatures2GeoJsonFeatureCollection(oldFeatureList), modifiedFeatures)
             //TODO: mcProblem happens here, we think. V V V
             console.log("features after fixoverlaps")
             console.log(newPolygons)
-            let featureList = geoJsonFeatureCollection2olFeatures(newPolygons) 
+            featureList = geoJsonFeatureCollection2olFeatures(newPolygons) 
                 
             //TODO: check flatcoordinates for the multipolygon in the console log below.
-            console.log(featureList)
-            if(featureList.length > 0){
-                getSource(map).clear()
-                getSource(map).addFeatures(featureList) 
-            }else{
-                console.log("cleaned input is empty")
-            }
+           
         }
         return featureList
     }
@@ -245,7 +240,7 @@ function MapWrapper() {
     const onMapClickGetPixel = (event) => {
         //Check if clicked on an existing polygon 
         if (isFeatureAtPixelAPolygon(event.map, event.pixel)){
-            currentClickedPolygon = getPolygon(event.map, event.pixel) 
+            currentClickedPolygon = getMapFeatureAtPixel(event.map, event.pixel) 
             mergeState += 1
             currentClickedPolygon.setStyle(selectedStyle)
             if(previousClickedPolygon != null){
@@ -346,7 +341,7 @@ function MapWrapper() {
     //interprets newly modified polygon and modifies it to not break topology rules.
     const handleModifyend = (event) => {
 
-        let modifiedFeatures = event.features.getArray()
+        /*let modifiedFeatures = event.features.getArray()
         //remove the latest modified features temporarily from the map source.
         modifiedFeatures.forEach((feature) => {
             event.target.map_.getLayers().getArray()[1].getSource().removeFeature(feature)
@@ -372,7 +367,7 @@ function MapWrapper() {
         modifiedFeatures.forEach((feature) => {
             source2.addFeature(feature)
             cleanUserInput(getMapFeatures(event.target.map_))
-        })
+        }) */
     }
 
     const removeFromMapIfInvalid = (event) => {

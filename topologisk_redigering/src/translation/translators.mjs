@@ -82,6 +82,7 @@ export const geoJsonFeature2JstsGeometry = (geoJsonFeature) => {
 /* Takes a jsts geometry and returns a geoJson feature */
 export const jstsGeometry2GeoJsonFeature = (jstsGeometry) => {
     //--------
+    const writer = new GeoJSONWriter()
     let getProperties = propertiesTableJSTS.get(jstsGeometry._SRID)
     propertiesTableJSTS.delete(jstsGeometry._SRID)
     let writtenGeometry = writer.write(jstsGeometry)
