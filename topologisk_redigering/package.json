@@ -31,8 +31,8 @@
     "build": "react-scripts build",
     "test": "mocha",
     "eject": "react-scripts eject",
-    "http": "json-server -p 4000 --watch --no-cors .\\src\\data\\geoJsonExample2.json",
-    "httpl": "json-server -p 4000 --watch --no-cors ./src/data/geoJsonExample2.json"
+    "http": "json-server -p 4000 --watch --no-cors .\\src\\data\\InputData.json",
+    "httpl": "json-server -p 4000 --watch --no-cors ./src/data/InputData.json"
   },
   "eslintConfig": {
     "extends": [

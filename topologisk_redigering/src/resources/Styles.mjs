@@ -1,6 +1,7 @@
 import { Circle as NodeStyle, Fill, Stroke, Style } from 'ol/style.js';
 import MultiPoint from 'ol/geom/MultiPoint.js';
 
+/* Default style for features. */
  export const defaultStyle = [
     new Style({
         stroke: new Stroke({
