@@ -14,7 +14,26 @@ export const getListOfOlFeaturesFromMap = (map) => {
 }
 
 export const getJstsGeometryCoordinates = (geom) => {
-    return geom._shell._points._coordinates
+    console.log(geom)
+    let coords = []
+    //if multipolygon, return coords in an array
+    if (geom._geometries) {   
+        geom._geometries.forEach(geometry => {
+            geometry._shell._points._coordinates.forEach(coordinatespair => {
+                coords.push(coordinatespair)
+            })
+        });
+        return coords
+    }
+    //else return the polygon's coordinates
+    else {
+        coords = geom._shell._points._coordinates
+        return coords
+    }
+
+    // geom._shell._points._coordinates
+    //[[x, y], [x, y]]
+
 }
 //Getters for geoJSON "FeatureCollections"
 

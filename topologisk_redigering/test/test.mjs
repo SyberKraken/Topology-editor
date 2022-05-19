@@ -1,3 +1,5 @@
+//TO RUN: node test/test.mjs
+
 import { test } from 'tape'
 import simplepolygon from 'simplepolygon'
 //import _, { cloneWith } from 'lodash'

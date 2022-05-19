@@ -3,6 +3,7 @@ import IsValidOp from "jsts/org/locationtech/jts/operation/valid/IsValidOp.js";
 import { GeometryFactory } from "jsts/org/locationtech/jts/geom.js";
 import polygonsAreConnected from "./TopologyValidation.mjs"
 import { geoJsonFeature2JstsGeometry, jstsGeometry2GeoJsonFeature } from "../translation/translators.mjs";
+import { coordinatesAreEquivalent } from "./HelperFunctions.mjs";
 
 //removes overlapped areas from new geometry
 //takes a jsts geometry and a list of all other jsts geometries.
@@ -53,19 +54,29 @@ export const addIntersectionNodes = (newJstsGeometry, originalJstsGeometries) =>
 }
 
 //takes a JSTSpolygon and a geoJsonFeatureCollection and returns a JSTS geomlist
+//TODO: return only mergeable features. the function does not work as expected as it currently returns ALL features.
 export default function getMergeableFeatures(selectedPolygon, allFeatures) { 
+
+   
+
 
   //removes selected polygon from polygons it will be checked against
   let otherFeatures = allFeatures.features.filter(function(feature) {
     const curPolygon = geoJsonFeature2JstsGeometry(feature)
-    return JSON.stringify(curPolygon) !== JSON.stringify(selectedPolygon)
+    return !coordinatesAreEquivalent(curPolygon, selectedPolygon)
+    //return JSON.stringify(curPolygon) !== JSON.stringify(selectedPolygon)
   })
+
+
 
   //fills results with features adjecent to selectedFeature.
   const result = otherFeatures.filter(function (feature) {
     const curPolygon = geoJsonFeature2JstsGeometry(feature)
     const intersection = OverlayOp.intersection(curPolygon, selectedPolygon)
+    console.log("is this true or false:", intersection)
+   // console.log(intersection)
     return intersection
+    
   })
 
   const resultCleaned = result.filter(function(poly) {
@@ -101,20 +112,7 @@ export function mergeFeatures(firstGeometry, secondGeometry){
         return -1
     }
  
-    let firstPointList = firstGeometry._shell._points._coordinates
-    let secondPointList = secondGeometry._shell._points._coordinates
 
-    let factory = new GeometryFactory();
-    firstPointList.forEach(function isColiding(coord){
-    let point = factory.createPoint(coord)
-    
-    secondPointList.forEach(function(coord2){
-        //check if same cacngle 
-        let point2 =  factory.createPoint(coord2)
-        if(firstPointList.includes(point2)){return}
-        else{let x = point._coordinates[0]}
-        })
-    })
 
   return union
 }

@@ -26,6 +26,7 @@ import { Button } from '@mui/material';
 import { Polygon, MultiPolygon } from 'ol/geom';
 import { DoubleClickZoom } from 'ol/interaction';
 
+
 /*
 MapWrapper contains the on screen map and runs functionality according to user interaction.
 The user draws polygons by placing their nodes on the map with left click. 
@@ -37,6 +38,7 @@ Polygons can be merged by clicking on two polygons in succession, if they are ad
 function MapWrapper() {
     //Common data used for most operations
     const [map, setMap] = useState();
+    let mergeState = 0
     let clickHandlerState = 'NONE';
     const mapElement = useRef();
     const mapRef = useRef();
@@ -121,6 +123,7 @@ function MapWrapper() {
 
 
     const cleanInputData = (inputData, source) => {
+        //TODO: remove this function and splittingMultiPolygons or explain how it can be used to changed to split multipolygon when this is wanted behavior ^^ vv
         const polygons = splittingMultipolygons(inputData)
         polygons.forEach( polygon => {
             source.addFeature(polygon) //handleDrawEnd assumes the new polygon already exists in the source.
@@ -136,7 +139,23 @@ function MapWrapper() {
         loader: function(){
             let url = "http://localhost:4000/file1"
             fetch(url).then(res => res.json()).then(result => {
-                cleanInputData(result, source)   
+            result.features.forEach(feature => {
+                
+                source.addFeature(geoJsonFeature2olFeature(feature))
+                
+                /* if (feature.geometry.coordinates.length > 1){
+                    let splitMulti = []
+                    feature.geometry.coordinates.forEach(coordinateArr => {
+                        splitMulti.push(new Feature(new Polygon(coordinateArr)))
+                    })
+                    source.addFeatures(splitMulti)
+                }
+                else{
+                    source.addFeature(new Feature(new Polygon(feature.geometry.coordinates[0])))
+                } */
+            })
+    
+            //cleanInputData(result, source)   
         })
     }
 
@@ -162,9 +181,17 @@ function MapWrapper() {
         let featureList = []
         if(oldFeatureList.length > 1)
         {
+            //console.log("features before fixoverlaps:")
+            //console.log(getMapFeatures(map))
+            //console.log(olFeatures2GeoJsonFeatureCollection(getMapFeatures(map)))
             let newPolygons = fixOverlaps(olFeatures2GeoJsonFeatureCollection(oldFeatureList), modifiedFeatures)
+            //TODO: mcProblem happens here, we think. V V V
+            console.log("features after fixoverlaps")
+            console.log(newPolygons)
             featureList = geoJsonFeatureCollection2olFeatures(newPolygons) 
-
+                
+            //TODO: check flatcoordinates for the multipolygon in the console log below.
+           
         }
         return featureList
     }
@@ -214,23 +241,32 @@ function MapWrapper() {
         //Check if clicked on an existing polygon 
         if (isFeatureAtPixelAPolygon(event.map, event.pixel)){
             currentClickedPolygon = getMapFeatureAtPixel(event.map, event.pixel) 
+            mergeState += 1
             currentClickedPolygon.setStyle(selectedStyle)
             if(previousClickedPolygon != null){
                 previousClickedPolygon.setStyle(defaultStyle)
                 if(currentClickedPolygon !== -1){
                     //merge if this click occurs directly after a click on another polygon
                     if(currentClickedPolygon !== previousClickedPolygon){
-                        merge(event.map)
+                        if (mergeState >= 2) {
+                            merge(event.map)
+                            currentClickedPolygon = null
+                            previousClickedPolygon = null
+                            mergeState = 0
+                        }
                     }
                     //delete if this click is on the same polygon as the last click.
                     if (currentClickedPolygon === previousClickedPolygon) {
                         deletePolygon(event.map, currentClickedPolygon)
+                        currentClickedPolygon = null
+                        previousClickedPolygon = null
                     }
                 }
             }
             previousClickedPolygon = currentClickedPolygon
         } 
         else {
+            mergeState = 0
             if(clickHandlerState === 'DRAWEND') {
                 //TODO: MAYBE unkink the drawn polygon HERE
                 //let cleaned = cleanUserInput(getFeatureList(event.map))
@@ -303,8 +339,8 @@ function MapWrapper() {
     }
 
     //interprets newly modified polygon and modifies it to not break topology rules.
-   /*  const handleModifyend = (event) => {
-
+     const handleModifyend = (event) => {
+/*
         console.log("HANDLEMODIFYEND",event.features.getArray())
 
         let modifiedFeatures = event.features
@@ -334,9 +370,9 @@ function MapWrapper() {
         modifiedFeatures.forEach((feature) => {
             eventSource.addFeature(feature)
             cleanUserInput(getMapFeatures(event.target.map_))
-        })
+        }) */
     }
- */
+ 
 
     const removeFromMapIfInvalid = (event) => {
         if (!isValid(olFeature2geoJsonFeature(event.feature))) {
@@ -366,7 +402,7 @@ function MapWrapper() {
     /* check if we are clicking on a polygon*/
     const isFeatureAtPixelAPolygon = (map, pixel) => {
         if(map.getFeaturesAtPixel(pixel).length > 0){
-            return map.getFeaturesAtPixel(pixel)[0].getGeometry().getType() === "Polygon"
+            return (map.getFeaturesAtPixel(pixel)[0].getGeometry().getType() === "Polygon" || map.getFeaturesAtPixel(pixel)[0].getGeometry().getType() === "MultiPolygon")
         }
         return false 
     }

@@ -1,16 +1,15 @@
 import simplepolygon from 'simplepolygon';
 import IsValidOp from "jsts/org/locationtech/jts/operation/valid/IsValidOp.js";
 //import OL3Parser from "jsts/org/locationtech/jts/io/OL3Parser.js";
-import BufferParameters from 'jsts/org/locationtech/jts/operation/buffer/BufferParameters.js'
-import BufferOp from 'jsts/org/locationtech/jts/operation/buffer/BufferOp.js'
-import OverlayOp from "jsts/org/locationtech/jts/operation/overlay/OverlayOp.js"
-//import { Point, LineString, LinearRing, Polygon, MultiLineString, MultiPolygon } from 'ol/geom.js'
-//import MultiPoint from 'ol/geom/MultiPoint.js';
-import { geoJsonFeature2JstsGeometry } from '../translation/translators.mjs';
+//import BufferParameters from 'jsts/org/locationtech/jts/operation/buffer/BufferParameters.js'
+//import BufferOp from 'jsts/org/locationtech/jts/operation/buffer/BufferOp.js'
+//import OverlayOp from "jsts/org/locationtech/jts/operation/overlay/OverlayOp.js"
+import { Point, LineString, LinearRing, Polygon, MultiLineString, MultiPolygon } from 'ol/geom.js'
+import MultiPoint from 'ol/geom/MultiPoint.js';
+import { geoJsonFeature2JstsGeometry, geoJsonFeature2geoJsonFeatureCollection } from '../translation/translators.mjs';
 import { fixCoordinateRotation } from './HelperFunctions.mjs';
-
-
-/* const parser = new OL3Parser();
+/*
+const parser = new OL3Parser();
 parser.inject(
     Point,
     LineString,
@@ -62,12 +61,18 @@ export const isValid = (geoJsonFeature) => {
     return result.length > 0
 } */
 
-
-//unkink a polygon and fix its coordinates so that the are clockwise
 export const unkink = (polygon) => {
-    let unkinkedPolygons = simplepolygon(polygon)
-    unkinkedPolygons.features.forEach(polygon => {
-        polygon = fixCoordinateRotation(polygon)
-    })
-    return unkinkedPolygons
+    //dont unkink multipoly?
+    if (polygon.geometry.type !== "MultiPolygon")
+    {        
+        let unkinkedPolygons = simplepolygon(polygon)
+        unkinkedPolygons.features.forEach(polygon => {
+            polygon = fixCoordinateRotation(polygon)
+        })
+        return unkinkedPolygons
+    }
+    else {
+        //TODO: support for unkink on multipolygons would perhaps start here...
+        return geoJsonFeature2geoJsonFeatureCollection(polygon)
+    }
 }
