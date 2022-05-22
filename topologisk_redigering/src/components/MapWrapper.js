@@ -26,6 +26,7 @@ import { Button } from '@mui/material';
 import { Polygon, MultiPolygon } from 'ol/geom';
 import { DoubleClickZoom } from 'ol/interaction';
 import * as turf from "@turf/turf"
+import { ModifyEvent } from 'ol/interaction/Modify';
 
 
 /*
@@ -95,23 +96,15 @@ function MapWrapper() {
         wrapX: true,
     })
 
-    const splittingMultipolygons = (Data) => {
-        let splitMulti = []
-
-        Data.features.forEach(feature => {
-            if (feature.geometry.coordinates.length > 1){
-                feature.geometry.coordinates.forEach(coordinateArr => {
-                    splitMulti.push(new Feature(new Polygon(coordinateArr)))
-                })
-            }
-            else{
-                splitMulti.push(new Feature(new Polygon(feature.geometry.coordinates[0])))
-            }
-        })
-
-        return splitMulti
-    }
-
+    /** 
+     * 
+     * Remove all features from source and then readd them.
+     * Used by? seems unecessary
+     *
+     * @param {source} source Map source
+     * @param {FeatureList} features features to be added to the map source
+     * 
+     */ 
     const updateSource = (source, features) => {
         console.log(features)
         if(features.length > 0){
@@ -123,18 +116,6 @@ function MapWrapper() {
 
     }
 
-
-    const cleanInputData = (inputData, source) => {
-        //TODO: remove this function and splittingMultiPolygons or explain how it can be used to changed to split multipolygon when this is wanted behavior ^^ vv
-        const polygons = splittingMultipolygons(inputData)
-        polygons.forEach( polygon => {
-            source.addFeature(polygon) //handleDrawEnd assumes the new polygon already exists in the source.
-            handleDrawend( polygon, source )
-            //handleModifyend() ? 
-        })
-
-    }
-
     //Loads geoJson data from server via url
     const source = new VectorSource({
         wrapX: false,
@@ -142,22 +123,8 @@ function MapWrapper() {
             let url = "http://localhost:4000/file1"
             fetch(url).then(res => res.json()).then(result => {
             result.features.forEach(feature => {
-                
                 source.addFeature(geoJsonFeature2olFeature(feature))
-                
-                /* if (feature.geometry.coordinates.length > 1){
-                    let splitMulti = []
-                    feature.geometry.coordinates.forEach(coordinateArr => {
-                        splitMulti.push(new Feature(new Polygon(coordinateArr)))
-                    })
-                    source.addFeatures(splitMulti)
-                }
-                else{
-                    source.addFeature(new Feature(new Polygon(feature.geometry.coordinates[0])))
-                } */
             })
-    
-            //cleanInputData(result, source)   
         })
     }
 
@@ -175,25 +142,19 @@ function MapWrapper() {
         hitDetection: true
     })
     
-    /*  
-    Removes parts of the most recently added polygon on the map that overlap with 
-        existing polygons. on the intersection points, the new polygon has nodes added.
+  /**
+    * Removes parts of the most recently added polygon on the map that overlap with 
+    * existing polygons. On the intersection points, the new polygon has nodes added.
+    * @param  {featureList} oldFeatureList open layers feature list
+    * @return {featureList} same feature list as above execpt now the last polygon has overlapped edges removed
+    * 
     */
-    const cleanUserInput = (oldFeatureList, modifiedFeatures=1) => {
+    const cleanUserInput = (oldFeatureList) => {
         let featureList = []
         if(oldFeatureList.length > 1)
         {
-            //console.log("features before fixoverlaps:")
-            //console.log(getMapFeatures(map))
-            //console.log(olFeatures2GeoJsonFeatureCollection(getMapFeatures(map)))
-            let newPolygons = fixOverlaps(olFeatures2GeoJsonFeatureCollection(oldFeatureList), modifiedFeatures)
-            //TODO: mcProblem happens here, we think. V V V
-            console.log("features after fixoverlaps")
-            console.log(newPolygons)
+            let newPolygons = fixOverlaps(olFeatures2GeoJsonFeatureCollection(oldFeatureList))
             featureList = geoJsonFeatureCollection2olFeatures(newPolygons) 
-                
-            //TODO: check flatcoordinates for the multipolygon in the console log below.
-           
         }
         return featureList
     }
@@ -231,7 +192,7 @@ function MapWrapper() {
                 initialMap.removeInteraction(interaction);
                 console.log(DoubleClickZoom.name)
             }
-        }
+            }
         )
 
         setMap(initialMap)
@@ -239,7 +200,7 @@ function MapWrapper() {
 
 
      
-    //Contextual clickhandler, different actions depending on if you click on a polygon or somewhere on the map 
+    // Contextual clickhandler, different actions depending on if you click on a polygon or somewhere on the map 
     const onMapClickGetPixel = (event) => {
         //Check if clicked on an existing polygon 
         if (isFeatureAtPixelAPolygon(event.map, event.pixel)){
@@ -271,9 +232,6 @@ function MapWrapper() {
         else {
             mergeState = 0
             if(clickHandlerState === 'DRAWEND') {
-                //TODO: MAYBE unkink the drawn polygon HERE
-                //let cleaned = cleanUserInput(getFeatureList(event.map))
-                //updateSource(getSource(event.map), cleaned)
                 clickHandlerState = 'NONE'
             }
             else if(clickHandlerState === 'NONE'){
@@ -289,10 +247,17 @@ function MapWrapper() {
             updateSource(getMapSource(event.map), cleanUserInput(getMapFeatures(event.map)))
         }
     }
-    //merges the two most recently clicked polygons when called
+
+
+
+    /**
+    * Merges the two most recently clicked polygons when called.
+    * @param  {Map} map Openlayers map
+    */
     const merge = (map) => {
         const featureList = olFeatures2GeoJsonFeatureCollection(getMapFeatures(map))
-        let newPoly = handleMerge(olFeature2geoJsonFeature(currentClickedPolygon), olFeature2geoJsonFeature(previousClickedPolygon),featureList)
+        let newPoly = handleMerge(olFeature2geoJsonFeature(currentClickedPolygon), 
+                                  olFeature2geoJsonFeature(previousClickedPolygon),featureList)
     
         if(newPoly !== -1){
             let OlPoly = (new GeoJSON()).readFeature(newPoly)
@@ -304,20 +269,18 @@ function MapWrapper() {
         }
     }
 
-    //interprets newly drawn polygon and modifies it to not break topology rules.
+  /**
+    * Called after a polygon has finished drawing, checks if the new polygon is invalid
+    * if it's invalid unkink it and add the new polgons to source. The old polygon however
+    * is still in the source. It's removed in handleNewPoly.
+    * @param  {Feature} newFeature 
+    * 
+    */
     const handleDrawend = (newFeature, source) => {
-        
-        // check if valid
-        let valid = false
-        try {
-            valid = isValid(olFeature2geoJsonFeature(newFeature))
-        } catch (error) {
-            console.log("isvalid error from drawendevent") 
-        }
 
         let cleanedFeatures
         
-        if (!valid)
+        if (!isValid(newFeature))
         {
             //if not valid unkink: return geoJsonFeatureCollection
             const unkinkedCollection = unkink(olFeature2geoJsonFeature(newFeature))
@@ -327,21 +290,16 @@ function MapWrapper() {
             source.addFeatures(olFeatures)
             cleanedFeatures = cleanUserInput(source.getFeatures())
             updateSource(source, cleanedFeatures)
-
-            return unkinkedCollection.features.length
         }
-        else 
-        {
-            //cleanedFeatures = cleanUserInput(source.getFeatures())
-            //updateSource(source, cleanedFeatures)
-
-            return 1
-        }
-
-
     }
 
 
+  /**
+    * Called when a node has just begun being modifyed. If the node was connected to two polygons it will 
+    * merge them and save them in a global value, originalPoly for later use by handleModifyend. 
+    * @param  {ModifyEvent} event
+    * 
+    */
     const handleModifyStart = (event) => {
         let features = event.features.getArray()
         if(features.length  > 1)
@@ -353,6 +311,18 @@ function MapWrapper() {
         }
     }
 
+
+  /**
+    * Called after a node has been modifiyed. Removes all features that are connected to the
+    * node that was moved from the source. Goes through the features again and checks if any are invalid
+    * invalid could mean two things the user moved the polygon inside and kinked it or the user moved the 
+    * node outside the outerring. We currently handle only the second case.
+    * After that is fixed go though the features connected to the moved node again and add them to the map
+    * and fix possible overlaps.
+    *  
+    * @param  {ModifyEvent} event
+    * 
+    */
     const handleModifyend = (event) => {
         let features = event.features.getArray()
         let source2 = getMapSource(event.target.map_)
@@ -362,33 +332,31 @@ function MapWrapper() {
         })
 
         for (let i = 0; i<features.length; i++) {
+            // node is moved outside the linestring
             if(!isValid(olFeature2geoJsonFeature(features[i])))
             {
-                features[i] = originalPoly
                 let newPoly = features[i - 1]
-                features.splice(i-1)
-                features.splice(i)
 
                 let intersection = turf.intersect(olFeature2geoJsonFeature(newPoly), originalPoly);
 
                 let difference = turf.difference(originalPoly, intersection);
                 
-                source2.addFeature(geoJsonFeature2olFeature(difference))
-                source2.addFeature(geoJsonFeature2olFeature(intersection))
+                features[i-1] = geoJsonFeature2olFeature(difference)
+                features[i] = geoJsonFeature2olFeature(intersection)
             }
         }
 
         for (let i = 0; i<features.length; i++) {
-            console.log(features[i])
             source2.addFeature(features[i])
             cleanUserInput(event.target.map_)
         }
+        // hack because overlaps are only fixed after moving a node without this.
         updateSource(getMapSource(event.target.map_), cleanUserInput(getMapFeatures(event.target.map_)))
 
     }
 
 
-    const removeFromMapIfInvalid = (event) => {
+    const handleNewFeature = (event) => {
         if (!isValid(olFeature2geoJsonFeature(event.feature))) {
             removeFeatureFromMap(event.feature)
         }
@@ -399,7 +367,7 @@ function MapWrapper() {
        Used to make sure no invalid polygons are added to the map. */
     useEffect(() => {
         if (map) {
-            getMapSource(map).addEventListener('addfeature', removeFromMapIfInvalid)
+            getMapSource(map).addEventListener('addfeature', handleNewFeature)
         }
     }, [map])
     
