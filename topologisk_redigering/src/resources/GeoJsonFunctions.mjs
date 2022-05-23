@@ -3,6 +3,7 @@ import GeoJSONReader from 'jsts/org/locationtech/jts/io/GeoJSONReader.js'
 import GeoJSONWriter from 'jsts/org/locationtech/jts/io/GeoJSONWriter.js'
 import { Feature } from 'ol';
 import { Polygon } from 'ol/geom.js';
+
 /*/-----------------------------------------------------------------------------
 This file contains functionlaity for operating on GeoJson objects,
 mainly translators into, or from GeoJson concering varieties of 

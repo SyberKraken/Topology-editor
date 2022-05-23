@@ -1,70 +1,55 @@
-# Getting Started with Create React App
+# Topology Editor
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+This topology editor was created as part of the project course TDP032: Agile System Development at Linköping University.
 
-## Available Scripts
+## Description
 
-In the project directory, you can run:
+Using a combination of JSTS, GeoJson and Openlayers, this topology editor can handle drawing, removing, modifying, merging, saving and loading of polygon based topologies.
 
-### `npm start`
+User input is interpreted and modified to become valid topology data. For example, overlapping areas of different polygons are removed and polygons being drawn that cross themselves are corrected into several different polygons. 
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+## Requirements
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+- Node package manager (NPM) must be installed on the system. For installation instructions, see: https://docs.npmjs.com/downloading-and-installing-node-js-and-npm
 
-### `npm test`
+## Known issues
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+- We did not have time to fully implement multipolygons, leading to some known bugs when using these. Sometimes these bugs result in the multipolygons being removed or not having their overlapping areas fixed.
 
-### `npm run build`
+## Getting started
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+- Open two instances of the terminal from the topologisk_redigering folder/directory. One will be running the mock server and one the topology editor.
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+- In one terminal, run "npm install" to install project dependecies. 
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+- In the same terminal, start the mock server by running 'npm run http' if you're on Windows, or 'npm run httpl' if you're on MacOS or Linux. 
 
-### `npm run eject`
+- In the other terminal, start the topology editor with 'npm start'.
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+A browser window running the topology editor will shortly be opened. 
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+## Using the editor
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+The editor supports both multipolygons and regular polygons. Multipolygons share the same attributes but are split in several self contained areas. Regular polygons have orange points on their corners while multipolygons do not. If one area of a multipolygon is clicked, the entire multipolygon will be selected. 
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+Operations supported by the editor are listed below:
 
-## Learn More
+- **Drawing**: Click on point on the map, then another to create a line between them. Continue placing points until you reach the starting point. Doubleclick to auto-finish the polygon. This creates a line between where you clicked and where the first point was placed.
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+- **Modifying**: Click and drag a line or point that has already been placed.
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+- **Merge**: Click on the polygon you want to merge, then click the polygon you want to merge it with. Mergeing two regular polygons that are not connected will turn them into a multipolygon.
 
-### Code Splitting
+- **Delete**: Double click a polygon to delete it. 
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+- **Save**: Click the save button in the top bar to save the current map to the server. Next time you reload the map, the map's current state will be loaded. 
 
-### Analyzing the Bundle Size
+## Credits
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+Andrei Platoga
+Daniel Huber
+Edvin Nilsson Sommermark
+Josefin Bodin
+Simon Gradin
+Theodore Nilsson
 
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
