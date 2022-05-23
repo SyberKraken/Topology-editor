@@ -23,6 +23,10 @@ import { GeometryFactory } from 'jsts/org/locationtech/jts/geom.js';
 
 let propertiesTableJSTS = new Map()
 
+/* 
+*   Generates a random number to be used as an id in jsts geometry and the properties table
+*   in order to keep track of properties at geojson <-> jsts conversion
+*/
 function getRandomId() {
     let id = Math.floor(Math.random() * 1000)
     if (propertiesTableJSTS.has(id)){
@@ -32,13 +36,21 @@ function getRandomId() {
 }
 
 
-/* Takes a full GeoJSON object and returns a GeoJSON FeatureCollection */
+/* 
+*   extract only featurecollection from a full geojson object
+*   @param  {GeoJson Object}    fullGeoJson     A complete geojson object
+*   @return {GeoJson FeatureCollection}         Extracted featureCollection from complete geojson
+*/
 export const fullGeoJson2GeoJsonFeatureCollection = (fullGeoJson) => {
     delete fullGeoJson["crs"]
     return fullGeoJson
 }
 
-/* Takes a featureCollection and returns a complete geoJson  */
+/*  
+*   convert a geojson featureCollection to a complete geojson object
+*   @param  {GeoJson FeatureCollection}  featureCollection  a geojson featureCollection
+*   @return {GeoJson Object}                                a complete geojson object
+*/
 export const geoJsonFeatureCollection2FullGeoJSON = (featureCollection) => {
     featureCollection["crs"] = {
         "type": "name",
@@ -50,12 +62,22 @@ export const geoJsonFeatureCollection2FullGeoJSON = (featureCollection) => {
 }
 
 /* Takes a GeoJSON FeatureCollection and returns a GeoJSON Feature */
+/*  
+*   extract a single geojson feature from a geojson featureCollection
+*   @param  {GeoJson FeatureCollection} geojsonFeatureCollection    a geojson featureCollection
+*   @param  {Number}                    index                       a number specifying at which index in geojson featurecollecion you want to extract geojson feature from
+*   @return {GeoJson Feature}                                       an extracted geojson feature.
+*/
 export const geoJsonFeatureCollection2GeoJsonFeature = (geoJsonFeatureCollection, index) => {
     let geoJsonFeature = geoJsonFeatureCollection.features[index]
     return geoJsonFeature
 }
 
-/* Takes a GeoJSON Feature and returns a GeoJSON Feature Collection with a single*/
+/*  
+*   convert a single geojson feature to a geojson featureCollection
+*   @param  {GeoJson Feature}   geoJsonFeature      a single geojson feature
+*   @return {GeoJson FeatureCollection}             a geojson featureCollection with a single feature
+*/
 export const geoJsonFeature2geoJsonFeatureCollection = (geoJsonFeature) => {
     let geoJsonFeatureCollection = {
         "type":"FeatureCollection",
@@ -66,22 +88,28 @@ export const geoJsonFeature2geoJsonFeatureCollection = (geoJsonFeature) => {
 }
 
 /* takes a geoJson feature and returns a jsts geometry  */
+/*  
+*   convert a geojson feature to a jsts geometry. Store the features properties in a table mapping to a randomly generated id that is given to the geometry.
+*   @param  {GeoJson Feature}   geoJsonFeature  a single geojson Feature
+*   @return {JSTS Geometry}                     the converted geometry
+*/
 export const geoJsonFeature2JstsGeometry = (geoJsonFeature) => {
 
-    //console.table(geoJsonFeature)
     const reader = new GeoJSONReader()
     let jsts = reader.read(geoJsonFeature)
     jsts.geometry.setSRID(getRandomId())
     propertiesTableJSTS.set(jsts.geometry._SRID, geoJsonFeature.properties)
-    //console.log(jsts)
-
     return jsts.geometry
 
 }
 
 /* Takes a jsts geometry and returns a geoJson feature */
+/*  
+*   
+*
+*
+*/
 export const jstsGeometry2GeoJsonFeature = (jstsGeometry) => {
-    //--------
     const writer = new GeoJSONWriter()
     let getProperties = propertiesTableJSTS.get(jstsGeometry._SRID)
     propertiesTableJSTS.delete(jstsGeometry._SRID)

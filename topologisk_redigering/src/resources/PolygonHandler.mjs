@@ -22,7 +22,6 @@ export const fixOverlaps = (features) => {
     
     //Fixes overlap of singular polygon over multipolygon
     if (trimmed._geometries) {
-        console.log("this is a multipolygon! we love multipolygons, so we add it.")
         cleanedJstsCollection.push(trimmed)
     }
     //if the polygon has holes, remove holes that are too small
