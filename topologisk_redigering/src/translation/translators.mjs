@@ -35,6 +35,9 @@ function getRandomId() {
     return id 
 }
 
+function deleteFromPropertyTable(srid){
+    propertiesTableJSTS.delete(srid)
+}
 
 /* 
 *   extract only featurecollection from a full geojson object
@@ -99,7 +102,6 @@ export const geoJsonFeature2JstsGeometry = (geoJsonFeature) => {
     let jsts = reader.read(geoJsonFeature)
     jsts.geometry.setSRID(getRandomId())
     propertiesTableJSTS.set(jsts.geometry._SRID, geoJsonFeature.properties)
-    console.log("GEO2GEOM",jsts.geometry)
     return jsts.geometry
 
 }
@@ -112,10 +114,9 @@ export const geoJsonFeature2JstsGeometry = (geoJsonFeature) => {
 */
 export const jstsGeometry2GeoJsonFeature = (jstsGeometry) => {
     
-    console.log("GEOM2GEO", jstsGeometry)
     const writer = new GeoJSONWriter()
     let getProperties = propertiesTableJSTS.get(jstsGeometry._SRID)
-    propertiesTableJSTS.delete(jstsGeometry._SRID)
+    
     let writtenGeometry = writer.write(jstsGeometry)
     //if multipolygon, new multipolygon. else new polygon 
     let polygon
@@ -130,8 +131,8 @@ export const jstsGeometry2GeoJsonFeature = (jstsGeometry) => {
     
     newFeature.setProperties(getProperties)
     newFeature = new GeoJSON().writeFeatureObject(newFeature)
+    deleteFromPropertyTable(jstsGeometry._SRID)
     return newFeature
-    
     
 }
 

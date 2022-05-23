@@ -22,7 +22,6 @@ export const fixOverlaps = (features) => {
     //add intersection nodes to old polygons
     jstsCollection.slice(0, jstsCollection.length - 1).forEach(function f(geom){
         let diff = (addIntersectionNodes(geom, [preTrimmedNewPolygon]))
-        diff.setSRID(srid)
         //removes too small polygons
         if(diff.getArea()/diff.getLength() > areaOverCircLimit){
             cleanedJstsCollection.push(diff)

@@ -355,9 +355,7 @@ function MapWrapper() {
             if(!isValid(olFeature2geoJsonFeature(features[i])))
             {
                 let newPoly = features[i - 1]
-
                 let intersection = turf.intersect(olFeature2geoJsonFeature(newPoly), originalPoly);
-
                 let difference = turf.difference(originalPoly, intersection);
                 
                 features[i-1] = geoJsonFeature2olFeature(difference)

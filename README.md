@@ -16,6 +16,8 @@ User input is interpreted and modified to become valid topology data. For exampl
 
 - Multipolygons could not be fully implemented, leading to some known bugs when using these, sometimes resulting in the multipolygons being removed or not having their overlapping areas fixed.
 
+- Properties are not preserved through GeoJSON <-> Geometry conversion. Need to go through all places in the code where geometries are handled and make sure that the SRID is the same going out of function as it was going in to function.
+
 ## Getting started
 
 - Open two instances of the terminal from the project root (the folder or directory where this README is located). One will be running the mock server and one the topology editor.
