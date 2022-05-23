@@ -1,10 +1,8 @@
 import { Draw, Snap } from 'ol/interaction.js'
 import { Circle as CircleStyle, Fill, Stroke, Style } from 'ol/style.js';
 
-
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-
+//Style for selected polygons, change this to edit color/effects on selected polygon
 
 const style = [
   new Style({
@@ -59,7 +57,6 @@ const getMapSource = (map) => {
 
 
 export const highlightPolygon = (polygon) => {
-  //console.log(map.getFeaturesAtPixel(pixel).length > 0)
     {
       polygon.setStyle(style)
     }
