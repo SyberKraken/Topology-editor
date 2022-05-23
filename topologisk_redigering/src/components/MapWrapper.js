@@ -272,8 +272,9 @@ function MapWrapper() {
   /**
     * Called after a polygon has finished drawing, checks if the new polygon is invalid
     * if it's invalid unkink it and add the new polgons to source. The old polygon however
-    * is still in the source. It's removed in handleNewPoly.
+    * is still in the source. It's removed in handleNewFeature.
     * @param  {Feature} newFeature 
+    * @param {Source} source
     * 
     */
     const handleDrawend = (newFeature, source) => {
@@ -348,7 +349,7 @@ function MapWrapper() {
 
         for (let i = 0; i<features.length; i++) {
             source2.addFeature(features[i])
-            cleanUserInput(event.target.map_)
+            cleanUserInput(getMapFeatures(event.target.map_))
         }
         // hack because overlaps are only fixed after moving a node without this.
         updateSource(getMapSource(event.target.map_), cleanUserInput(getMapFeatures(event.target.map_)))
@@ -378,7 +379,8 @@ function MapWrapper() {
     /* check if we are clicking on a polygon*/
     const isFeatureAtPixelAPolygon = (map, pixel) => {
         if(map.getFeaturesAtPixel(pixel).length > 0){
-            return (map.getFeaturesAtPixel(pixel)[0].getGeometry().getType() === "Polygon" || map.getFeaturesAtPixel(pixel)[0].getGeometry().getType() === "MultiPolygon")
+            return (map.getFeaturesAtPixel(pixel)[0].getGeometry().getType() === "Polygon" 
+                 || map.getFeaturesAtPixel(pixel)[0].getGeometry().getType() === "MultiPolygon")
         }
         return false 
     }
