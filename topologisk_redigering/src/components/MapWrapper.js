@@ -198,36 +198,53 @@ function MapWrapper() {
         setMap(initialMap)
     }, []);
 
+  /**
+    * The user select a polygon and there was another polygon selected, merge these polygons.
+    * If the user clicks the same polygon twice, delete that polygon
+    * @param  {Map} Map
+    * 
+    */
+    const selectHandler = (map) => {
+        if(previousClickedPolygon != null){
+            previousClickedPolygon.setStyle(defaultStyle)
+            if(currentClickedPolygon !== -1){
+                //merge if this click occurs directly after a click on another polygon
+                if(currentClickedPolygon !== previousClickedPolygon){
+                    if (mergeState >= 2) {
+                        merge(map)
+                        currentClickedPolygon = null
+                        previousClickedPolygon = null
+                        mergeState = 0
+                    }
+                }
+                //delete if this click is on the same polygon as the last click.
+                if (currentClickedPolygon === previousClickedPolygon) {
+                    deletePolygon(map, currentClickedPolygon)
+                    currentClickedPolygon = null
+                    previousClickedPolygon = null
+                }
+            }
+        }
+        previousClickedPolygon = currentClickedPolygon
+    }
 
-     
-    // Contextual clickhandler, different actions depending on if you click on a polygon or somewhere on the map 
+
+  /**
+    * Contextual clickhandler, different actions depending on if you click on a polygon or somewhere on the map.
+    * If the users clicks on a polygon it will take care of selection. Setting the style and trying to merge
+    * if there was a previously selected polygon.
+    * 
+    * If the user click on the map, clickHandlerState turn the drawing and and off.
+    * @param  {Event} Event
+    * 
+    */
     const onMapClickGetPixel = (event) => {
         //Check if clicked on an existing polygon 
         if (isFeatureAtPixelAPolygon(event.map, event.pixel)){
             currentClickedPolygon = getMapFeatureAtPixel(event.map, event.pixel) 
             mergeState += 1
             currentClickedPolygon.setStyle(selectedStyle)
-            if(previousClickedPolygon != null){
-                previousClickedPolygon.setStyle(defaultStyle)
-                if(currentClickedPolygon !== -1){
-                    //merge if this click occurs directly after a click on another polygon
-                    if(currentClickedPolygon !== previousClickedPolygon){
-                        if (mergeState >= 2) {
-                            merge(event.map)
-                            currentClickedPolygon = null
-                            previousClickedPolygon = null
-                            mergeState = 0
-                        }
-                    }
-                    //delete if this click is on the same polygon as the last click.
-                    if (currentClickedPolygon === previousClickedPolygon) {
-                        deletePolygon(event.map, currentClickedPolygon)
-                        currentClickedPolygon = null
-                        previousClickedPolygon = null
-                    }
-                }
-            }
-            previousClickedPolygon = currentClickedPolygon
+            selectHandler(event.map);
         } 
         else {
             mergeState = 0
@@ -244,6 +261,7 @@ function MapWrapper() {
                 }) 
                 
             }
+            // this is very bad, all features are removed and re-added on each click
             updateSource(getMapSource(event.map), cleanUserInput(getMapFeatures(event.map)))
         }
     }
