@@ -1,8 +1,6 @@
 import { olFeatures2GeoJsonFeatureCollection, geoJsonFeatureCollection2olFeatures,geoJsonFeature2JstsGeometry,
-    jstsGeometry2GeoJsonFeature, jstsGeometries2GeoJsonFeatureCollection, geoJsonFeatureCollection2JstsGeometries,
-    geoJsonFeatureCollection2FullGeoJSON, 
-    fullGeoJson2GeoJsonFeatureCollection,
-    geoJsonFeatureCollection2GeoJsonFeature} from "../src/translation/translators.mjs";
+        jstsGeometry2GeoJsonFeature, jstsGeometries2GeoJsonFeatureCollection, geoJsonFeatureCollection2JstsGeometries,
+        geoJsonFeatureCollection2FullGeoJSON, fullGeoJson2GeoJsonFeatureCollection, geoJsonFeatureCollection2GeoJsonFeature} from "../src/translation/translators.mjs";
 import test from 'tape'
 import GeoJSON from "ol/format/GeoJSON.js";
 import { getFeatureCoordinates, getOlFeatureCoordinates } from "../src/translation/getter.mjs";
@@ -207,7 +205,6 @@ test('Convert single feature to a FeatureCollection', function(t){
     t.deepEqual(actual, expected)
     t.end()
 })
-//TODO test for feature -> featureCollection, must implement function
 
 test('Convert geoJson FeatureCollection to an array of jsts geometries', function(t){
     let actual = geoJsonFeatureCollection2JstsGeometries(featureCollection())
@@ -239,7 +236,6 @@ test('Convert a list of OL features to a FeatureCollection', function(t) {
 })
 
 test('Convert a FeatureCollection to a list of OL features', function(t){
-    //console.log(geoJsonFeatureCollection2olFeatures(featureCollection()))
     let actual = [] 
     geoJsonFeatureCollection2olFeatures(featureCollection()).forEach(feature => {
         actual.push(getOlFeatureCoordinates(feature))
@@ -248,16 +244,12 @@ test('Convert a FeatureCollection to a list of OL features', function(t){
     featureCollection().features.forEach(feature => {
         expected.push(feature.geometry.coordinates)
     })
-   /*  olFeatureList.forEach(feature => {
-        expected.push(getOlFeatureCoordinates(feature))
-    }) */
     t.deepEqual(actual, expected)
     t.end()
 }) 
 
 test('Convert olFeature to geoJson feature', function(t){
     let actual = olFeature2geoJsonFeature(olFeatureList[0])
-    //console.log(actual)
     let expected = feature()
     t.deepEqual(actual, expected)
     t.end()
@@ -266,7 +258,6 @@ test('Convert olFeature to geoJson feature', function(t){
 test('Convert geoJsonFeature to olFeature', function(t){
     let actual = getOlFeatureCoordinates(geoJsonFeature2olFeature(feature()))
     let expected = feature().geometry.coordinates
-    //let expected = getOlFeatureCoordinates(olFeatureList[0])
     t.deepEqual(actual, expected)
     t.end()
 })
