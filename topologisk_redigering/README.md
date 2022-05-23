@@ -25,8 +25,6 @@ User input is interpreted and modified to become valid topology data. For exampl
 
 - Each click on the map, for example when drawing a polygon, leads to updateSource() being called, which removes all features and then adds them again. This happens in the function OnClickMapGetPixel and leads to a performance loss. 
 
-
-
 ## Getting started
 
 - Open two instances of the terminal from the topologisk_redigering folder/directory. One will be running the mock server and one the topology editor.
