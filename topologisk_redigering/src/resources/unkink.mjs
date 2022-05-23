@@ -9,7 +9,7 @@ import { fixCoordinateRotation } from './HelperFunctions.mjs';
  * return true if @geoJsonFeature is valid, definition of valid in IsValidOP
  * @param {Feature} geoJsonFeature : GeoJson feature
  * @return {Bool}
-/*
+*/
 export const isValid = (geoJsonFeature) => {
     let jstsLastDrawnPoly
     try {
@@ -27,7 +27,7 @@ export const isValid = (geoJsonFeature) => {
  * unkinks a polygon and returns the resulting polygon(s)
  * @param {Feature} geoJsonFeature : Geojson feature
  * @return {FeatureCollection} : GeoJson FeatureCollection
-/*
+*/
 export const unkink = (polygon) => {
     //dont unkink multipoly?
     if (polygon.geometry.type !== "MultiPolygon")
