@@ -1,7 +1,5 @@
 import simplepolygon from 'simplepolygon';
 import IsValidOp from "jsts/org/locationtech/jts/operation/valid/IsValidOp.js";
-import { Point, LineString, LinearRing, Polygon, MultiLineString, MultiPolygon } from 'ol/geom.js'
-import MultiPoint from 'ol/geom/MultiPoint.js';
 import { geoJsonFeature2JstsGeometry, geoJsonFeature2geoJsonFeatureCollection } from '../translation/translators.mjs';
 import { fixCoordinateRotation } from './HelperFunctions.mjs';
 

@@ -63,7 +63,6 @@ export const handleMerge = (firstInputPolygon, secondInputPolygon, featureCollec
     let firstPolygon = geoJsonFeature2JstsGeometry(firstInputPolygon)
     let secondPolygon = geoJsonFeature2JstsGeometry(secondInputPolygon)
 
-    let mergables = getMergeableFeatures(firstPolygon, featureCollection)
     let status = -1
     
     status = jstsGeometry2GeoJsonFeature(mergeFeatures(firstPolygon, secondPolygon))

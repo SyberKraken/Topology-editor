@@ -95,42 +95,55 @@ export const geoJsonFeature2geoJsonFeatureCollection = (geoJsonFeature) => {
 */
 export const geoJsonFeature2JstsGeometry = (geoJsonFeature) => {
 
-    const reader = new GeoJSONReader()
-    let jsts = reader.read(geoJsonFeature)
-    jsts.geometry.setSRID(getRandomId())
-    propertiesTableJSTS.set(jsts.geometry._SRID, geoJsonFeature.properties)
-    return jsts.geometry
+    let jsts
+    if(geoJsonFeature.geometry.type === "Polygon"){
+        jsts = new GeoJSONReader().read(geoJsonFeature.geometry)
+        jsts.setSRID(getRandomId())
+        propertiesTableJSTS.set(jsts._SRID, geoJsonFeature.properties)
+        return jsts
+    } else if(geoJsonFeature.geometry.type === "MultiPolygon"){
+        jsts = new GeometryFactory().createMultiPolygon(geoJsonFeature.geometry)
+        jsts.setSRID(getRandomId())
+        propertiesTableJSTS.set(jsts._SRID, geoJsonFeature.properties)
+        return jsts
+    }
+
 
 }
 
 /* Takes a jsts geometry and returns a geoJson feature */
-/*  
-*   
-*
-*
+/*
+*   convert a jsts geometry to a geojson feature. properties are fetched from table and added to feature  
+*   @param   {JSTS Geometry}    jstsGeometry    a jsts geometry object
+*   @return  {GeoJson Feature}                  a geojson feature that is either a polygon or a multipolygon
 */
 export const jstsGeometry2GeoJsonFeature = (jstsGeometry) => {
-    const writer = new GeoJSONWriter()
-    let getProperties = propertiesTableJSTS.get(jstsGeometry._SRID)
-    propertiesTableJSTS.delete(jstsGeometry._SRID)
-    let writtenGeometry = writer.write(jstsGeometry)
-    //if multipolygon, new multipolygon. else new polygon 
-    let polygon;
-    if(writtenGeometry.type == "MultiPolygon") {
-        polygon = new MultiPolygon(writtenGeometry.coordinates)
+    if(jstsGeometry.getGeometryType() === "Polygon"){
+        let writer = new GeoJSONWriter()
+        let getProperties = propertiesTableJSTS.get(jstsGeometry._SRID)
+        propertiesTableJSTS.delete(jstsGeometry._SRID)
+        let writtenGeometry = writer.write(jstsGeometry)    
+        let polygon = new Polygon(writtenGeometry.coordinates)
+        let newFeature = new Feature(polygon)
+        newFeature.setProperties(getProperties)
+        newFeature = new GeoJSON().writeFeatureObject(newFeature)
+        return newFeature
+    } else if (jstsGeometry.getGeometryType() === "MultiPolygon"){
+        let properties = propertiesTableJSTS.get(jstsGeometry._SRID)
+        const coordinates = jstsGeometry._geometries.coordinates
+        const multiPolygon = new MultiPolygon([coordinates])
+        let newFeature = new Feature(multiPolygon)
+        newFeature.setProperties(properties)
+        return new GeoJSON().writeFeatureObject(newFeature)
     }
-    //else: it's a singlePolygon
-    else {
-        polygon = new Polygon(writtenGeometry.coordinates)
-    }
-    let newFeature = new Feature(polygon)
-    
-    newFeature.setProperties(getProperties)
-    newFeature = new GeoJSON().writeFeatureObject(newFeature)
-    return newFeature
 }
 
-/* Takes a featureCollection and returns an array of jsts geometries */
+
+/*  
+*   convert a featureCollection to an array of jsts geometries
+*   @param  {GeoJson FeatureCollection}     geojsonFeatureCollection    a geojson featureCollection
+*   @return {JSTS GeometryCollection}                                   an array of jsts geometries
+*/
 export const geoJsonFeatureCollection2JstsGeometries = (geoJsonFeatureCollection) => {
     
     let geometries = []
@@ -141,7 +154,11 @@ export const geoJsonFeatureCollection2JstsGeometries = (geoJsonFeatureCollection
     return geometries
 }
 
-/* takes an array of geometries and returns a FeatureCollection */
+/*  
+*   convert an array of jsts geometries to geojson features and adds them to a geojson featureCollection
+*   @param  {JSTS GeometryCollection}   jstsGeometries      an array of jsts geometries
+*   @return {GeoJson FeatureCollection}                     a geojson featureCollection
+*/
 export const jstsGeometries2GeoJsonFeatureCollection = (jstsGeometries) => {
 
     let featureList = []
@@ -156,45 +173,60 @@ export const jstsGeometries2GeoJsonFeatureCollection = (jstsGeometries) => {
     });
     
     featureCollection.features = featureList
-    //console.log(featureCollection)
     return featureCollection
 }
-//////////////////////////////////////////////////////////////////////////
-//      The functions above this line are where  want them to be        //
-//////////////////////////////////////////////////////////////////////////
 
-/* Takes an array of ol features and returns a feature collection */        
+/*  
+*   convert an array of openlayers features to a geojson featureCollection
+*   @param  {OpenLayers Features}   olFeatures  an array of openlayers features
+*   @return {GeoJson FeatureCollection}         a geojson featureCollection
+*/     
 export const olFeatures2GeoJsonFeatureCollection = (olFeatures) => {
     const jsonObj = new GeoJSON({ projection: "EPSG:3006" }).writeFeaturesObject(olFeatures)
     return jsonObj
 } 
 
-/* Takes a geoJson featureCollection and returns an Array of features */
+
+/*  
+*   convert a geojson featureCollection to an array of openlayers features
+*   @param  {GeoJson FeatureCollection} featureCollection   a geojson featureCollection
+*   @return {OpenLayers Features}                           an array of openlayers features
+*/
 export const geoJsonFeatureCollection2olFeatures = (featureCollection) => {
     return new GeoJSON().readFeatures(featureCollection)
 }
 
+/*  
+*   convert an openlayer feature to a geojson feature
+*   @param  {OpenLayers Feature}    olFeature   an openlayers feature
+*   @return {GeoJson Feature}                   a geojson feature
+*/
 export const olFeature2geoJsonFeature = (olFeature) => {
     let geoJsonFeature = new GeoJSON().writeFeatureObject(olFeature)
     return geoJsonFeature
 }
 
+/*  
+*   convert a geojson feature to an openlayers feature
+*   @param  {GeoJson Feature}   geoJsonFeature    a geojson feature
+*   @return {OpenLayers Feature}                  an openlayers feature
+*/
 export const geoJsonFeature2olFeature = (geoJsonFeature) => {
-    //console.log(geoJsonFeature)
     let olFeature = new GeoJSON().readFeature(geoJsonFeature)
-    //console.log(olFeature)
     return olFeature
 }
 
-
-
+/*  
+*   convert a list of geojson features to a geojson featureCollection
+*   @param  {Array}     geoJsonFeatureList      an array of geojson features
+*   @return {GeoJson FeatureCollection}         a geojson featurecollection containing all features from in param
+*/
 export const geoJsonFeatureList2geoJsonFeatureCollection = (geoJsonFeatureList) => {
     let featureCollection = {
         "type":"FeatureCollection",
         "features":[]
     }
    featureCollection.features = geoJsonFeatureList
-
    return featureCollection
 }
 

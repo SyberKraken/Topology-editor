@@ -1,6 +1,5 @@
 import OverlayOp from "jsts/org/locationtech/jts/operation/overlay/OverlayOp.js"
 import IsValidOp from "jsts/org/locationtech/jts/operation/valid/IsValidOp.js";
-import polygonsAreConnected from "./TopologyValidation.mjs"
 import { geoJsonFeature2JstsGeometry, jstsGeometry2GeoJsonFeature } from "../translation/translators.mjs";
 import { coordinatesAreEquivalent } from "./HelperFunctions.mjs";
 
@@ -64,47 +63,6 @@ export const addIntersectionNodes = (jstsNewGeoemtry, jstsOriginalGeometries) =>
     return jstsNewGeoemtry
 }
 
-/*
-*
-* NOTE: This function does not appear to be working as intended, instead returning every other feature. Because we do not want 
-* merge to only work with connected features any longer, this is not a problem in its current use.
-*
-* returns a list of features that are connected by more than a single point (i.e a line or more) with the selected feature. 
-*
-* @param {jsts geometry} selectedPolygon - the polygon that connected features will be found for
-* @param {GeoJSON feature collecioton}allFeatures = features to compare with selectedPolygon.
-*
-* @return {jsts featurecollection} jstsFeatureList
-*
-*/
-export default function getMergeableFeatures(selectedPolygon, allFeatures) { 
-  //Removes selected polygon from polygons it will be checked against
-  let otherFeatures = allFeatures.features.filter(function(feature) {
-    const curPolygon = geoJsonFeature2JstsGeometry(feature)
-    return !coordinatesAreEquivalent(curPolygon, selectedPolygon)
-  })
-
-  //Fills results with features adjecent to selectedFeature.
-  const result = otherFeatures.filter(function (feature) {
-    const curPolygon = geoJsonFeature2JstsGeometry(feature)
-    const intersection = OverlayOp.intersection(curPolygon, selectedPolygon)
-    return intersection
-  })
-
-  const resultCleaned = result.filter(function(poly) {
-      const curPolygon = geoJsonFeature2JstsGeometry(poly)
-      return polygonsAreConnected(jstsGeometry2GeoJsonFeature(curPolygon), jstsGeometry2GeoJsonFeature(selectedPolygon))
-  })
-
-  //Converting to jsts geometry collection
-  const jstsFeatureList = []
-  for (let index = 0; index < resultCleaned.length; index++) {
-      const element = resultCleaned[index];
-      jstsFeatureList.push(geoJsonFeature2JstsGeometry(element))
-  } 
-
-  return jstsFeatureList;
-}
 
 /*
 *
@@ -116,8 +74,6 @@ export default function getMergeableFeatures(selectedPolygon, allFeatures) {
 * @return {jsts featurecollection} union
 *
 */
-
-//takes jsts geometries and return the union in jstsgeometry format
 export function mergeFeatures(firstGeometry, secondGeometry){
     let union = -1;
 
