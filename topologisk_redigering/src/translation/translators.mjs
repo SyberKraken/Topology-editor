@@ -95,19 +95,12 @@ export const geoJsonFeature2geoJsonFeatureCollection = (geoJsonFeature) => {
 */
 export const geoJsonFeature2JstsGeometry = (geoJsonFeature) => {
 
-    let jsts
-    if(geoJsonFeature.geometry.type === "Polygon"){
-        jsts = new GeoJSONReader().read(geoJsonFeature.geometry)
-        jsts.setSRID(getRandomId())
-        propertiesTableJSTS.set(jsts._SRID, geoJsonFeature.properties)
-        return jsts
-    } else if(geoJsonFeature.geometry.type === "MultiPolygon"){
-        jsts = new GeometryFactory().createMultiPolygon(geoJsonFeature.geometry)
-        jsts.setSRID(getRandomId())
-        propertiesTableJSTS.set(jsts._SRID, geoJsonFeature.properties)
-        return jsts
-    }
-
+    const reader = new GeoJSONReader()
+    let jsts = reader.read(geoJsonFeature)
+    jsts.geometry.setSRID(getRandomId())
+    propertiesTableJSTS.set(jsts.geometry._SRID, geoJsonFeature.properties)
+    console.log("GEO2GEOM",jsts.geometry)
+    return jsts.geometry
 
 }
 
@@ -118,24 +111,28 @@ export const geoJsonFeature2JstsGeometry = (geoJsonFeature) => {
 *   @return  {GeoJson Feature}                  a geojson feature that is either a polygon or a multipolygon
 */
 export const jstsGeometry2GeoJsonFeature = (jstsGeometry) => {
-    if(jstsGeometry.getGeometryType() === "Polygon"){
-        let writer = new GeoJSONWriter()
-        let getProperties = propertiesTableJSTS.get(jstsGeometry._SRID)
-        propertiesTableJSTS.delete(jstsGeometry._SRID)
-        let writtenGeometry = writer.write(jstsGeometry)    
-        let polygon = new Polygon(writtenGeometry.coordinates)
-        let newFeature = new Feature(polygon)
-        newFeature.setProperties(getProperties)
-        newFeature = new GeoJSON().writeFeatureObject(newFeature)
-        return newFeature
-    } else if (jstsGeometry.getGeometryType() === "MultiPolygon"){
-        let properties = propertiesTableJSTS.get(jstsGeometry._SRID)
-        const coordinates = jstsGeometry._geometries.coordinates
-        const multiPolygon = new MultiPolygon([coordinates])
-        let newFeature = new Feature(multiPolygon)
-        newFeature.setProperties(properties)
-        return new GeoJSON().writeFeatureObject(newFeature)
+    
+    console.log("GEOM2GEO", jstsGeometry)
+    const writer = new GeoJSONWriter()
+    let getProperties = propertiesTableJSTS.get(jstsGeometry._SRID)
+    propertiesTableJSTS.delete(jstsGeometry._SRID)
+    let writtenGeometry = writer.write(jstsGeometry)
+    //if multipolygon, new multipolygon. else new polygon 
+    let polygon
+    if(writtenGeometry.type == "MultiPolygon") {
+        polygon = new MultiPolygon(writtenGeometry.coordinates)
     }
+    //else: it's a singlePolygon
+    else {
+        polygon = new Polygon(writtenGeometry.coordinates)
+    }
+    let newFeature = new Feature(polygon)
+    
+    newFeature.setProperties(getProperties)
+    newFeature = new GeoJSON().writeFeatureObject(newFeature)
+    return newFeature
+    
+    
 }
 
 

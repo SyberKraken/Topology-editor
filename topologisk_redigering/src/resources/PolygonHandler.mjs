@@ -1,10 +1,11 @@
-import getMergeableFeatures, { handleIntersections, mergeFeatures } from "./JSTSFunctions.mjs"
+import { handleIntersections, mergeFeatures } from "./JSTSFunctions.mjs"
 import { addIntersectionNodes } from "./JSTSFunctions.mjs"
 import { geoJsonFeatureCollection2JstsGeometries, jstsGeometries2GeoJsonFeatureCollection, jstsGeometry2GeoJsonFeature } from "../translation/translators.mjs"
 import { geoJsonFeature2JstsGeometry} from "../translation/translators.mjs"
 import Area from "jsts/org/locationtech/jts/algorithm/Area.js"
 
-/* 
+/*
+*   NOTE: Properties disappear here since new geometries are created and SRID changes 
 *   Remove areas from the last drawn feature where it overlaps with other features
 *   @param  {GeoJson FeatureCollection} features    all features 
 *   @return {GeoJson FeatureCollection}             all features where overlapping areas have been removed
@@ -13,12 +14,15 @@ export const fixOverlaps = (features) => {
     let areaOverCircLimit = 10
     let jstsCollection = geoJsonFeatureCollection2JstsGeometries(features)
     let preTrimmedNewPolygon = jstsCollection[jstsCollection.length - 1]
+    let srid = preTrimmedNewPolygon._SRID
     let trimmed = handleIntersections(jstsCollection[jstsCollection.length - 1], jstsCollection.slice(0, jstsCollection.length - 1))
+    trimmed.setSRID(srid)
     let cleanedJstsCollection = []
 
     //add intersection nodes to old polygons
     jstsCollection.slice(0, jstsCollection.length - 1).forEach(function f(geom){
         let diff = (addIntersectionNodes(geom, [preTrimmedNewPolygon]))
+        diff.setSRID(srid)
         //removes too small polygons
         if(diff.getArea()/diff.getLength() > areaOverCircLimit){
             cleanedJstsCollection.push(diff)
