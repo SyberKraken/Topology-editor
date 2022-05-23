@@ -14,13 +14,22 @@ User input is interpreted and modified to become valid topology data. For exampl
 
 ## Known issues
 
-- We did not have time to fully implement multipolygons, leading to some known bugs when using these. Sometimes these bugs result in the multipolygons being removed or not having their overlapping areas fixed.
+### We did not have time to fully implement multipolygons, leading to some known bugs when using these
+
+- A node from one multipolygon can't be moved into another polygon, as can be done with regular polygons.
+- Multipolygons can't be unkinked, this means modifying a multipolygon so it intersects with itself is not handled.
+
+### Other known issues
+
+- Several polygons fully encircled by another polygon leads to the inner polygons not being able to have their borders modified outside the encircling polygon.
+
+- Each click on the map, for example when drawing a polygon, leads to updateSource() being called, which removes all features and then adds them again. This happens in the function OnClickMapGetPixel and leads to a performance loss. 
 
 ## Getting started
 
 - Open two instances of the terminal from the topologisk_redigering folder/directory. One will be running the mock server and one the topology editor.
 
-- In one terminal, run "npm install" to install project dependecies. 
+- In one terminal, run "npm install" to install project dependencies. 
 
 - In the same terminal, start the mock server by running 'npm run http' if you're on Windows, or 'npm run httpl' if you're on MacOS or Linux. 
 
@@ -34,11 +43,11 @@ The editor supports both multipolygons and regular polygons. Multipolygons share
 
 Operations supported by the editor are listed below:
 
-- **Drawing**: Click on point on the map, then another to create a line between them. Continue placing points until you reach the starting point. Doubleclick to auto-finish the polygon. This creates a line between where you clicked and where the first point was placed.
+- **Drawing**: Click to place a point on the map, then click somewhere else to create a line between the two points. Continue placing points until you reach the starting point. Doubleclick to auto-finish the polygon. This creates a line between where you clicked and where the first point was placed.
 
 - **Modifying**: Click and drag a line or point that has already been placed.
 
-- **Merge**: Click on the polygon you want to merge, then click the polygon you want to merge it with. Mergeing two regular polygons that are not connected will turn them into a multipolygon.
+- **Merge**: Click on the polygon you want to merge, then click the polygon you want to merge it with. Merging two regular polygons that are not connected will turn them into a multipolygon.
 
 - **Delete**: Double click a polygon to delete it. 
 
