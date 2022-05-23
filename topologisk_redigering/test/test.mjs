@@ -21,6 +21,7 @@ import { handleIntersections } from '../src/res/jsts.mjs'
 /*Variables*/
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+//polygon with many decimals, gotten from hand-drawing in OL
 const gj = () => {
   return (
     {
@@ -71,8 +72,7 @@ const gj = () => {
     }
   )
 }
-
-
+//Single invalid polygon with crossing borders shaped like an hourglass
 const hourglassBefore = () => {
   return (
     {
@@ -97,6 +97,7 @@ const hourglassBefore = () => {
   )
 }
 
+// collection of 2 small Overlapping polygons
 const overlapPolygons = () => {
   return (
     {
@@ -155,7 +156,7 @@ const polygon1 = () => {
     }
   )
 }
-
+// clockwise version of above "polygon1"
 const polygon1Clockwise = () => {
   return (
     {
@@ -176,7 +177,7 @@ const polygon1Clockwise = () => {
   )
 }
 
-
+//polygon to merge with polygon1
 const polygon2 = () => {
   return (
     {
@@ -196,7 +197,7 @@ const polygon2 = () => {
     }
   )
 }
-
+//pre-merge polygons 
 const mergeFeatureCollection = () => {
   return (
     {
@@ -205,7 +206,7 @@ const mergeFeatureCollection = () => {
     }
   )
 }
-
+//expected output post-merge from above pre-merge collection
 const mergedPolygonExpected = () => {
   return (
     {
@@ -227,13 +228,13 @@ const mergedPolygonExpected = () => {
   )
 }
 
-
+//result of unkink on hourglass
 const unkinkedPolygon = unkink(hourglassBefore().features[0])
 
 
 //[[[0,0], [1,0], [1,1], [0,1], [0,0]], [[1,0], [2,0], [2,1], [1,1], [1,0]], [[2,0], [3,0], [3,1], [2,1], [2,0]]]
 
-
+//inner polygon that should be surrounded by another polygon for testing
 const addIntersectionInner = {
   "type":"Feature",
   "properties": null,
@@ -251,7 +252,7 @@ const addIntersectionInner = {
     ]
   }
 }
-
+//polygon encompasing addIntersectionInner
 const addIntersectionOuter = {
 
   "type":"Feature",
@@ -270,7 +271,7 @@ const addIntersectionOuter = {
   }
 }
 
-
+//expected result from addIntersercation for inner polygon
 const addIntersectionInnerWanted = {
   "type":"Feature",
   "properties": null,
@@ -286,7 +287,7 @@ const addIntersectionInnerWanted = {
     ]
   }
 }
-
+//Collection of "other" field in addintersectionnodes function
 const handleInterSectionOthers = () => {
   return (
     {
@@ -310,7 +311,7 @@ const handleInterSectionOthers = () => {
     }
   )
 }
-
+//triangle bordering square
 const topTriangle = {
   "type":"Feature",
   "properties": null,
@@ -324,7 +325,7 @@ const topTriangle = {
     ]
   }
 }
-
+//bigger area triangle bordering square
 const topTriangleBig = {
   "type":"Feature",
   "properties": null,
@@ -338,7 +339,7 @@ const topTriangleBig = {
     ]
   }
 }
-
+//Overlapping polygons 
 const overlappingCollection = () => {
   return (
     {
@@ -392,7 +393,7 @@ const overlappingCollection = () => {
   )
 }
 
-
+//Triangle bordering top of square polygon
 const houseBig = {
   "type":"Feature",
   "properties": null,
@@ -464,7 +465,8 @@ const coordinatesAreEquivalent = (coordinateArray1, coordinateArray2) => {
   return true
 }
 
-
+//Checks that new nodes are added in correct places whenever we fix overlaps
+// of 2 polygons
 const testAddIntersectionNodes = (geoJsonInner, geoJsonOuter) =>{
 
   const inner = geoJsonFeature2JstsGeometry(geoJsonInner)
@@ -475,6 +477,8 @@ const testAddIntersectionNodes = (geoJsonInner, geoJsonOuter) =>{
   return jstsGeometry2GeoJsonFeature(geoJsonInnerNew)
 }
 
+//Checks that polygons are cut and reshaped with the old ones having priority
+// whenever we fix overlaps of 2 polygons
 const testHandleIntersection = (jstsNew, jstsOther) => {
   const newGeo = geoJsonFeature2JstsGeometry(jstsNew)
   const oldList = geoJsonFeatureCollection2JstsGeometries(jstsOther)
@@ -529,8 +533,8 @@ test('handleInterSection', function(t){
 
 test('fixoverlaps removes overlapping areas AND adds needed nodes on intersection points AND removes features that are too small', function(t){
   const test = fixOverlaps(overlappingCollection())
-  console.log(test.features[0].geometry.coordinates[0])
-  console.log(bigBoxWithExtraNodes.geometry.coordinates[0])
+  //console.log(test.features[0].geometry.coordinates[0])
+  //console.log(bigBoxWithExtraNodes.geometry.coordinates[0])
   t.assert(coordinatesAreEquivalent(test.features[test.features.length-1].geometry.coordinates[0], topTriangleBig.geometry.coordinates[0]))
   t.assert(coordinatesAreEquivalent(test.features[0].geometry.coordinates[0], bigBoxWithExtraNodes.geometry.coordinates[0]))
   t.end()

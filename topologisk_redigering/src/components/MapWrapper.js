@@ -9,7 +9,7 @@ import WMTS from 'ol/source/WMTS';
 import { get as getProjection } from 'ol/proj';
 import { getWidth } from 'ol/extent';
 import GeoJSON from 'ol/format/GeoJSON';
-import { saveToDatabase } from '../resources/DatabaseFunctions.mjs';
+import { saveToFile } from '../resources/DatabaseFunctions.mjs';
 import { drawPolygon } from '../resources/UIFunctions.mjs';
 import { createStringXY } from 'ol/coordinate';
 import MousePosition from 'ol/control/MousePosition'
@@ -421,7 +421,7 @@ function MapWrapper() {
     }
 
     const saveFeatureCollection = () => {
-        saveToDatabase(olFeatures2GeoJsonFeatureCollection(getMapFeatures(map)))
+        saveToFile(olFeatures2GeoJsonFeatureCollection(getMapFeatures(map)))
     }
 
 
