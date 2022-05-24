@@ -56,14 +56,14 @@ export const fixCoordinateRotation = (polygon) => {
   */
 export const coordinatesAreEquivalent = (coordinateArray1, coordinateArray2) => {
   let i = 0;
-  while (coordinateArray2[i] && JSON.stringify(coordinateArray1[0]) != JSON.stringify(coordinateArray2[i])) {
+  while (coordinateArray2[i] && JSON.stringify(coordinateArray1[0]) !== JSON.stringify(coordinateArray2[i])) {
     i++;
   }
   if(!coordinateArray2[i]){
     return false
   }
   for(let j = 0; j < coordinateArray1.length; j++, i++){
-    if(JSON.stringify(coordinateArray1[j]) != JSON.stringify(coordinateArray2[i % coordinateArray2.length])){
+    if(JSON.stringify(coordinateArray1[j]) !== JSON.stringify(coordinateArray2[i % coordinateArray2.length])){
       return false
     }
   }

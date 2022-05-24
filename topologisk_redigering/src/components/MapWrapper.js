@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Feature, Map, View } from 'ol';
+import { Map, View } from 'ol';
 import TileLayer from 'ol/layer/Tile';
 import 'ol/ol.css';
 import VectorLayer from 'ol/layer/Vector';
@@ -23,10 +23,8 @@ import { geoJsonFeature2olFeature, geoJsonFeatureCollection2olFeatures, olFeatur
 import UploadFileIcon from '@mui/icons-material/UploadFile';
 import SaveIcon from '@mui/icons-material/Save';
 import { Button } from '@mui/material';
-import { Polygon, MultiPolygon } from 'ol/geom';
 import { DoubleClickZoom } from 'ol/interaction';
 import * as turf from "@turf/turf"
-import { ModifyEvent } from 'ol/interaction/Modify';
 
 
 /*
@@ -106,7 +104,6 @@ function MapWrapper() {
      * 
      */ 
     const updateSource = (source, features) => {
-        console.log(features)
         if(features.length > 0){
             source.clear()
             source.addFeatures(features) 
