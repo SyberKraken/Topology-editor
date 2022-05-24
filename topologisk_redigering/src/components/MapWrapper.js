@@ -352,14 +352,20 @@ function MapWrapper() {
 
         for (let i = 0; i<features.length; i++) {
             // node is moved outside the linestring
-            if(!isValid(olFeature2geoJsonFeature(features[i])))
-            {
-                let newPoly = features[i - 1]
-                let intersection = turf.intersect(olFeature2geoJsonFeature(newPoly), originalPoly);
-                let difference = turf.difference(originalPoly, intersection);
-                
-                features[i-1] = geoJsonFeature2olFeature(difference)
-                features[i] = geoJsonFeature2olFeature(intersection)
+            try {
+                if(!isValid(olFeature2geoJsonFeature(features[i])))
+                {
+                    let newPoly = features[i - 1]
+                    let intersection = turf.intersect(olFeature2geoJsonFeature(newPoly), originalPoly);
+                    let difference = turf.difference(originalPoly, intersection);
+                    
+                    features[i-1] = geoJsonFeature2olFeature(difference)
+                    features[i] = geoJsonFeature2olFeature(intersection)
+                }
+            }
+            catch(error){
+                console.log("Polygon can not intersect itself when being modified:")
+                console.log(error)
             }
         }
 

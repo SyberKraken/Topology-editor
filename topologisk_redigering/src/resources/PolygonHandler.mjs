@@ -42,7 +42,6 @@ export const fixOverlaps = (features) => {
     }
     
     if (trimmed._geometries) {
-        console.log("this is a multipolygon! we love multipolygons, so we add it.")
         cleanedJstsCollection.push(trimmed)
     }
 

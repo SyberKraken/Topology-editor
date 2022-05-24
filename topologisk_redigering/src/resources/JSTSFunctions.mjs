@@ -51,8 +51,8 @@ export const addIntersectionNodes = (jstsNewGeoemtry, jstsOriginalGeometries) =>
                 //if intersection is a single geometry, do union on intersection and difference (creating nodes at intersection)
                 jstsNewGeoemtry = OverlayOp.union(difference, intersection)
             } catch (error) {
-                console.log("can't find union with GeometryCollection. It's ok if this error happens!")
-                console.log(error)
+                //console.log("can't find union with GeometryCollection. It's ok if this error happens!")
+                //console.log(error)
             }
         })
     //if something goes wrong, returns the original jsts geometry without new nodes.     

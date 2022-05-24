@@ -14,15 +14,30 @@ User input is interpreted and modified to become valid topology data. For exampl
 
 ## Known issues
 
-- Multipolygons could not be fully implemented, leading to some known bugs when using these, sometimes resulting in the multipolygons being removed or not having their overlapping areas fixed.
+### We did not have time to fully implement multipolygons, leading to some known bugs when using these
 
-- Properties are not preserved through GeoJSON <-> Geometry conversion. Need to go through all places in the code where geometries are handled and make sure that the SRID is the same going out of function as it was going in to function.
+- A node from one multipolygon can't be moved into another polygon, as can be done with regular polygons.
+- Multipolygons can't be unkinked, this means modifying a multipolygon so it intersects with itself is not handled.
+
+### Other known issues
+
+- Modifying a regular polygon so it intersects itself is bugged, the polygon will be removed if this happens.
+
+- Several polygons fully encircled by another polygon leads to the inner polygons not being able to have their borders modified outside the encircling polygon.
+
+- Each click on the map, for example when drawing a polygon, leads to updateSource() being called. This removes all features and then adds them back again. This happens in the function OnClickMapGetPixel and leads to a performance loss. 
+
+- Properties are not preserved through GeoJSON <-> Geometry conversion. The fix for this would require one to go through all places in the code where geometries are handled and make sure that the SRID is the same going out of function as it was going into function.
+
+- Loading GeoJson data that was not created by being drawn in this tool may may break the program.
 
 ## Getting started
 
-- Open two instances of the terminal from the project root (the folder or directory where this README is located). One will be running the mock server and one the topology editor.
+- Open two instances of the terminal from the topologisk_redigering folder/directory. One will be running the mock server and one the topology editor.
 
-- In one terminal, start the mock server by running 'npm run http' if you're on Windows, or 'npm run httpl' if you're on MacOS or Linux. 
+- In one terminal, run "npm install" to install project dependencies. 
+
+- In the same terminal, start the mock server by running 'npm run http' if you're on Windows, or 'npm run httpl' if you're on MacOS or Linux. 
 
 - In the other terminal, start the topology editor with 'npm start'.
 
@@ -34,11 +49,11 @@ The editor supports both multipolygons and regular polygons. Multipolygons share
 
 Operations supported by the editor are listed below:
 
-- **Drawing**: Click on point on the map, then another to create a line between them. Continue placing points until you reach the starting point. Doubleclick to auto-finish the polygon. This creates a line between where you clicked and where the first point was placed.
+- **Drawing**: Click to place a point on the map, then click somewhere else to create a line between the two points. Continue placing points until you reach the starting point. Doubleclick to auto-finish the polygon. This creates a line between where you clicked and where the first point was placed.
 
 - **Modifying**: Click and drag a line or point that has already been placed.
 
-- **Merge**: Click on the polygon you want to merge, then click the polygon you want to merge it with. Mergeing two regular polygons that are not connected will turn them into a multipolygon.
+- **Merge**: Click on the polygon you want to merge, then click the polygon you want to merge it with. Merging two regular polygons that are not connected will turn them into a multipolygon.
 
 - **Delete**: Double click a polygon to delete it. 
 
@@ -53,3 +68,26 @@ Josefin Bodin
 Simon Gradin
 Theodore Nilsson
 
+## License
+
+MIT License
+
+Copyright (c) [2022] [Andrei Platoga, Daniel Huber, Edvin Nilsson Sommermark, Josefin Bodin, Simon Gradin, Theodore Nilsson]
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
