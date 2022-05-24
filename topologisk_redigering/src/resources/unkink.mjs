@@ -32,8 +32,8 @@ export const unkink = (polygon) => {
     {        
         let unkinkedPolygons = simplepolygon(polygon)
         unkinkedPolygons.features.forEach(polygon => {
-            polygon = fixCoordinateRotation(polygon)
-        })
+        polygon = fixCoordinateRotation(polygon)
+    })
         return unkinkedPolygons
     }
     else {

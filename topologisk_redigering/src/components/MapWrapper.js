@@ -14,11 +14,11 @@ import { drawPolygon } from '../resources/UIFunctions.mjs';
 import { createStringXY } from 'ol/coordinate';
 import MousePosition from 'ol/control/MousePosition'
 import { defaults as defaultControls } from 'ol/control'
-import { fixOverlaps, handleMerge } from '../resources/PolygonHandler.mjs';
+import {fixOverlaps, handleMerge} from 'topology-operations'
+import { unkink, isValid } from "../resources/unkink.mjs"
 import { Modify } from 'ol/interaction';
 import {deletePolygon} from '../resources/HelperFunctions.mjs'
 import {defaultStyle, selectedStyle } from '../resources/Styles.mjs'
-import { isValid, unkink }  from '../resources/unkink.mjs'
 import { geoJsonFeature2olFeature, geoJsonFeatureCollection2olFeatures, olFeature2geoJsonFeature, olFeatures2GeoJsonFeatureCollection } from '../translation/translators.mjs';
 import UploadFileIcon from '@mui/icons-material/UploadFile';
 import SaveIcon from '@mui/icons-material/Save';
