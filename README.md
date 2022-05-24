@@ -21,6 +21,10 @@ User input is interpreted and modified to become valid topology data. For exampl
 
 ### Other known issues
 
+- Some complex overlapping may result in the overlapping areas not being removed. Most of the time, this can be fixed by modifying a border anywhere on the drawn polygon.
+
+- Putting a polygon inside a polygon that's inside a polygon, and so on, repeatedly will lead to inner polygons eventually disappearing. 
+
 - Modifying a regular polygon so it intersects itself is bugged, the polygon will be removed if this happens.
 
 - Several polygons fully encircled by another polygon leads to the inner polygons not being able to have their borders modified outside the encircling polygon.
