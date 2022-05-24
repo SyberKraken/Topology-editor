@@ -31,6 +31,8 @@ User input is interpreted and modified to become valid topology data. For exampl
 
 - Loading GeoJson data that was not created by being drawn in this tool may may break the program.
 
+- Functionality from the load button has been removed. To load GeoJson data from the server, simply reload the page.
+
 ## Getting started
 
 - Open two instances of the terminal from the topologisk_redigering folder/directory. One will be running the mock server and one the topology editor.
@@ -49,11 +51,11 @@ The editor supports both multipolygons and regular polygons. Multipolygons share
 
 Operations supported by the editor are listed below:
 
-- **Drawing**: Click to place a point on the map, then click somewhere else to create a line between the two points. Continue placing points until you reach the starting point. Doubleclick to auto-finish the polygon. This creates a line between where you clicked and where the first point was placed.
+- **Draw**: Click to place a point on the map, then click somewhere else to create a line between the two points. Continue placing points until you reach the starting point. Doubleclick to auto-finish the polygon. This creates a line between where you clicked and where the first point was placed.
 
-- **Modifying**: Click and drag a line or point that has already been placed.
+- **Modify**: Click and drag a line or point that has already been placed.
 
-- **Merge**: Click on the polygon you want to merge, then click the polygon you want to merge it with. Merging two regular polygons that are not connected will turn them into a multipolygon.
+- **Merge**: Click on the polygon you want to merge, then click the polygon you want to merge it with. Merging two regular polygons that are not connected will turn them into a multipolygon. Though if the two polygons are connected when merged, they will form a single regular polygon.
 
 - **Delete**: Double click a polygon to delete it. 
 
