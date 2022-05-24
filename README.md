@@ -21,6 +21,10 @@ User input is interpreted and modified to become valid topology data. For exampl
 
 ### Other known issues
 
+- Some complex overlapping may result in the overlapping areas not being removed. Most of the time, this can be fixed by modifying a border anywhere on the drawn polygon.
+
+- Putting a polygon inside a polygon that's inside a polygon, and so on, repeatedly will lead to inner polygons eventually disappearing. 
+
 - Modifying a regular polygon so it intersects itself is bugged, the polygon will be removed if this happens.
 
 - Several polygons fully encircled by another polygon leads to the inner polygons not being able to have their borders modified outside the encircling polygon.
@@ -30,6 +34,8 @@ User input is interpreted and modified to become valid topology data. For exampl
 - Properties are not preserved through GeoJSON <-> Geometry conversion. The fix for this would require one to go through all places in the code where geometries are handled and make sure that the SRID is the same going out of function as it was going into function.
 
 - Loading GeoJson data that was not created by being drawn in this tool may may break the program.
+
+- Functionality from the load button has been removed. To load GeoJson data from the server, simply reload the page.
 
 ## Getting started
 
@@ -49,11 +55,11 @@ The editor supports both multipolygons and regular polygons. Multipolygons share
 
 Operations supported by the editor are listed below:
 
-- **Drawing**: Click to place a point on the map, then click somewhere else to create a line between the two points. Continue placing points until you reach the starting point. Doubleclick to auto-finish the polygon. This creates a line between where you clicked and where the first point was placed.
+- **Draw**: Click to place a point on the map, then click somewhere else to create a line between the two points. Continue placing points until you reach the starting point. Doubleclick to auto-finish the polygon. This creates a line between where you clicked and where the first point was placed.
 
-- **Modifying**: Click and drag a line or point that has already been placed.
+- **Modify**: Click and drag a line or point that has already been placed.
 
-- **Merge**: Click on the polygon you want to merge, then click the polygon you want to merge it with. Merging two regular polygons that are not connected will turn them into a multipolygon.
+- **Merge**: Click on the polygon you want to merge, then click the polygon you want to merge it with. Merging two regular polygons that are not connected will turn them into a multipolygon. Though if the two polygons are connected when merged, they will form a single regular polygon.
 
 - **Delete**: Double click a polygon to delete it. 
 
